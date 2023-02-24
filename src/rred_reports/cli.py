@@ -10,7 +10,6 @@ def console(example_input: str):
     Uncaught exceptions logged by loguru which uses `better exceptions`
     """
     logger.info(f"Running command '{example_input}'")
-    ...
 
 
 def main():
