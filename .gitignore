@@ -143,3 +143,8 @@ src/*/_version.py
 # IDE
 .idea/
 .vscode/
+
+input/*
+!input/*/.gitkeep
+output/*
+!output/*/.gitkeep
