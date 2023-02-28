@@ -27,7 +27,7 @@ class Pupil:
     assessiii_engtest9: int
     assessiii_iretest4: int
     entry_dob: datetime.datetime
-    Summer: str
+    summer: str
     entry_date: datetime.datetime
     entry_testdate: datetime.datetime
     exit_date: datetime.datetime
