@@ -146,5 +146,6 @@ src/*/_version.py
 
 input/*
 !input/*/.gitkeep
+!input/templates/RRED_Report_Template_Single_Category.docx
 output/*
 !output/*/.gitkeep
