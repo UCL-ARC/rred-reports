@@ -85,7 +85,7 @@ class Teacher(AsFrame):
 
 
 @dataclass
-class School:
+class School(AsFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Index[int]
