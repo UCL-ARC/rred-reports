@@ -35,12 +35,26 @@ def test_populate_table(template_filler):
     tables = template_filler.tables
     first_table = tables[0]
     assert len(first_table.rows) == 7
-    df = pd.DataFrame()
-    template_filler.populate_table(first_table, df)
 
-    row_contents = [cell.text.strip() for cell in first_table.row_cells(1)]
-    assert len(first_table.columns) == len(row_contents)
-    assert len(first_table.rows) == 2
+    test_data = {
+        "RRED User ID": ["1", "2", "3"],
+        "Pupil Number": ["1", "2", "3"],
+        "Year Group": ["1", "2", "3"],
+        "Gender": ["1", "2", "3"],
+        "Summer Birthday": ["1", "2", "3"],
+        "Ethnicity": ["1", "2", "3"],
+        "First Language": ["1", "2", "3"],
+        "Poverty Indicator": ["1", "2", "3"],
+        "Special Cohort Group": ["1", "2", "3"],
+        "Outcome": ["1", "2", "3"],
+    }
+    test_df = pd.DataFrame.from_dict(test_data)
+
+    template_filler.populate_table(first_table, test_df)
+
+    first_row_contents = [cell.text.strip() for cell in first_table.row_cells(1)]
+    assert len(first_table.columns) == len(first_row_contents)
+    assert len(first_table.rows) == len(list(test_data.values())[0]) + 1
 
 
 def test_view_table_header(template_filler):

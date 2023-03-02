@@ -5,6 +5,15 @@ from docx import Document
 from docx.table import Table
 
 
+class TemplateFillerException(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+    def __repr__(self) -> str:
+        return self.message
+
+
 class TemplateFiller:
     def __init__(self, template_path: Path):
         self.doc = Document(template_path)
@@ -28,7 +37,7 @@ class TemplateFiller:
         Can't read comments with python-docx
 
         Args:
-            table (Table): Table within a .docx file
+            table (Table): Table object representing a table within a .docx file
 
         Returns:
             list[Table.row_cells]: List of table row cells
@@ -39,18 +48,37 @@ class TemplateFiller:
         """Populate a table with the contents of a pandas dataframe
 
         Args:
-            table (Table): Table within a .docx file
-            df (pd.DataFrame): Pandas dataframe of table contents
+            table (Table): Table object representing a table within a .docx file
+            df (pd.DataFrame): Pandas dataframe of future table contents
         """
         self.__class__.remove_all_rows(table)
-        assert len(df) == 0
-        # Add a new row and populate the text value
-        new_row = table.add_row()
-        cell_count = 0
-        for cell in new_row.cells:
-            cell.text = f"{cell_count}: long text values wrap as expected based on their width"
-            cell_count += 1
+        self._verify_new_rows(table, df)
+
+        for i in range(df.shape[0]):
+            table.add_row()
+            for j in range(df.shape[-1]):
+                table.cell(i + 1, j).text = str(df.values[i, j])
+
+    def _verify_new_rows(self, table: Table, df: pd.DataFrame):
+        """Verify dimension of new rows to be added to existing table
+        Pandas dataframe width should be the columnar dimension of the table
+        i.e. the number of columns should match in both
+
+        Args:
+            table (Table): Table object representing a table within a .docx file
+            df (pd.DataFrame): Pandas dataframe of future table contents
+
+        Raises:
+            TemplateFillerException: DataFrame dimensions do not match table
+        """
+        message = f"Pandas dataframe with shape {df.shape}. Table has {table.columns} columns - dimension mismatch."
+        if not df.shape[1] == len(table.columns):
+            raise TemplateFillerException(message)
 
     def save_document(self, output_path: Path):
-        """Save the document"""
+        """Save the document to the defined output path
+
+        Args:
+            output_path (Path): Output file path
+        """
         self.doc.save(output_path)
