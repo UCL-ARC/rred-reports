@@ -1,6 +1,5 @@
-# import datetime
-# from datetime import date
 from dataclasses import dataclass
+from typing import Literal as L
 
 import pandas as pd
 from pandas_dataclasses import AsFrame, Data, Index
@@ -33,11 +32,11 @@ class Pupil(AsFrame):
     assessiii_engtest11: Data[float]
     assessiii_engtest9: Data[float]
     assessiii_iretest4: Data[float]
-    entry_dob: Data[str]
+    entry_dob: Data[L["datetime64[ns]"]]
     summer: Data[str]
-    entry_date: Data[str]
-    entry_testdate: Data[str]
-    exit_date: Data[str]
+    entry_date: Data[L["datetime64[ns]"]]
+    entry_testdate: Data[L["datetime64[ns]"]]
+    exit_date: Data[L["datetime64[ns]"]]
     exit_outcome: Data[str]
     entry_year: Data[str]
     entry_gender: Data[str]
@@ -66,11 +65,11 @@ class Pupil(AsFrame):
     exit_wv_result: Data[float]
     exit_hrsw_result: Data[float]
     exit_bas_result: Data[float]
-    month3_testdate: Data[str]
+    month3_testdate: Data[L["datetime64[ns]"]]
     month3_bl_result: Data[float]
     month3_wv_result: Data[float]
     month3_bas_result: Data[float]
-    month6_testdate: Data[str]
+    month6_testdate: Data[L["datetime64[ns]"]]
     month6_bl_result: Data[float]
     month6_wv_result: Data[float]
     month6_bas_result: Data[float]
