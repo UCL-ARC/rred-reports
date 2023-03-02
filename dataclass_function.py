@@ -8,7 +8,7 @@ from pandas_dataclasses import AsFrame, Data, Index
 class Pupil(AsFrame):
     """Pupil information"""
 
-    pupilno: Index[complex]
+    pupilno: Index[str]
     rreduserID: Data[str]
     assessi_engtest2: Data[int]
     assessi_iretest1: Data[int]
@@ -81,14 +81,14 @@ class Teacher(AsFrame):
 
     rreduserID: Index[str]
     reg_rr_title: Data[str]
-    school_id: Data[int]
+    school_id: Data[str]
 
 
 @dataclass
 class School(AsFrame):
     """School information can link with Teacher df with school_id"""
 
-    school_id: Index[int]
+    school_id: Index[str]
     rrcp_school: Data[str]
     rrcp_area: Data[int]
     rrcp_country: Data[int]
