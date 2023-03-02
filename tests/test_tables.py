@@ -2,8 +2,9 @@ import os
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
-from rred_reports.reports.filler import TemplateFiller
+from rred_reports.reports.filler import TemplateFiller, TemplateFillerException
 
 
 def test_load_report(template_report_path):
@@ -29,6 +30,49 @@ def test_remove_all_rows(template_filler):
     assert len(first_table.rows) == 7
     TemplateFiller.remove_all_rows(first_table)
     assert len(first_table.rows) == 1
+
+
+def test_verify_new_rows_failure_raises_exception(template_filler):
+    tables = template_filler.tables
+    first_table = tables[0]
+    test_bad_data = {
+        "RRED User ID": ["1", "2", "3"],
+        "Pupil Number": ["1", "2", "3"],
+        "Year Group": ["1", "2", "3"],
+        "Gender": ["1", "2", "3"],
+        "Summer Birthday": ["1", "2", "3"],
+        "Ethnicity": ["1", "2", "3"],
+        "First Language": ["1", "2", "3"],
+        "Poverty Indicator": ["1", "2", "3"],
+        "Special Cohort Group": ["1", "2", "3"],
+    }
+    test_df = pd.DataFrame.from_dict(test_bad_data)
+    with pytest.raises(TemplateFillerException):
+        template_filler._verify_new_rows(first_table, test_df)
+
+
+def test_custom_template_filler_exception_message():
+    filler_exception = TemplateFillerException("Scary error")
+    assert filler_exception.__repr__() == "Scary error"
+
+
+def test_verify_new_rows_good_data(template_filler):
+    tables = template_filler.tables
+    first_table = tables[0]
+    test_good_data = {
+        "RRED User ID": ["1", "2", "3"],
+        "Pupil Number": ["1", "2", "3"],
+        "Year Group": ["1", "2", "3"],
+        "Gender": ["1", "2", "3"],
+        "Summer Birthday": ["1", "2", "3"],
+        "Ethnicity": ["1", "2", "3"],
+        "First Language": ["1", "2", "3"],
+        "Poverty Indicator": ["1", "2", "3"],
+        "Special Cohort Group": ["1", "2", "3"],
+        "Outcome": ["1", "2", "3"],
+    }
+    test_df = pd.DataFrame.from_dict(test_good_data)
+    template_filler._verify_new_rows(first_table, test_df)
 
 
 def test_populate_table(template_filler):
