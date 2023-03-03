@@ -144,8 +144,7 @@ src/*/_version.py
 .idea/
 .vscode/
 
-!input/*/.gitkeep
-!input/templates/RRED_Report_Template_Single_Category.docx
 input/*
-!output/*/.gitkeep
+!input/*/.gitkeep
 output/*
+!output/*/.gitkeep
