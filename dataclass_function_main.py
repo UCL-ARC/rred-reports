@@ -6,11 +6,16 @@ from pandas_dataclasses import AsFrame, Data, Index
 
 
 @dataclass
-class Pupil(AsFrame):
-    """Pupil information"""
+class Main(AsFrame):
+    """School information can link with Teacher df with school_id"""
 
+    rrcp_country: Index[int]
+    rrcp_area: Index[int]
+    school_id: Index[str]
+    rrcp_school: Index[str]
+    rred_user_id: Index[str]
+    reg_rr_title: Index[str]
     pupil_no: Index[str]
-    rred_user_id: Data[str]
     assessi_engtest2: Data[float]
     assessi_iretest1: Data[float]
     assessi_iretype1: Data[float]
@@ -76,25 +81,6 @@ class Pupil(AsFrame):
     rred_qc_parameters: Data[str]
 
 
-@dataclass
-class Teacher(AsFrame):
-    """Teacher information, can link with Pupil df with rreduserID"""
-
-    rred_user_id: Index[str]
-    reg_rr_title: Data[str]
-    school_id: Data[str]
-
-
-@dataclass
-class School(AsFrame):
-    """School information can link with Teacher df with school_id"""
-
-    school_id: Index[str]
-    rrcp_school: Data[str]
-    rrcp_area: Data[int]
-    rrcp_country: Data[int]
-
-
 # function for getting list from df columns
 
 
@@ -105,15 +91,14 @@ def createdf(file):
     def clmnlist(i):
         return list(df.iloc[:, i])
 
-    school_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
-    school_df = school_df.drop_duplicates()
-
-    teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))
-    teach_df = teach_df.drop_duplicates()
-
-    pupil_df = Pupil.new(
-        clmnlist(0),
+    return Main.new(
+        clmnlist(3),
+        clmnlist(4),
+        clmnlist(6),
+        clmnlist(5),
         clmnlist(1),
+        clmnlist(2),
+        clmnlist(0),
         clmnlist(7),
         clmnlist(8),
         clmnlist(9),
@@ -179,11 +164,7 @@ def createdf(file):
         clmnlist(69),
     )
 
-    return school_df, teach_df, pupil_df
 
+main_test_df = createdf("example_dataset.xlsx")
 
-school_test_df, teach_test_df, pupil_test_df = createdf("example_dataset.xlsx")
-
-school_test_df
-teach_test_df
-pupil_test_df
+main_test_df
