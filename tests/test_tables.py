@@ -103,7 +103,7 @@ def test_populate_table(template_filler):
 
 def test_view_table_header(template_filler):
     first_table = template_filler.tables[0]
-    headers = template_filler.view_header(first_table)
+    headers = TemplateFiller.view_header(first_table)
     expected_headers = [
         "RRED User ID",
         "Pupil Number",

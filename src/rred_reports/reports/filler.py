@@ -38,7 +38,8 @@ class TemplateFiller:
             row = table.rows[row_number]
             row._element.getparent().remove(row._element)  # pylint: disable=protected-access
 
-    def view_header(self, table: Table) -> list[Table.row_cells]:
+    @staticmethod
+    def view_header(table: Table) -> list[Table.row_cells]:
         """View header text
         Can't read comments with python-docx
 
