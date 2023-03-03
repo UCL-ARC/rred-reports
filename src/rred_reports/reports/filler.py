@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from docx import Document
-from docx.table import Table
+from docx.table import Table, _Row
 
 
 class TemplateFillerException(Exception):
@@ -25,6 +25,23 @@ class TemplateFiller:
     def __init__(self, template_path: Path):
         self.doc = Document(template_path)
         self.tables = self.doc.tables
+        self.clean_tables()
+
+    @staticmethod
+    def remove_row(table: Table, row: _Row) -> Table:
+        """Remove a single row from a Table object
+
+        Args:
+            table (Table): Table object representing a table within a .docx file
+
+        Returns:
+            table (Table): Table object representing a table within a .docx file
+        """
+
+        tbl = table._tbl  # pylint: disable=protected-access
+        table_row = row._tr  # pylint: disable=protected-access
+        tbl.remove(table_row)
+        return table
 
     @staticmethod
     def remove_all_rows(table: Table):
@@ -51,6 +68,37 @@ class TemplateFiller:
         """
         return table.row_cells(0)
 
+    def clean_tables(self):
+        """Perform any necessary table cleaning steps"""
+        self.remove_duplicated_columns()
+
+    def remove_duplicated_columns(self):
+        """Remove duplicated columns in tables.
+        Observed in some test tables, some tables contain columns that appear
+        to be hidden when viewed in MS Word.
+        """
+        updated_tables = []
+        for table in self.tables:
+            table_header = self.__class__.view_header(table)
+            header_text = [cell.text.strip() for cell in table_header]
+
+            headers_df = pd.DataFrame({"duplicate_cols": header_text}).drop_duplicates(keep="first")
+
+            headers = headers_df["duplicate_cols"].to_list()
+
+            if headers != header_text:
+                # Duplicate header found...
+                self.__class__.remove_all_rows(table)
+                row = table.rows[0]
+                table = self.__class__.remove_row(table, row)
+                table = self.doc.add_table(rows=0, cols=len(headers), style=table.style)
+                table.add_row()
+                for column, header in enumerate(headers):
+                    table.cell(0, column).text = header
+
+            updated_tables.append(table)
+        self.tables = updated_tables
+
     def populate_table(self, table: Table, data: pd.DataFrame):
         """Populate a table with the contents of a pandas dataframe
 
@@ -58,7 +106,7 @@ class TemplateFiller:
             table (Table): Table object representing a table within a .docx file
             df (pd.DataFrame): Pandas dataframe of future table contents
         """
-        self.__class__.remove_all_rows(table)
+        self.remove_all_rows(table)
         self._verify_new_rows(table, data)
 
         for i in range(data.shape[0]):
@@ -78,9 +126,25 @@ class TemplateFiller:
         Raises:
             TemplateFillerException: DataFrame dimensions do not match table
         """
-        message = f"Pandas dataframe with shape {data.shape}. Table has {table.columns} columns - dimension mismatch."
+        table_header = self.__class__.view_header(table)
+        contents = [cell.text.strip() for cell in table_header]
+        message = f"Pandas dataframe with {data.shape[-1]} columns. Table has {len(table.columns)} columns - dimension mismatch. Table columns are {contents}."
         if not data.shape[1] == len(table.columns):
             raise TemplateFillerException(message)
+
+    def verify_tables_filled(self):
+        """Verify all cells in a table are filled
+
+        Args:
+            table (Table): Table object representing a table within a .docx file
+        """
+        for table_idx, table in enumerate(self.tables):
+            for i, _row in enumerate(table.rows):
+                for j, _col in enumerate(table.columns):
+                    cell_content = table.cell(i, j).text
+                    if cell_content == "":
+                        message = f"Empty cell ({i},{j}) (row, col) found in table {table_idx+1}"
+                        raise TemplateFillerException(message)
 
     def save_document(self, output_path: Path):
         """Save the document to the defined output path

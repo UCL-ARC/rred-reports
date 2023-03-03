@@ -75,6 +75,32 @@ def test_verify_new_rows_good_data(template_filler):
     template_filler._verify_new_rows(first_table, test_df)
 
 
+def test_verify_tables_filled(template_filler_populated_tables):
+    template_filler = template_filler_populated_tables
+    template_filler.verify_tables_filled()
+
+
+def test_verify_tables_filled_fails_with_missing_data(template_filler):
+    first_table = template_filler.tables[0]
+    test_bad_data = {
+        "RRED User ID": ["1", "2", "3"],
+        "Pupil Number": ["1", "2", "3"],
+        "Year Group": ["1", "2", "3"],
+        "Gender": ["1", "2", "3"],
+        "Summer Birthday": ["1", "2", "3"],
+        "Ethnicity": ["1", "2", "3"],
+        "First Language": ["1", "2", "3"],
+        "Poverty Indicator": ["1", "2", "3"],
+        "Special Cohort Group": ["1", "2", "3"],
+        "Outcome": ["1", "2", ""],
+    }
+    test_df = pd.DataFrame.from_dict(test_bad_data)
+    template_filler.populate_table(first_table, test_df)
+
+    with pytest.raises(TemplateFillerException):
+        template_filler.verify_tables_filled()
+
+
 def test_populate_table(template_filler):
     tables = template_filler.tables
     first_table = tables[0]
@@ -117,3 +143,24 @@ def test_view_table_header(template_filler):
         "Outcome",
     ]
     assert expected_headers == [cell.text.strip() for cell in headers]
+
+
+def test_remove_duplicated_columns(template_filler):
+    second_table = template_filler.tables[1]
+    columns = len(second_table.columns)
+    second_table.cell(0, 0).text = "Outcome"
+
+    template_filler.remove_duplicated_columns()
+    second_table_updated = template_filler.tables[1]
+
+    assert len(second_table_updated.columns) == columns - 1
+
+
+def test_remove_single_row(template_filler_populated_tables):
+    template_filler = template_filler_populated_tables
+    second_table = template_filler.tables[1]
+    rows_before_removal = len(second_table.rows)
+    TemplateFiller.remove_row(second_table, second_table.rows[3])
+    rows_after_removal = len(second_table.rows)
+
+    assert rows_before_removal - 1 == rows_after_removal
