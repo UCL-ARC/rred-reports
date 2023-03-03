@@ -15,7 +15,7 @@ def template_report_path() -> Path:
     """
     Returns a Path object representing a test report template docx file
     """
-    return Path(__file__).resolve().parents[2] / "input" / "templates" / "RRED_Report_Template_Single_Category.docx"
+    return Path(__file__).resolve().parents[1] / "data" / "RRED_Report_Template_Single_Category.docx"
 
 
 @pytest.fixture()
