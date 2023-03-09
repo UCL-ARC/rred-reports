@@ -100,9 +100,6 @@ class School(AsFrame):
     rrcp_country: Data[int]
 
 
-# function for getting list from df columns
-
-
 def createdf(file: Path) -> pd.DataFrame:
     """Create a nested dataframe from an excel file
 
