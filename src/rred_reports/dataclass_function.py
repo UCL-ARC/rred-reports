@@ -109,20 +109,20 @@ def createdf(file: Path) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Nested pandas DataFrame
     """
-    df = pd.read_excel(file)
+    full_data = pd.read_excel(file)
 
     def clmnlist(i):
-        return list(df.iloc[:, i])
+        return list(full_data.iloc[:, i])
 
-    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
-    all_schools_df = all_schools_df.drop_duplicates()
+    all_schools_df = School(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
+    all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
-    teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))
-    teach_df = teach_df.drop_duplicates()
+    teach_df = Teacher(clmnlist(1), clmnlist(2), clmnlist(6))
+    teach_df = teach_df.drop_duplicates()  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
     drop_cols.append(teach_df.columns.values[1])
-    df_slimmed = df.drop(columns=drop_cols)
+    df_slimmed = full_data.drop(columns=drop_cols)
     school_teacher = []
     school_dict = all_schools_df.to_dict("records")
     for school in school_dict:
