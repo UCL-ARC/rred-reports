@@ -1,24 +1,25 @@
 from datetime import datetime
+from typing import Any
 
 import pytz
 
 from rred_reports.reports import ReportSettings
-from rred_reports.reports.email import Content
-from rred_reports.reports.email import send as send_mail
+from rred_reports.reports.emails import Content
+from rred_reports.reports.emails import send as send_mail
 
 
 def create():
     # stubbed out for now
-    return None
+    settings = ReportSettings(sender="h.moss@ucl.ac.uk", recipients=["h.moss@ucl.ac.uk"], smtp_host="isd-smtp.ucl.ac.uk", smtp_port="25")
+
+    report = None
+
+    send(settings, report)
 
 
-def send(
-    settings: ReportSettings,
-) -> bool:
+def send(settings: ReportSettings, report: Any | None) -> bool:
     local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
     now = local_datetime.strftime("%d/%m/%Y at %H:%M")
-
-    report = create()
 
     email_content = Content(
         sender=settings.sender,
@@ -34,3 +35,11 @@ def send(
     send_mail(email_content)
 
     return True
+
+
+def main():
+    create()
+
+
+if __name__ == "__main___":
+    main()

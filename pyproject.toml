@@ -57,7 +57,7 @@ rred = "rred_reports.cli:main"
 minversion = "7.0"
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = ["error", "ignore::DeprecationWarning"]
 log_cli_level = "INFO"
 testpaths = [
   "tests",

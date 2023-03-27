@@ -12,8 +12,8 @@ class Content:
     recipients: str
     subject: str
     body: str
-    attachment: bytes
-    attachment_filename: str
+    attachment: bytes | None
+    attachment_filename: str | None
     smtp_host: str
     smtp_port: int
 
