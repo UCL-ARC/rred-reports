@@ -5,7 +5,6 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
-from typing import Any
 
 import pytz
 
@@ -50,12 +49,14 @@ def create_and_send():
     # stubbed out for now
     settings = ReportSettings(sender="h.moss@ucl.ac.uk", recipients=["h.moss@ucl.ac.uk"], smtp_host="isd-smtp.ucl.ac.uk", smtp_port="25")
 
+    # this needs to be created with the report filling
+    # should return bytes for the report
     report = None
 
     send(settings, report)
 
 
-def send(settings: ReportSettings, report: Any | None) -> bool:
+def send(settings: ReportSettings, report: bytes | None) -> bool:
     local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
     now = local_datetime.strftime("%d/%m/%Y at %H:%M")
 

@@ -1,8 +1,5 @@
-from rred_reports.reports.emails import create_and_send
-
-
 def main():
-    create_and_send()
+    pass
 
 
 if __name__ == "__main___":
