@@ -49,13 +49,6 @@ class ReportEmailer:
         smtp.quit()
         return result
 
-    def create_and_send(self, report: bytes | None) -> None:
-        # this needs to be created with the report filling
-        # should return bytes for the report
-        report = None
-
-        self.send(report)
-
     def send(self, report: bytes | None) -> bool:
         local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
         now = local_datetime.strftime("%d/%m/%Y at %H:%M")
