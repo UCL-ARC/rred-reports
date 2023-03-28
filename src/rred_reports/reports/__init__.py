@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ReportSettings:
+class ReportEmailConfig:
     sender: str
     recipients: str | list[str]
     smtp_host: str

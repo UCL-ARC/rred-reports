@@ -8,7 +8,7 @@ from smtplib import SMTP
 
 import pytz
 
-from rred_reports.reports import ReportSettings
+from rred_reports.reports import ReportEmailConfig
 
 
 @dataclass
@@ -23,54 +23,54 @@ class EmailContent:
     smtp_port: int
 
 
-def build_email(content: EmailContent) -> MIMEMultipart:
-    message = MIMEMultipart("mixed")
-    message["From"] = content.sender
-    message["To"] = content.recipients
-    message["Subject"] = content.subject
-    message.attach(MIMEText(content.body))
+@dataclass
+class ReportEmailer:
+    settings: ReportEmailConfig
 
-    if content.attachment is not None:
-        mime_application = MIMEApplication(content.attachment)
-        mime_application.add_header("Content-Disposition", f"attachment; filename={content.attachment_filename}")
-        message.attach(mime_application)
+    @staticmethod
+    def build_email(content: EmailContent) -> MIMEMultipart:
+        message = MIMEMultipart("mixed")
+        message["From"] = content.sender
+        message["To"] = content.recipients
+        message["Subject"] = content.subject
+        message.attach(MIMEText(content.body))
 
-    return message
+        if content.attachment is not None:
+            mime_application = MIMEApplication(content.attachment)
+            mime_application.add_header("Content-Disposition", f"attachment; filename={content.attachment_filename}")
+            message.attach(mime_application)
 
+        return message
 
-def send_email(smtp_host: str, smtp_port: int, message: MIMEMultipart) -> None:
-    smtp = SMTP(host=smtp_host, port=smtp_port)
-    result = smtp.send_message(message)
-    smtp.quit()
-    return result
+    @staticmethod
+    def send_email(smtp_host: str, smtp_port: int, message: MIMEMultipart) -> None:
+        smtp = SMTP(host=smtp_host, port=smtp_port)
+        result = smtp.send_message(message)
+        smtp.quit()
+        return result
 
+    def create_and_send(self, report: bytes | None) -> None:
+        # this needs to be created with the report filling
+        # should return bytes for the report
+        report = None
 
-def create_and_send():
-    # stubbed out for now
-    settings = ReportSettings(sender="h.moss@ucl.ac.uk", recipients=["h.moss@ucl.ac.uk"], smtp_host="isd-smtp.ucl.ac.uk", smtp_port="25")
+        self.send(report)
 
-    # this needs to be created with the report filling
-    # should return bytes for the report
-    report = None
+    def send(self, report: bytes | None) -> bool:
+        local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
+        now = local_datetime.strftime("%d/%m/%Y at %H:%M")
 
-    send(settings, report)
+        email_content = EmailContent(
+            sender=self.settings.sender,
+            recipients=",".join(self.settings.recipients),
+            subject="RRED Processed Report",
+            body=f"Report processed {now}.",
+            attachment=report,
+            attachment_filename="RRED_Processed_Report.docx",
+            smtp_host=self.settings.smtp_host,
+            smtp_port=self.settings.smtp_port,
+        )
+        email = self.build_email(email_content)
+        self.send_email(email_content.smtp_host, email_content.smtp_port, email)
 
-
-def send(settings: ReportSettings, report: bytes | None) -> bool:
-    local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
-    now = local_datetime.strftime("%d/%m/%Y at %H:%M")
-
-    email_content = EmailContent(
-        sender=settings.sender,
-        recipients=",".join(settings.recipients),
-        subject="RRED Processed Report",
-        body=f"Report processed on {now}.",
-        attachment=report,
-        attachment_filename="RRED_Processed_Report.docx",
-        smtp_host=settings.smtp_host,
-        smtp_port=settings.smtp_port,
-    )
-    email = build_email(email_content)
-    send_email(email_content.smtp_host, email_content.smtp_port, email)
-
-    return True
+        return True

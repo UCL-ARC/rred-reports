@@ -1,14 +1,4 @@
-import smtpd
-
 import pytest
-
-
-class MockSMTPServer(smtpd.SMTPServer):
-    def __init__(*args, **kwargs):
-        smtpd.SMTPServer.__init__(*args, **kwargs)
-
-    def process_message(*args, **kwargs):
-        pass
 
 
 @pytest.fixture()
