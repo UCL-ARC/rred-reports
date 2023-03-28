@@ -116,3 +116,4 @@ messages_control.disable = [
   "missing-module-docstring",
   "wrong-import-position",
 ]
+generated-members= "pandas.*"

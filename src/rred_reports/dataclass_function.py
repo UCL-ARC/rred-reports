@@ -1,13 +1,10 @@
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 import pandas as pd
+from loguru import logger
 from pandas_dataclasses import AsFrame, Data
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -17,26 +14,26 @@ class Pupil(AsFrame):
     pupil_no: Data[str]
     rred_user_id: Data[str]
     assessi_engtest2: Data[pd.Int32Dtype]
-    assessi_iretest1: Data[float]
-    assessi_iretype1: Data[float]
-    assessi_maltest1: Data[float]
-    assessi_outcome: Data[float]
-    assessi_scotest1: Data[float]
-    assessi_scotest2: Data[float]
-    assessi_scotest3: Data[float]
-    assessii_engcheck1: Data[float]
-    assessii_engtest4: Data[float]
-    assessii_engtest5: Data[float]
-    assessii_engtest6: Data[float]
-    assessii_engtest7: Data[float]
-    assessii_engtest8: Data[float]
-    assessii_scotest4: Data[float]
-    assessii_iretest2: Data[float]
-    assessii_iretype2: Data[float]
-    assessiii_engtest10: Data[float]
-    assessiii_engtest11: Data[float]
-    assessiii_engtest9: Data[float]
-    assessiii_iretest4: Data[float]
+    assessi_iretest1: Data[pd.Int32Dtype]
+    assessi_iretype1: Data[pd.Int32Dtype]
+    assessi_maltest1: Data[pd.Int32Dtype]
+    assessi_outcome: Data[pd.Int32Dtype]
+    assessi_scotest1: Data[pd.Int32Dtype]
+    assessi_scotest2: Data[pd.Int32Dtype]
+    assessi_scotest3: Data[pd.Int32Dtype]
+    assessii_engcheck1: Data[pd.Int32Dtype]
+    assessii_engtest4: Data[pd.Int32Dtype]
+    assessii_engtest5: Data[pd.Int32Dtype]
+    assessii_engtest6: Data[pd.Int32Dtype]
+    assessii_engtest7: Data[pd.Int32Dtype]
+    assessii_engtest8: Data[pd.Int32Dtype]
+    assessii_scotest4: Data[pd.Int32Dtype]
+    assessii_iretest2: Data[pd.Int32Dtype]
+    assessii_iretype2: Data[pd.Int32Dtype]
+    assessiii_engtest10: Data[pd.Int32Dtype]
+    assessiii_engtest11: Data[pd.Int32Dtype]
+    assessiii_engtest9: Data[pd.Int32Dtype]
+    assessiii_iretest4: Data[pd.Int32Dtype]
     entry_dob: Data[Literal["datetime64[ns]"]]
     summer: Data[str]
     entry_date: Data[Literal["datetime64[ns]"]]
@@ -50,34 +47,34 @@ class Pupil(AsFrame):
     entry_poverty: Data[str]
     entry_sen_status: Data[str]
     entry_special_cohort: Data[str]
-    entry_bl_result: Data[float]
-    entry_li_result: Data[float]
-    entry_cap_result: Data[float]
-    entry_wt_result: Data[float]
-    entry_wv_result: Data[float]
-    entry_hrsw_result: Data[float]
-    entry_bas_result: Data[float]
-    exit_num_weeks: Data[float]
-    exit_num_lessons: Data[float]
-    exit_lessons_missed_ca: Data[float]
-    exit_lessons_missed_cu: Data[float]
-    exit_lessons_missed_ta: Data[float]
-    exit_lessons_missed_tu: Data[float]
-    exit_bl_result: Data[float]
-    exit_li_result: Data[float]
-    exit_cap_result: Data[float]
-    exit_wt_result: Data[float]
-    exit_wv_result: Data[float]
-    exit_hrsw_result: Data[float]
-    exit_bas_result: Data[float]
+    entry_bl_result: Data[pd.Int32Dtype]
+    entry_li_result: Data[pd.Int32Dtype]
+    entry_cap_result: Data[pd.Int32Dtype]
+    entry_wt_result: Data[pd.Int32Dtype]
+    entry_wv_result: Data[pd.Int32Dtype]
+    entry_hrsw_result: Data[pd.Int32Dtype]
+    entry_bas_result: Data[pd.Int32Dtype]
+    exit_num_weeks: Data[pd.Int32Dtype]
+    exit_num_lessons: Data[pd.Int32Dtype]
+    exit_lessons_missed_ca: Data[pd.Int32Dtype]
+    exit_lessons_missed_cu: Data[pd.Int32Dtype]
+    exit_lessons_missed_ta: Data[pd.Int32Dtype]
+    exit_lessons_missed_tu: Data[pd.Int32Dtype]
+    exit_bl_result: Data[pd.Int32Dtype]
+    exit_li_result: Data[pd.Int32Dtype]
+    exit_cap_result: Data[pd.Int32Dtype]
+    exit_wt_result: Data[pd.Int32Dtype]
+    exit_wv_result: Data[pd.Int32Dtype]
+    exit_hrsw_result: Data[pd.Int32Dtype]
+    exit_bas_result: Data[pd.Int32Dtype]
     month3_testdate: Data[Literal["datetime64[ns]"]]
-    month3_bl_result: Data[float]
-    month3_wv_result: Data[float]
-    month3_bas_result: Data[float]
+    month3_bl_result: Data[pd.Int32Dtype]
+    month3_wv_result: Data[pd.Int32Dtype]
+    month3_bas_result: Data[pd.Int32Dtype]
     month6_testdate: Data[Literal["datetime64[ns]"]]
-    month6_bl_result: Data[float]
-    month6_wv_result: Data[float]
-    month6_bas_result: Data[float]
+    month6_bl_result: Data[pd.Int32Dtype]
+    month6_wv_result: Data[pd.Int32Dtype]
+    month6_bas_result: Data[pd.Int32Dtype]
     rred_qc_parameters: Data[str]
 
 
@@ -100,7 +97,7 @@ class School(AsFrame):
     rrcp_country: Data[int]
 
 
-def createdf(file: Path) -> pd.DataFrame:
+def create_nested_df(file: Path) -> pd.DataFrame:
     """Create a nested dataframe from an excel file
 
     Args:
@@ -114,15 +111,17 @@ def createdf(file: Path) -> pd.DataFrame:
     def clmnlist(i):
         return list(full_data.iloc[:, i])
 
-    all_schools_df = School(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
-    all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
+    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
+    all_schools_df = all_schools_df.drop_duplicates()
 
-    teach_df = Teacher(clmnlist(1), clmnlist(2), clmnlist(6))
-    teach_df = teach_df.drop_duplicates()  # pylint: disable=E1101
+    teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))
+    teach_df = teach_df.drop_duplicates()
 
     drop_cols = list(all_schools_df.columns.values)
     drop_cols.append(teach_df.columns.values[1])
+
     df_slimmed = full_data.drop(columns=drop_cols)
+
     school_teacher = []
     school_dict = all_schools_df.to_dict("records")
     for school in school_dict:
@@ -164,7 +163,6 @@ def print_nested_dataframe_contents(nested_df: pd.DataFrame) -> None:
     Args:
         nested_df (pd.DataFrame): Nested pandas DataFrame
     """
-
     for dataframe in nested_df:
         logger.info(dataframe)
 
@@ -172,7 +170,7 @@ def print_nested_dataframe_contents(nested_df: pd.DataFrame) -> None:
 def main():
     """Entrypoint for generating nested dataframe"""
     file_path = Path(__file__).resolve().parents[2] / "input" / "templates" / "example_dataset.xlsx"
-    full_nested_df = createdf(file_path)
+    full_nested_df = create_nested_df(file_path)
 
     unravelled_data = parse_nested_dataframe(full_nested_df)
 
@@ -187,3 +185,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# testing
+
+print_nested_dataframe_contents(parse_nested_dataframe(create_nested_df("example_dataset.xlsx"))["teacher_pupil"])
+print_nested_dataframe_contents(parse_nested_dataframe(create_nested_df("example_dataset.xlsx"))["school_teacher"])
