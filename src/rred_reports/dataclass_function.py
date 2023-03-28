@@ -111,10 +111,10 @@ def create_nested_df(file: Path) -> pd.DataFrame:
     def clmnlist(i):
         return list(full_data.iloc[:, i])
 
-    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))
+    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
-    teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))
+    teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
     teach_df = teach_df.drop_duplicates()  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
