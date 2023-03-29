@@ -27,7 +27,9 @@ dynamic = ["version"]
 dependencies = [
   "python_version>='3.9'",
   "loguru == 0.6.0",
+  "openpyxl==3.1.1",
   "pandas == 1.5.3",
+  "pandas-dataclasses == 0.12.0",
   "python-docx == 0.8.11",
   "typer == 0.7.0",
 ]
@@ -114,3 +116,4 @@ messages_control.disable = [
   "missing-module-docstring",
   "wrong-import-position",
 ]
+generated-members= "pandas.*"
