@@ -6,6 +6,9 @@ import pandas as pd
 from loguru import logger
 from pandas_dataclasses import AsFrame, Data
 
+# hardcode column number so that extra rows can be added, but ignored for our processing
+COL_NUMBER_AFTER_SLIMMING = 65
+
 
 @dataclass
 class Pupil(AsFrame):
@@ -122,7 +125,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
-    remaining_columns = [clmnlist(x, df_slimmed) for x in range(df_slimmed.columns.size)]
+    remaining_columns = [clmnlist(x, df_slimmed) for x in range(COL_NUMBER_AFTER_SLIMMING)]
 
     pupils_df = Pupil.new(*remaining_columns)
     pupils_df.drop_duplicates(inplace=True)  # pylint: disable=E1101
