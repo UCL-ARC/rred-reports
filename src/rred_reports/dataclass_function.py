@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
-from loguru import logger
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
@@ -144,31 +143,3 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     """
     pupil_teachers = pd.merge(masterfile_dfs["pupils"], masterfile_dfs["teachers"], on="rred_user_id")
     return pd.merge(pupil_teachers, masterfile_dfs["schools"], on="school_id")
-
-
-def unravell_nested_data(nested_df: pd.DataFrame) -> dict[pd.DataFrame]:
-    """Helper function to parse the nested dataframe
-    Removes a single layer of nesting
-
-    Args:
-        nested_df (pd.DataFrame): Nested pandas DataFrame
-    Returns:
-        dict[pd.DataFrame]: _description_
-    """
-
-    school_teacher_df = nested_df.loc["school_teacher"].iloc[0]["school_teacher"]
-    teacher_pupil_df = nested_df.loc["teacher_pupil"].iloc[0]["teacher_pupil"]
-
-    return {"school_teacher": pd.DataFrame(school_teacher_df), "teacher_pupil": pd.DataFrame(teacher_pupil_df)}
-
-
-def print_nested_dataframe_contents(nested_df: pd.DataFrame) -> None:
-    """Print the contents of a nested dataframe
-    Mainly for convenience/debugging. Should be replaced with
-    some proper logging if we're going to use this going forward.
-
-    Args:
-        nested_df (pd.DataFrame): Nested pandas DataFrame
-    """
-    for dataframe in nested_df:
-        logger.info(dataframe)
