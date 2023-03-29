@@ -97,19 +97,19 @@ class School(AsFrame):
     rrcp_country: Data[int]
 
 
-def create_nested_df(file: Path) -> pd.DataFrame:
-    """Create a nested dataframe from an excel file
+def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
+    """Create a nested dataframe from an Excel masterfile
 
     Args:
-        file (Path): Path object pointing to excel file
+        file (Path): Path object pointing to Excel masterfile
 
     Returns:
-        pd.DataFrame: Nested pandas DataFrame
+        dict[str, pd.DataFrame]: Dictionary of dataframes
     """
     full_data = pd.read_excel(file)
 
-    def clmnlist(i):
-        return list(full_data.iloc[:, i])
+    def clmnlist(i, data=full_data):
+        return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
@@ -122,24 +122,28 @@ def create_nested_df(file: Path) -> pd.DataFrame:
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
-    school_teacher = []
-    school_dict = all_schools_df.to_dict("records")
-    for school in school_dict:
-        school_df = pd.DataFrame.from_dict([school])
-        school_teacher.append(pd.merge(school_df["school_id"], teach_df, how="inner", on="school_id"))
+    remaining_columns = [clmnlist(x, df_slimmed) for x in range(df_slimmed.columns.size)]
 
-    teacher_pupils = []
-    for teacher in school_teacher:
-        pupil_df = pd.merge(teacher["rred_user_id"], df_slimmed, how="inner", on="rred_user_id")
-        teacher_pupils.append(pupil_df)
+    pupils_df = Pupil.new(*remaining_columns)
+    pupils_df.drop_duplicates(inplace=True)  # pylint: disable=E1101
 
-    school_teacher_df = pd.DataFrame({"school_teacher": school_teacher})
-    teacher_pupil_df = pd.DataFrame({"teacher_pupil": teacher_pupils})
-
-    return pd.DataFrame({"dfs": [school_teacher_df, teacher_pupil_df]}, index=["school_teacher", "teacher_pupil"])
+    return {"pupils": pupils_df, "teachers": teach_df, "schools": all_schools_df}
 
 
-def parse_nested_dataframe(nested_df: pd.DataFrame) -> dict[pd.DataFrame]:
+def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """
+    Helper function to join entire masterfile dataframes together
+
+    Args:
+        masterfile_dfs: dict[str, pd.DataFrame]: Dictionary of Dataframes
+    Returns:
+        pd.DataFrame: joined masterfile
+    """
+    pupil_teachers = pd.merge(masterfile_dfs["pupils"], masterfile_dfs["teachers"], on="rred_user_id")
+    return pd.merge(pupil_teachers, masterfile_dfs["schools"], on="school_id")
+
+
+def unravell_nested_data(nested_df: pd.DataFrame) -> dict[pd.DataFrame]:
     """Helper function to parse the nested dataframe
     Removes a single layer of nesting
 
@@ -152,7 +156,7 @@ def parse_nested_dataframe(nested_df: pd.DataFrame) -> dict[pd.DataFrame]:
     school_teacher_df = nested_df.loc["school_teacher"].iloc[0]["school_teacher"]
     teacher_pupil_df = nested_df.loc["teacher_pupil"].iloc[0]["teacher_pupil"]
 
-    return {"school_teacher": school_teacher_df, "teacher_pupil": teacher_pupil_df}
+    return {"school_teacher": pd.DataFrame(school_teacher_df), "teacher_pupil": pd.DataFrame(teacher_pupil_df)}
 
 
 def print_nested_dataframe_contents(nested_df: pd.DataFrame) -> None:
@@ -165,28 +169,3 @@ def print_nested_dataframe_contents(nested_df: pd.DataFrame) -> None:
     """
     for dataframe in nested_df:
         logger.info(dataframe)
-
-
-def main():
-    """Entrypoint for generating nested dataframe"""
-    file_path = Path(__file__).resolve().parents[2] / "input" / "templates" / "example_dataset.xlsx"
-    full_nested_df = create_nested_df(file_path)
-
-    unravelled_data = parse_nested_dataframe(full_nested_df)
-
-    school_teacher_df = unravelled_data["school_teacher"]
-    teacher_pupil_df = unravelled_data["teacher_pupil"]
-
-    print_nested_dataframe_contents(school_teacher_df)
-    print_nested_dataframe_contents(teacher_pupil_df)
-
-    return full_nested_df
-
-
-if __name__ == "__main__":
-    main()
-
-# testing
-
-print_nested_dataframe_contents(parse_nested_dataframe(create_nested_df("example_dataset.xlsx"))["teacher_pupil"])
-print_nested_dataframe_contents(parse_nested_dataframe(create_nested_df("example_dataset.xlsx"))["school_teacher"])
