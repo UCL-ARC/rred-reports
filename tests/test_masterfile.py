@@ -1,4 +1,4 @@
-from rred_reports.dataclass_function import join_masterfile_dfs, parse_masterfile
+from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 
 
 def test_masterfile_read(data_path):
