@@ -5,6 +5,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
+from typing import Optional
 
 import pytz
 
@@ -19,8 +20,8 @@ class EmailContent:
     recipients: str
     subject: str
     body: str
-    attachment: bytes | None
-    attachment_filename: str | None
+    attachment: Optional[bytes]
+    attachment_filename: Optional[str]
 
 
 @dataclass
@@ -70,7 +71,7 @@ class ReportEmailer:
         smtp.quit()
         return result
 
-    def send(self, report: bytes | None) -> dict:
+    def send(self, report: Optional[bytes]) -> dict:
         """Prepare, construct and send an email
 
         Args:

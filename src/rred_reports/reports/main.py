@@ -1,5 +1,5 @@
 def main():
-    pass
+    """Stubbed main function"""
 
 
 if __name__ == "__main___":

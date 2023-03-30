@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 @dataclass
 class ReportEmailConfig:
+    """Basic configuration for sending reports as email"""
+
     sender: str
     recipients: str
     smtp_host: str
