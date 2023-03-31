@@ -38,7 +38,13 @@ class ReportEmailer:
         """
 
         recipients = [Mailbox(email_address=x) for x in mail_content.recipients]
-        message = Message(account=mail_content.account, subject=mail_content.subject, body=mail_content.body, to_recipients=recipients)
+        message = Message(
+            account=mail_content.account,
+            subject=mail_content.subject,
+            body=mail_content.body,
+            to_recipients=recipients,
+            cc_recipients=mail_content.cc_recipients,
+        )
 
         if mail_content.attachment is not None:
             attachment = FileAttachment(name=mail_content.attachment_filename, content=mail_content.attachment)
@@ -68,6 +74,9 @@ class ReportEmailer:
         """
         local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
         now = local_datetime.strftime("%d/%m/%Y at %H:%M")
+
+        if cc_to is None:
+            cc_to = []
 
         authenticator = RREDAuthenticator()
         email_content = EmailContent(
