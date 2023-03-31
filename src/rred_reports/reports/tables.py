@@ -5,16 +5,6 @@ import pandas as pd
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
-summary_columns = [
-    "number_of_rr_teachers",
-    "number_of_pupils_served",
-    "po_discontinud",
-    "po_referred_to_school",
-    "po_incomplete",
-    "po_left_school",
-    "po_ongoing",
-]
-
 table_one_columns = [
     "rred_user_id",
     "pupil_no",
