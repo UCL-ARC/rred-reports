@@ -21,7 +21,7 @@ class RREDAuthenticator:
             client_id=self.settings.client_id,
             client_secret=self.settings.client_secret,
             tenant_id=self.settings.tenant_id,
-            username=self.settings.username,
+            username=f"{self.settings.username}@ucl.ac.uk",
             password=self.settings.auth_pass,
         )
 
@@ -29,4 +29,4 @@ class RREDAuthenticator:
         return Configuration(server=self.settings.server, credentials=self.get_credentials())
 
     def get_account(self) -> Account:
-        return Account(primary_smtp_address=self.settings.username, config=self.get_config(), access_type=DELEGATE)
+        return Account(primary_smtp_address=f"{self.settings.send_emails_as}", config=self.get_config(), access_type=DELEGATE)

@@ -1,18 +1,8 @@
 """Filling report templates tables with RRED data"""
-from dataclasses import dataclass
 
-from dynaconf import Dynaconf
 from dynaconf.base import Settings
 
-
-@dataclass
-class ReportEmailConfig:
-    """Basic configuration for sending reports as email"""
-
-    sender: str
-    recipients: str
-    smtp_host: str
-    smtp_port: int
+from rred_reports.config import settings
 
 
 def get_settings() -> Settings:
@@ -24,6 +14,6 @@ def get_settings() -> Settings:
     the envvar_prefix variable set in config.py
 
     Returns:
-        Settings: Dynaconf settings
+        settings (Settings): Dynaconf settings
     """
-    return Dynaconf()
+    return settings
