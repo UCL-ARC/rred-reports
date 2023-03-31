@@ -5,6 +5,16 @@ import pandas as pd
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
+summary_columns = [
+    "number_of_rr_teachers",
+    "number_of_pupils_served",
+    "po_discontinud",
+    "po_referred_to_school",
+    "po_incomplete",
+    "po_left_school",
+    "po_ongoing",
+]
+
 table_one_columns = [
     "rred_user_id",
     "pupil_no",
@@ -156,11 +166,17 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
 
     template_filler = TemplateFiller(template_path)
 
+    # adding in summary table first
+    add_in_summary_table = summary_table(school_df)
+    current_table = template_filler.tables[0]
+    template_filler.populate_table(current_table, add_in_summary_table)
+
+    # now adding other tables
     for index, column_and_filter in enumerate(columns_and_filters):
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df)
         table_to_write = filtered[columns]
-        current_table = template_filler.tables[index]
+        current_table = template_filler.tables[index + 1]
         template_filler.populate_table(current_table, table_to_write)
     template_filler.save_document(r"output/reports")
 
