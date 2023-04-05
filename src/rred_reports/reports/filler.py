@@ -24,6 +24,13 @@ class TemplateFiller:
     """
 
     def __init__(self, template_path: Path, header_rows: list[int]):
+        """
+        Create a template filler, clean up repeated columns for tables which have a single header row
+
+        Args:
+            template_path (Path): Path to the template
+            header_rows (list[int]): list of the number of header rows for each table
+        """
         self.doc = Document(template_path)
         self.tables = self.doc.tables
         self.header_rows = header_rows
