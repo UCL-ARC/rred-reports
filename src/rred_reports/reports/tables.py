@@ -118,7 +118,7 @@ def filter_six(school_dataframe: pd.DataFrame):
     return school_dataframe
 
 
-def summary_table_function(school_df: pd.DataFrame):
+def summary_table(school_df: pd.DataFrame):
     """
     Args:
         school_filter(pd.DataFrame)
@@ -138,7 +138,7 @@ def summary_table_function(school_df: pd.DataFrame):
     def filter_summary_table(school_df):
         """Filter for summary table
 
-        Args: pd.DataFrame
+        Args: school_filter(pd.DataFrame)
         """
         return school_df
 
@@ -149,25 +149,27 @@ def summary_table_function(school_df: pd.DataFrame):
             return 0
 
     filtered = filter_summary_table(school_df)
-    summary_table = filtered[columns_used]
+    filtered_summary_table = filtered[columns_used]
 
     return pd.DataFrame(
         {
-            "number_of_rr_teachers": [summary_table["rred_user_id"].nunique()],
-            "number_of_pupils_served": [summary_table["pupil_no"].nunique()],
-            "po_discontinud": get_outcome_from_summary(summary_table, "Discontinued"),
-            "po_referred_to_school": get_outcome_from_summary(summary_table, "Referred to school"),
-            "po_incomplete": get_outcome_from_summary(summary_table, "Incomplete"),
-            "po_left_school": get_outcome_from_summary(summary_table, "Left school"),
-            "po_ongoing": get_outcome_from_summary(summary_table, "Ongoing"),
+            "number_of_rr_teachers": [filtered_summary_table["rred_user_id"].nunique()],
+            "number_of_pupils_served": [filtered_summary_table["pupil_no"].nunique()],
+            "po_discontinud": get_outcome_from_summary(filtered_summary_table, "Discontinued"),
+            "po_referred_to_school": get_outcome_from_summary(filtered_summary_table, "Referred to school"),
+            "po_incomplete": get_outcome_from_summary(filtered_summary_table, "Incomplete"),
+            "po_left_school": get_outcome_from_summary(filtered_summary_table, "Left school"),
+            "po_ongoing": get_outcome_from_summary(filtered_summary_table, "Ongoing"),
         }
     )
 
 
-def make_table(school_df: pd.DataFrame, template_path: Path):
+def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id):
     """Function to fill the template with the dataframe
 
-    Args: pd.DataFrame
+    Args: school_filter(pd.DataFrame), Path, school_id
+
+    Returns: Populated template per school, named {school_id}.docx in outputs/reports folder
     """
 
     # adding a column for table four
@@ -186,7 +188,7 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
 
     # adding in summary table first
     template_filler = TemplateFiller(template_path, header_rows)
-    add_in_summary_table = summary_table_function(school_df)
+    add_in_summary_table = summary_table(school_df)
     template_filler.populate_table(0, add_in_summary_table)
 
     # now adding other tables
@@ -195,14 +197,15 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
         filtered = filter_function(school_df)
         table_to_write = filtered[columns]
         template_filler.populate_table(index + 1, table_to_write)
-    template_filler.save_document(r"output/reports/test.docx")
+    template_filler.save_document(rf"output/reports/{school_id}.docx")
 
 
 # some tests
 if __name__ == "__main__":
     nested_data = parse_masterfile("tests/data/example_masterfile.xlsx")
     testing_df = join_masterfile_dfs(nested_data)
-    make_table(
+    populate_school_tables(
         school_filter(testing_df, "RRS2030250"),
         "C:/Users/Katie Buntic/OneDrive - University College London/Projects/RRED/rred-reports/input/templates/2021/2021-22_template.docx",
+        "RRS2030250",
     )
