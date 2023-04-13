@@ -1,0 +1,8 @@
+,record_id,rrcp_rr_id,_test_details,_test_timestamp,rrcp_area_eng,rrcp_area_sco,entry_school_eng_bark_v1,entry_school_sco_wlot_v1,entry_school_eng_bark_v2,entry_school_sco_wlot_v2,entry_school_eng_bark_v3,entry_school_sco_wlot_v3,no_rr_children
+0,AB9234,AB9234,2021-04-21 09:20:03,1st of 3 english schools   ,80,RRS180,,,,,,3
+1,AB9235,AB9235,2021-04-21 09:21:03,2nd of 3 english schools   ,80,,,,RRS180,,,,3
+2,AB9236,AB9236,2021-04-21 09:22:03,3rd of 3 english schools   ,80,,,,,,RRS180,,3
+100,AB100,AB100,not entered        ,timestamp not entered      ,,30,,RRS100,,,,,1
+101,AB101,AB101,2021-04-21 09:22:03,no_rr_children=0           ,80,,,RRS101,,,,,0
+102,AB102,AB102,2021-04-21 09:22:03,no_rr_children na          ,80,,,RRS101,,,,,
+102,AB103,,2021-04-21 09:22:03,     no rrcp_rr_id              ,80,,,RRS101,,,,,1
