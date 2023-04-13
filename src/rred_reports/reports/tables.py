@@ -20,7 +20,7 @@ table_one_columns = [
 
 table_two_columns = ["rred_user_id", "pupil_no", "entry_sen_status", "exit_outcome"]
 
-table_three_columns = ["rred_user_id", "pupil_no", "entry_date", "exit_testdate", "exit_num_weeks", "exit_num_lessons", "exit_outcome"]
+table_three_columns = ["rred_user_id", "pupil_no", "entry_date", "exit_date", "exit_num_weeks", "exit_num_lessons", "exit_outcome"]
 
 table_four_columns = [
     "rred_user_id",
@@ -66,6 +66,7 @@ table_six_columns = [
     "exit_bas_result",
     "month3_bas_result",
     "month6_bas_result",
+    "exit_outcome",
 ]
 
 
@@ -117,6 +118,9 @@ def summary_table(school_df: pd.DataFrame):
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
     def filter_summary_table(df):
+        """
+        Filter for summary table
+        """
         return df
 
     def get_outcome_from_summary(df, outcome_type):
@@ -154,37 +158,27 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
         (table_six_columns, filter_six),
     )
 
-    template_filler = TemplateFiller(template_path)
-
+    header_rows = [2, 1, 1, 1, 1, 2, 2]
     # adding in summary table first
+    template_filler = TemplateFiller(template_path, header_rows)
     add_in_summary_table = summary_table(school_df)
-    current_table = template_filler.tables[0]
-    template_filler.populate_table(current_table, add_in_summary_table)
+    template_filler.populate_table(0, add_in_summary_table)
 
     # now adding other tables
     for index, column_and_filter in enumerate(columns_and_filters):
+        template_filler = TemplateFiller(template_path, header_rows)
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df)
         table_to_write = filtered[columns]
-        current_table = template_filler.tables[index + 1]
-        template_filler.populate_table(current_table, table_to_write)
-    template_filler.save_document(r"output/reports")
+        template_filler.populate_table(index + 1, table_to_write)
+    template_filler.save_document(r"output/reports/test1.docx")
 
 
 # some tests
 if __name__ == "__main__":
-    # table four test
     nested_data = parse_masterfile("tests/data/example_masterfile.xlsx")
     testing_df = join_masterfile_dfs(nested_data)
-    testing_df.info()
-    testing_df["total_lost_lessons"] = testing_df[list(testing_df.columns)[45:49]].sum(axis=1)
-    testing_df
-
-    school_filter(testing_df, "RRS2030250")
     make_table(
         school_filter(testing_df, "RRS2030250"),
         "C:/Users/Katie Buntic/OneDrive - University College London/Projects/RRED/rred-reports/input/templates/2021/2021-22_template.docx",
     )
-
-    # summary table test
-    summary_table(school_filter(testing_df, "RRS2030250"))
