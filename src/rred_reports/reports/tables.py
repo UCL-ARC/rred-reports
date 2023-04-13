@@ -188,16 +188,14 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
     template_filler = TemplateFiller(template_path, header_rows)
     add_in_summary_table = summary_table_function(school_df)
     template_filler.populate_table(0, add_in_summary_table)
-    template_filler.save_document(r"output/reports/test.docx")
 
     # now adding other tables
     for index, column_and_filter in enumerate(columns_and_filters):
-        template_filler = TemplateFiller("output/reports/test.docx", header_rows)
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df)
         table_to_write = filtered[columns]
         template_filler.populate_table(index + 1, table_to_write)
-        template_filler.save_document(r"output/reports/test.docx")
+    template_filler.save_document(r"output/reports/test.docx")
 
 
 # some tests
