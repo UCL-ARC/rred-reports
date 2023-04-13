@@ -16,7 +16,7 @@ class Pupil(AsFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
-    assessi_engtest2: Data[pd.Int32Dtype]
+    assessi_engtest2: Data[pd.Int32Dtype]  # surprising that there isn't an engtest1 here, is this an accident?
     assessi_iretest1: Data[pd.Int32Dtype]
     assessi_iretype1: Data[pd.Int32Dtype]
     assessi_maltest1: Data[pd.Int32Dtype]
