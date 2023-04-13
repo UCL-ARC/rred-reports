@@ -118,7 +118,7 @@ def filter_six(school_dataframe: pd.DataFrame):
     return school_dataframe
 
 
-def summary_table(school_df: pd.DataFrame):
+def summary_table_function(school_df: pd.DataFrame):
     """
     Args:
         school_filter(pd.DataFrame)
@@ -186,7 +186,7 @@ def make_table(school_df: pd.DataFrame, template_path: Path):
 
     # adding in summary table first
     template_filler = TemplateFiller(template_path, header_rows)
-    add_in_summary_table = summary_table(school_df)
+    add_in_summary_table = summary_table_function(school_df)
     template_filler.populate_table(0, add_in_summary_table)
     template_filler.save_document(r"output/reports/test.docx")
 
