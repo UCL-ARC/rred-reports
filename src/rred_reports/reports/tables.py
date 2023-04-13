@@ -70,40 +70,58 @@ table_six_columns = [
 ]
 
 
-def school_filter(df: pd.DataFrame, school_id):
+def school_filter(whole_dataframe: pd.DataFrame, school_id):
     """Function to filter school"""
-    return df[df.school_id == school_id]
+    return whole_dataframe[whole_dataframe.school_id == school_id]
 
 
 # specific filter for each table
-def filter_one(df: pd.DataFrame):
-    return df
+def filter_one(school_dataframe: pd.DataFrame):
+    """Filter for table one, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
-def filter_two(df: pd.DataFrame):
-    return df
+def filter_two(school_dataframe: pd.DataFrame):
+    """Filter for table two, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
-def filter_three(df: pd.DataFrame):
-    return df
+def filter_three(school_dataframe: pd.DataFrame):
+    """Filter for table three, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
-def filter_four(df: pd.DataFrame):
-    return df
+def filter_four(school_dataframe: pd.DataFrame):
+    """Filter for table four, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
-def filter_five(df: pd.DataFrame):
-    return df
+def filter_five(school_dataframe: pd.DataFrame):
+    """Filter for table five, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
-def filter_six(df: pd.DataFrame):
-    return df
+def filter_six(school_dataframe: pd.DataFrame):
+    """Filter for table six, for later use
+
+    Args: school_filter(pd.DataFrame)"""
+    return school_dataframe
 
 
 def summary_table(school_df: pd.DataFrame):
     """
     Args:
-        pd.DataFrame
+        school_filter(pd.DataFrame)
 
     Returns:
         table with the following columns
@@ -117,15 +135,16 @@ def summary_table(school_df: pd.DataFrame):
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
-    def filter_summary_table(df):
-        """
-        Filter for summary table
-        """
-        return df
+    def filter_summary_table(school_df):
+        """Filter for summary table
 
-    def get_outcome_from_summary(df, outcome_type):
+        Args: pd.DataFrame
+        """
+        return school_df
+
+    def get_outcome_from_summary(school_df, outcome_type):
         try:
-            return df["exit_outcome"].value_counts()[outcome_type]
+            return school_df["exit_outcome"].value_counts()[outcome_type]
         except KeyError:
             return 0
 
@@ -146,6 +165,11 @@ def summary_table(school_df: pd.DataFrame):
 
 
 def make_table(school_df: pd.DataFrame, template_path: Path):
+    """Function to fill the template with the dataframe
+
+    Args: pd.DataFrame
+    """
+
     # adding a column for table four
     school_df["total_lost_lessons"] = school_df[list(school_df.columns)[45:49]].sum(axis=1)
 
