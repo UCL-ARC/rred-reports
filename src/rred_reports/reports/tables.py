@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
 table_one_columns = [
@@ -72,7 +71,7 @@ table_six_columns = [
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
     """Function to filter school"""
-    return whole_dataframe[whole_dataframe.school_id == school_id]
+    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
 
 
 # specific filter for each table
@@ -164,16 +163,17 @@ def summary_table(school_df: pd.DataFrame):
     )
 
 
-def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id):
-    """Function to fill the template with the dataframe
+def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
+    """Function to fill the school template tables, saving them the file
 
     Args: school_filter(pd.DataFrame), Path, school_id
 
-    Returns: Populated template per school, named {school_id}.docx in outputs/reports folder
+    Returns: The template filler with populated data
     """
 
     # adding a column for table four
-    school_df["total_lost_lessons"] = school_df[list(school_df.columns)[45:49]].sum(axis=1)
+    lost_lesson_cols = [col for col in school_df if col.startswith("exit_lessons_missed")]
+    school_df["total_lost_lessons"] = school_df[lost_lesson_cols].sum(axis=1)
 
     columns_and_filters = (
         (table_one_columns, filter_one),
@@ -197,15 +197,9 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_
         filtered = filter_function(school_df)
         table_to_write = filtered[columns]
         template_filler.populate_table(index + 1, table_to_write)
-    template_filler.save_document(rf"output/reports/{school_id}.docx")
 
+    if not output_path:
+        output_path = Path(f"output/reports/{school_id}.docx")
+    template_filler.save_document(output_path)
 
-# some tests
-if __name__ == "__main__":
-    nested_data = parse_masterfile("tests/data/example_masterfile.xlsx")
-    testing_df = join_masterfile_dfs(nested_data)
-    populate_school_tables(
-        school_filter(testing_df, "RRS2030250"),
-        "C:/Users/Katie Buntic/OneDrive - University College London/Projects/RRED/rred-reports/input/templates/2021/2021-22_template.docx",
-        "RRS2030250",
-    )
+    return template_filler

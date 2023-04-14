@@ -160,11 +160,14 @@ class TemplateFiller:
         if not data.shape[1] == len(table.columns):
             raise TemplateFillerException(message)
 
-    def verify_tables_filled(self):
-        """Verify all cells in a table are filled
+    def verify_tables_filled(self) -> bool:
+        """Verify all cells in all table are filled
 
-        Args:
-            table (Table): Table object representing a table within a .docx file
+        Returns:
+            True if successful
+
+        Raises:
+            TemplateFillerException if not all cells are filled
         """
         for table_idx, table in enumerate(self.tables):
             for i, _row in enumerate(table.rows):
@@ -173,6 +176,7 @@ class TemplateFiller:
                     if cell_content == "":
                         message = f"Empty cell ({i},{j}) (row, col) found in table {table_idx + 1}"
                         raise TemplateFillerException(message)
+        return True
 
     def save_document(self, output_path: Path):
         """Save the document to the defined output path
