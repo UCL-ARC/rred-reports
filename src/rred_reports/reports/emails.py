@@ -65,7 +65,7 @@ class ReportEmailer:
         else:
             message.send()
 
-    def run_emails(self, to_list: list[str], cc_to: Optional[list[str]] = None, report: Optional[bytes] = None) -> None:
+    def run(self, to_list: list[str], cc_to: Optional[list[str]] = None, report: Optional[bytes] = None) -> None:
         """Prepare, construct and send an email
 
         Args:
