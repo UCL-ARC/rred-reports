@@ -38,7 +38,7 @@ class Pupil(AsFrame):
     assessiii_engtest9: Data[pd.Int32Dtype]
     assessiii_iretest4: Data[pd.Int32Dtype]
     entry_dob: Data[Literal["datetime64[ns]"]]
-    summer: Data[str]
+    summer: Data[str]  # if this is used, will need to populate from redcap data, I suspect we may be able to remove it
     entry_date: Data[Literal["datetime64[ns]"]]
     entry_testdate: Data[Literal["datetime64[ns]"]]
     exit_date: Data[Literal["datetime64[ns]"]]
