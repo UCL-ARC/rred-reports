@@ -31,7 +31,7 @@ class TemplateFiller:
             template_path (Path): Path to the template
             header_rows (list[int]): list of the number of header rows for each table
         """
-        self.doc = Document(template_path)
+        self.doc: Document = Document(template_path)
         self.tables = self.doc.tables
         self.header_rows = header_rows
         self.clean_tables()

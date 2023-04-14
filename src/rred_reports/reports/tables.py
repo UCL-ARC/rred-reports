@@ -163,6 +163,13 @@ def summary_table(school_df: pd.DataFrame):
     )
 
 
+def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
+    template_filler = populate_school_tables(school_df, template_path, school_id, output_path)
+    # edit text of word doc
+    template_filler.save_document(output_path)
+    return template_filler
+
+
 def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
     """Function to fill the school template tables, saving them the file
 
@@ -200,6 +207,5 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_
 
     if not output_path:
         output_path = Path(f"output/reports/{school_id}.docx")
-    template_filler.save_document(output_path)
 
     return template_filler
