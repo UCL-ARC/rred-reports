@@ -1,5 +1,5 @@
 """All functionality dealing with the RRED masterfile"""
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Literal
 
@@ -7,7 +7,7 @@ import pandas as pd
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
-COL_NUMBER_AFTER_SLIMMING = 65
+COL_NUMBER_AFTER_SLIMMING = 64
 
 
 @dataclass
@@ -78,7 +78,10 @@ class Pupil(AsFrame):
     month6_bl_result: Data[pd.Int32Dtype]
     month6_wv_result: Data[pd.Int32Dtype]
     month6_bas_result: Data[pd.Int32Dtype]
-    rred_qc_parameters: Data[str]
+
+    @classmethod
+    def fields(cls):
+        return [field.name for field in fields(cls)]
 
 
 @dataclass
@@ -89,6 +92,10 @@ class Teacher(AsFrame):
     reg_rr_title: Data[str]
     school_id: Data[str]
 
+    @classmethod
+    def fields(cls):
+        return [field.name for field in fields(cls)]
+
 
 @dataclass
 class School(AsFrame):
@@ -98,6 +105,10 @@ class School(AsFrame):
     rrcp_school: Data[str]
     rrcp_area: Data[int]
     rrcp_country: Data[int]
+
+    @classmethod
+    def fields(cls):
+        return [field.name for field in fields(cls)]
 
 
 def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
@@ -142,5 +153,5 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     Returns:
         pd.DataFrame: joined masterfile
     """
-    pupil_teachers = pd.merge(masterfile_dfs["pupils"], masterfile_dfs["teachers"], on="rred_user_id")
-    return pd.merge(pupil_teachers, masterfile_dfs["schools"], on="school_id")
+    teacher_schools = pd.merge(masterfile_dfs["teachers"], masterfile_dfs["schools"], on="school_id")
+    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
