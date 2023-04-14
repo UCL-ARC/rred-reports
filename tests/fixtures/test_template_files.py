@@ -17,19 +17,11 @@ def data_path() -> Path:
 
 
 @pytest.fixture()
-def template_report_path(data_path) -> Path:
-    """
-    Returns a Path object representing a test report template docx file
-    """
-    return data_path / "RRED_Report_Template_Single_Category.docx"
-
-
-@pytest.fixture()
-def template_filler(template_report_path) -> TemplateFiller:
+def template_filler(data_path) -> TemplateFiller:
     """
     Returns a TemplateFiller object to avoid boilerplate in tests
     """
-    return TemplateFiller(template_report_path, [1, 1, 2])
+    return TemplateFiller(data_path / "RRED_Report_Template_Single_Category.docx", [1, 1, 2])
 
 
 @pytest.fixture()
