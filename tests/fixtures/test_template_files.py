@@ -25,7 +25,7 @@ def template_report_path(data_path) -> Path:
 
 
 @pytest.fixture()
-def template_filler(template_report_path) -> Path:
+def template_filler(template_report_path) -> TemplateFiller:
     """
     Returns a TemplateFiller object to avoid boilerplate in tests
     """
@@ -33,7 +33,7 @@ def template_filler(template_report_path) -> Path:
 
 
 @pytest.fixture()
-def template_filler_populated_tables(template_filler) -> Path:
+def template_filler_populated_tables(template_filler) -> TemplateFiller:
     """
     Returns a TemplateFiller object to avoid boilerplate in tests
     """
