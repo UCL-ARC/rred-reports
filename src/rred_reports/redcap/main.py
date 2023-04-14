@@ -7,8 +7,8 @@ import pandas as pd
 def read_recap_extract(file_path: Path) -> pd.DataFrame:
     extract = pd.read_csv(file_path)
     processed_wide = preprocess_wide_data(extract)
-    # after long to wide, should populate factor numbers -> strings
-    return wide_to_long(processed_wide)
+    long = wide_to_long(processed_wide)
+    return convert_numeric_factors_to_string(long)
 
 
 def preprocess_wide_data(extract: pd.DataFrame) -> pd.DataFrame:
@@ -31,12 +31,12 @@ def _convert_timestamps_to_dates(extract: pd.DataFrame):
 
 def _fill_region_and_school_with_coersion(extract: pd.DataFrame):
     rrcp_area_cols = [col for col in extract if col.startswith("rrcp_area_")]
-    extract["rccp_area"] = extract[rrcp_area_cols].bfill(axis=1).iloc[:, 0]
+    extract["rrcp_area"] = extract[rrcp_area_cols].bfill(axis=1).iloc[:, 0]
     school_id_cols = [col for col in extract if col.startswith("entry_school_")]
     extract["school_id"] = extract[school_id_cols].bfill(axis=1).iloc[:, 0]
 
 
-def _filter_out_no_children_and_no_rr_id(extract: pd.DataFrame):
+def _filter_out_no_children_and_no_rr_id(extract: pd.DataFrame) -> pd.DataFrame:
     filtered = extract[extract["no_rr_children"].notnull() & extract["no_rr_children"] != 0]
     return filtered[filtered["rrcp_rr_id"].notnull()]
 
@@ -51,10 +51,11 @@ def _rename_wide_cols_with_student_number_suffix(extract: pd.DataFrame) -> pd.Da
     return extract.rename(pupil_column_rename, axis=1)
 
 
-def wide_to_long(wide_extract: pd.DataFrame) -> pd.DataFrame:
-    non_wide_columns = ["reg_rr_title", "rrcp_country", "rccp_area", "school_id"]
-
-    wide_cols_before_summer = [
+# Hardcoded columns for exporting, could finesse this but probably isn't worth the time
+# The final columns output are under unit testing so will catch any changes to input or output data
+_parsing_cols = {
+    "non_wide_columns": ["reg_rr_title", "rrcp_country", "rrcp_area", "school_id"],
+    "wide_cols_before_summer": [
         "assessi_engtest2",
         "assessi_iretest1",
         "assessi_iretype1",
@@ -77,15 +78,14 @@ def wide_to_long(wide_extract: pd.DataFrame) -> pd.DataFrame:
         "assessiii_engtest9",
         "assessiii_iretest4",
         "entry_dob",
-    ]
-
-    wide_cols_between_summer_and_entry_year = [
+    ],
+    "wide_cols_between_summer_and_entry_year": [
         "entry_date",
         "entry_testdate",
         "exit_date",
         "exit_outcome",
-    ]
-    wide_cols_after_entry_year = [
+    ],
+    "wide_cols_after_entry_year": [
         "entry_gender",
         "entry_ethnicity",
         "entry_language",
@@ -120,33 +120,32 @@ def wide_to_long(wide_extract: pd.DataFrame) -> pd.DataFrame:
         "month6_bl_result",
         "month6_wv_result",
         "month6_bas_result",
-    ]
+    ],
+}
 
+
+def wide_to_long(wide_extract: pd.DataFrame) -> pd.DataFrame:
     entry_year_cols = [f"entry_year_{country}" for country in ["eng", "ire", "mal", "sco"]]
 
-    # merge entry year for each country to entry_year_vx
-    initial_long = _long_and_merge(wide_extract, wide_cols_before_summer[0])
+    export_data = _create_long_data(entry_year_cols, wide_extract)
+    processed_data = _process_calculated_columns(entry_year_cols, export_data)
+    processed_data.rename(columns={"rrcp_rr_id": "rred_user_id"}, inplace=True)
 
-    export_data = initial_long[[*non_wide_columns, wide_cols_before_summer[0]]]
+    return processed_data[processed_data["entry_date"].notnull()]
 
-    remaining_wide_columns = [*wide_cols_before_summer[0:], *wide_cols_between_summer_and_entry_year, *wide_cols_after_entry_year, *entry_year_cols]
 
+def _create_long_data(entry_year_cols: list[str], wide_extract: pd.DataFrame) -> pd.DataFrame:
+    initial_long = _long_and_merge(wide_extract, _parsing_cols["wide_cols_before_summer"][0])
+    export_data = initial_long[[*_parsing_cols["non_wide_columns"], _parsing_cols["wide_cols_before_summer"][0]]]
+    remaining_wide_columns = [
+        *_parsing_cols["wide_cols_before_summer"][1:],
+        *_parsing_cols["wide_cols_between_summer_and_entry_year"],
+        *_parsing_cols["wide_cols_after_entry_year"],
+        *entry_year_cols,
+    ]
     for wide_column in remaining_wide_columns:
         export_data = _long_and_merge(wide_extract, wide_column, export_data)
-
-    entry_year = export_data[entry_year_cols].bfill(axis=1).iloc[:, 0]
-    summer_index = len(non_wide_columns) + len(wide_cols_before_summer) + 1
-    export_data.insert(summer_index, "Summer", pd.Series(""))
-    entry_year_index = summer_index + len(wide_cols_between_summer_and_entry_year) + 1
-    export_data.insert(entry_year_index, "entry_year", entry_year)
-    export_data.reset_index(inplace=True)
-    pupil_no = export_data["student_id"].astype(str) + "_" + export_data["rrcp_rr_id"]
-    export_data.insert(0, "pupil_no", pupil_no)
-    export_data.rename({"rrcp_rr_id": "rred_user_id"}, inplace=True)
-
-    filtered_export_data = export_data.drop(entry_year_cols, axis=1)
-
-    return filtered_export_data[filtered_export_data["entry_dob"].notnull()]
+    return export_data
 
 
 def _long_and_merge(wide_df: pd.DataFrame, column_prefix: str, long_df: pd.DataFrame = None):
@@ -154,3 +153,22 @@ def _long_and_merge(wide_df: pd.DataFrame, column_prefix: str, long_df: pd.DataF
     if long_df is not None:
         return pd.concat([long_df, transformed[column_prefix]], axis=1)
     return transformed
+
+
+def _process_calculated_columns(entry_year_cols: list[str], export_data: pd.DataFrame) -> pd.DataFrame:
+    processed_data = export_data.copy()
+    entry_year = processed_data[entry_year_cols].bfill(axis=1).iloc[:, 0]
+    summer_index = len(_parsing_cols["non_wide_columns"]) + len(_parsing_cols["wide_cols_before_summer"]) + 1
+    processed_data.insert(summer_index, "summer", pd.Series(""))
+    entry_year_index = summer_index + len(_parsing_cols["wide_cols_after_entry_year"]) + 1
+    processed_data.insert(entry_year_index, "entry_year", entry_year)
+    processed_data.reset_index(inplace=True)
+    pupil_no = processed_data["student_id"].astype(str) + "_" + processed_data["rrcp_rr_id"]
+    processed_data.insert(0, "pupil_no", pupil_no)
+    processed_data.drop(entry_year_cols, axis=1, inplace=True)
+    processed_data.drop("student_id", axis=1, inplace=True)
+    return processed_data
+
+
+def convert_numeric_factors_to_string(long_df: pd.DataFrame) -> pd.DataFrame:
+    return long_df

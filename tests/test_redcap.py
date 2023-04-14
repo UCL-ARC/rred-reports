@@ -1,5 +1,6 @@
 import pandas as pd
 
+from rred_reports.masterfile import masterfile_columns
 from rred_reports.redcap.main import preprocess_wide_data, read_recap_extract
 
 
@@ -16,7 +17,7 @@ def test_preprocess_wide_data(data_path):
 
     # coerced variables filled
     same_coerced_values = redcap.loc[redcap["record_id"].isin(["AB9234", "AB9235", "AB9236"])]
-    assert (same_coerced_values.get("rccp_area") == 80).all()
+    assert (same_coerced_values.get("rrcp_area") == 80).all()
     assert (same_coerced_values.get("school_id") == "RRS180").all()
 
     # missing date converted to 0001-01-01
@@ -29,3 +30,4 @@ def test_read_recap_extract(data_path):
     file_path = data_path / "redcap" / "extract.csv"
     extract = read_recap_extract(file_path)
     assert extract.shape[0] == 3
+    assert list(extract.columns.values) == masterfile_columns()

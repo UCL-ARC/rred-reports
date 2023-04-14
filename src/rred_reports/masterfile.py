@@ -102,9 +102,9 @@ class School(AsFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Data[str]
-    rrcp_school: Data[str]
-    rrcp_area: Data[int]
     rrcp_country: Data[int]
+    rrcp_area: Data[int]
+    rrcp_school: Data[str]
 
     @classmethod
     def fields(cls):
@@ -125,7 +125,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     def clmnlist(i, data=full_data):
         return list(data.iloc[:, i])
 
-    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))  # pylint: disable=E1121
+    all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
@@ -155,3 +155,11 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     """
     teacher_schools = pd.merge(masterfile_dfs["teachers"], masterfile_dfs["schools"], on="school_id")
     return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
+
+
+def masterfile_columns():
+    pupil_no, user_id, *other_pupil_fields = Pupil.fields()
+    school_id, *other_school_fields = School.fields()
+    user_id, *other_teacher_fields, school_id = Teacher.fields()
+
+    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, *other_pupil_fields]
