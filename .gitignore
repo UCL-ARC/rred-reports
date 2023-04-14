@@ -144,9 +144,9 @@ src/*/_version.py
 .idea/
 .vscode/
 
-input/**
+input/downloaded
+input/processed
 !input/*/.gitkeep
-!input/templates
 output/**
 !output/*/.gitkeep
 **/.DS_Store
