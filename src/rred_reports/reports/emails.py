@@ -22,7 +22,6 @@ class EmailContent:
     attachment_filename: Optional[str]
 
 
-@dataclass
 class ReportEmailer:
     """Encapsulation of email data and methods"""
 

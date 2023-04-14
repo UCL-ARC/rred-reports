@@ -20,9 +20,6 @@ def test_build_email_with_report(mock_ews_account, template_report_bytes):
     assert mail_content.recipients[0] == test_email.to_recipients[0].email_address
     assert mail_content.attachment_filename == test_email.attachments[0].name
 
-    # instance = mock_smtp_server.return_value
-    # assert instance.send_message.called_once_with(test_email)
-
 
 def test_build_email_without_report(mock_ews_account):
     report_emailer = ReportEmailer()
