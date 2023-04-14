@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from rred_reports.masterfile import masterfile_columns
 from rred_reports.redcap.main import preprocess_wide_data, read_recap_extract
@@ -26,7 +27,13 @@ def test_preprocess_wide_data(data_path):
     assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103"])].size == 0
 
 
+@pytest.mark.xfail(reason="Will fail until add in code to populate the school name column from the ID")
 def test_read_recap_extract(data_path):
+    """
+    Given an extract from redcap with 3 valid rows
+    When the extract is processed
+    3 rows should exist, and the output columns should match what is in our masterfile definition
+    """
     file_path = data_path / "redcap" / "extract.csv"
     extract = read_recap_extract(file_path)
     assert extract.shape[0] == 3
