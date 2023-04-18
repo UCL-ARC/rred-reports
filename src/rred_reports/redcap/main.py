@@ -4,19 +4,31 @@ from pathlib import Path
 import pandas as pd
 
 
-def read_recap_extract(file_path: Path) -> pd.DataFrame:
-    extract = pd.read_csv(file_path)
-    processed_wide = preprocess_wide_data(extract)
+def read_recap_extract(raw_file_path: Path, labelled_file_path: Path) -> pd.DataFrame:
+    raw_data = pd.read_csv(raw_file_path)
+    labelled_data = pd.read_csv(labelled_file_path)
+    processed_wide = preprocess_wide_data(raw_data, labelled_data)
     long = wide_to_long(processed_wide)
     return convert_numeric_factors_to_string(long)
 
 
-def preprocess_wide_data(extract: pd.DataFrame) -> pd.DataFrame:
-    processed_extract = extract.copy(deep=True)
+def preprocess_wide_data(raw_data: pd.DataFrame, labelled_file_path: pd.DataFrame) -> pd.DataFrame:
+    processed_extract = labelled_file_path.copy(deep=True)
+    _fill_school_id_with_coersion(raw_data, processed_extract)
+    _fill_region_with_coersion(processed_extract)
     _convert_timestamps_to_dates(processed_extract)
-    _fill_region_and_school_with_coersion(processed_extract)
     filtered = _filter_out_no_children_and_no_rr_id(processed_extract)
     return _rename_wide_cols_with_student_number_suffix(filtered)
+
+
+def _fill_school_id_with_coersion(raw_data, processed_extract):
+    school_id_cols = [col for col in raw_data if col.startswith("entry_school_")]
+    processed_extract["school_id"] = raw_data[school_id_cols].bfill(axis=1).iloc[:, 0]
+
+
+def _fill_region_with_coersion(extract: pd.DataFrame):
+    rrcp_area_cols = [col for col in extract if col.startswith("rrcp_area_")]
+    extract["rrcp_area"] = extract[rrcp_area_cols].bfill(axis=1).iloc[:, 0]
 
 
 def _convert_timestamps_to_dates(extract: pd.DataFrame):
@@ -27,13 +39,6 @@ def _convert_timestamps_to_dates(extract: pd.DataFrame):
         .applymap(pd.Timestamp.date)
     )
     extract[timestamp_cols] = dates
-
-
-def _fill_region_and_school_with_coersion(extract: pd.DataFrame):
-    rrcp_area_cols = [col for col in extract if col.startswith("rrcp_area_")]
-    extract["rrcp_area"] = extract[rrcp_area_cols].bfill(axis=1).iloc[:, 0]
-    school_id_cols = [col for col in extract if col.startswith("entry_school_")]
-    extract["school_id"] = extract[school_id_cols].bfill(axis=1).iloc[:, 0]
 
 
 def _filter_out_no_children_and_no_rr_id(extract: pd.DataFrame) -> pd.DataFrame:
