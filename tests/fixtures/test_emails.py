@@ -17,11 +17,3 @@ def mock_message(mocker):
     mocker.patch("exchangelib.Message", new=message_mock)
 
     return message_mock
-
-
-@pytest.fixture()
-def mock_authenticator(mocker):
-    auth_mock = mocker.MagicMock(name="auth_mock")
-
-    mocker.patch("rred_reports.reports.auth.RREDAuthenticator", new=auth_mock)
-    return auth_mock

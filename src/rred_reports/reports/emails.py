@@ -9,6 +9,17 @@ from exchangelib import Account, FileAttachment, Mailbox, Message
 from rred_reports.reports.auth import RREDAuthenticator
 
 
+class ReportEmailerException(Exception):
+    """Custom exception generator for the ReportEmailer class"""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+    def __repr__(self) -> str:
+        return self.message
+
+
 @dataclass
 class EmailContent:
     """Email content class"""
@@ -33,7 +44,7 @@ class ReportEmailer:
             content (EmailContent): EmailContent object
 
         Returns:
-            Message: Email (optionally with attachment) as exchangelib Message
+            message: Email (optionally with attachment) as exchangelib Message
         """
 
         recipients = [Mailbox(email_address=x) for x in mail_content.recipients]
@@ -51,7 +62,7 @@ class ReportEmailer:
         return message
 
     @staticmethod
-    def send_email(message: Message, save: bool = False) -> None:
+    def send_email(message: Message, save: bool = False) -> bool:
         """Sends the defined email.
 
         Also can save a copy in the sent mailbox via
@@ -59,17 +70,35 @@ class ReportEmailer:
 
         Args:
             message (Message): Constructed message to send
+        Returns:
+            process_status (bool): Did the message successfully send?
         """
+        process_success = False
         if save:
-            message.send_and_save()
+            try:
+                message.send_and_save()
+                process_success = True
+                return process_success
+            except Exception as err:
+                message = "An error occurred emailing this report."
+                raise ReportEmailerException(message) from err
         else:
-            message.send()
+            try:
+                message.send()
+                process_success = True
+                return process_success
+            except Exception as err:
+                message = "An error occurred emailing this report."
+                raise ReportEmailerException(message) from err
 
-    def run(self, to_list: list[str], cc_to: Optional[list[str]] = None, report: Optional[bytes] = None) -> None:
+    def run(self, to_list: list[str], cc_to: Optional[list[str]] = None, report: Optional[bytes] = None, save_email: bool = False) -> bool:
         """Prepare, construct and send an email
 
         Args:
             report (bytes | None): Optionally attach a report to the email
+
+        Returns:
+            bool: Did the message successfully send?
         """
         local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
         now = local_datetime.strftime("%d/%m/%Y at %H:%M")
@@ -88,4 +117,5 @@ class ReportEmailer:
             attachment_filename="RRED_Processed_Report.docx",
         )
         email = self.build_email(email_content)
-        self.send_email(email, save=False)
+
+        return self.send_email(email, save=save_email)
