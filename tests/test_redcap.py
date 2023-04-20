@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 
 from rred_reports.masterfile import masterfile_columns
 from rred_reports.redcap.main import preprocess_wide_data, read_recap_extract
@@ -17,7 +16,7 @@ def test_preprocess_wide_data(data_path):
     extract_raw = pd.read_csv(raw_data_path)
     extract_labelled = pd.read_csv(labelled_data_path)
 
-    redcap = preprocess_wide_data(extract_raw, extract_labelled)
+    redcap = preprocess_wide_data(extract_raw, extract_labelled, "2021-2022")
 
     # coerced variables filled
     same_coerced_values = redcap.loc[redcap["record_id"] == "AB9234"]
@@ -30,7 +29,6 @@ def test_preprocess_wide_data(data_path):
     assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103"])].size == 0
 
 
-@pytest.mark.xfail(reason="Will fail until add in code to populate the school name column from the ID")
 def test_read_recap_extract(data_path):
     """
     Given an extract from redcap with 3 valid rows
@@ -39,6 +37,6 @@ def test_read_recap_extract(data_path):
     """
     raw_file_path = data_path / "redcap" / "extract.csv"
     labelled_file_path = data_path / "redcap" / "extract_labels.csv"
-    extract = read_recap_extract(raw_file_path, labelled_file_path)
+    extract = read_recap_extract(raw_file_path, labelled_file_path, "2021-2022")
     assert extract.shape[0] == 3
     assert list(extract.columns.values) == masterfile_columns()
