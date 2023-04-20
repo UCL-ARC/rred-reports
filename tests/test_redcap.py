@@ -1,7 +1,7 @@
 import pandas as pd
 
 from rred_reports.masterfile import masterfile_columns
-from rred_reports.redcap.main import preprocess_wide_data, read_recap_extract
+from rred_reports.redcap.main import RedcapReader
 
 
 def test_preprocess_wide_data(data_path):
@@ -12,11 +12,12 @@ def test_preprocess_wide_data(data_path):
     """
     raw_data_path = data_path / "redcap" / "extract.csv"
     labelled_data_path = data_path / "redcap" / "extract_labels.csv"
+    school_list = data_path / "redcap" / "school_list.csv"
 
     extract_raw = pd.read_csv(raw_data_path)
     extract_labelled = pd.read_csv(labelled_data_path)
-
-    redcap = preprocess_wide_data(extract_raw, extract_labelled, "2021-2022")
+    recap_reader = RedcapReader(school_list)
+    redcap = recap_reader.preprocess_wide_data(extract_raw, extract_labelled, "2021-2022")
 
     # coerced variables filled
     same_coerced_values = redcap.loc[redcap["record_id"] == "AB9234"]
@@ -37,6 +38,9 @@ def test_read_recap_extract(data_path):
     """
     raw_file_path = data_path / "redcap" / "extract.csv"
     labelled_file_path = data_path / "redcap" / "extract_labels.csv"
-    extract = read_recap_extract(raw_file_path, labelled_file_path, "2021-2022")
+    school_list = data_path / "redcap" / "school_list.csv"
+
+    recap_reader = RedcapReader(school_list)
+    extract = recap_reader.read_recap_extract(raw_file_path, labelled_file_path, "2021-2022")
     assert extract.shape[0] == 3
     assert list(extract.columns.values) == masterfile_columns()
