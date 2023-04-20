@@ -83,7 +83,7 @@ Sign in and consent to the requested app permissions.
 Create a `secrets.toml` from the provided example
 
 ```bash
-cp src/rred_reports/reports/.example-secrets.toml src/rred_reports/reports/.secrets.toml
+cp src/rred_reports/.example-secrets.toml src/rred_reports/.secrets.toml
 ```
 
 Fill in `client_id`, `client_secret` and `tenant_id` with the values noted down
