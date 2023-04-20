@@ -17,7 +17,7 @@ def test_preprocess_wide_data(data_path):
     extract_raw = pd.read_csv(raw_data_path)
     extract_labelled = pd.read_csv(labelled_data_path)
     recap_reader = RedcapReader(school_list)
-    redcap = recap_reader.preprocess_wide_data(extract_raw, extract_labelled, "2021-2022")
+    redcap = recap_reader.preprocess_wide_data(extract_raw, extract_labelled)
 
     # coerced variables filled
     same_coerced_values = redcap.loc[redcap["record_id"] == "AB9234"]

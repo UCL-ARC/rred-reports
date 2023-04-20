@@ -10,6 +10,8 @@ from rred_reports.masterfile import masterfile_columns
 
 @dataclass
 class ExtractInput:
+    """Inputs required for a single year of a redcap extract"""
+
     coded_data_path: Path
     labelled_data_path: Path
     survey_period: str
@@ -17,26 +19,64 @@ class ExtractInput:
 
 class RedcapReader:
     def __init__(self, school_list: Path):
+        """
+        Setup for reading from redcap
+
+        Args:
+            school_list: path to csv file defining a mapping of all school ids to their names
+        """
         self._school_list = pd.read_csv(school_list)
 
-    def read_redcap_data(self, current_year: ExtractInput, previous_year: ExtractInput):
+    def read_redcap_data(self, current_year: ExtractInput, previous_year: ExtractInput) -> pd.DataFrame:
+        """
+        Process two years of redcap data from wide to long, and join them together
+
+        Args:
+            current_year (ExtractInput): current surveyed year
+            previous_year (ExtractInput): previous surveyed year
+
+        Returns:
+            pd.DataFrame: Long data from surveys, combined by rows
+        """
         current_extract = self.read_single_redcap_year(current_year)
         previous_extract = self.read_single_redcap_year(previous_year)
         return pd.concat([current_extract, previous_extract], ignore_index=True)
 
     def read_single_redcap_year(self, redcap_fields: ExtractInput) -> pd.DataFrame:
+        """
+        Process a single year of redcap data from wide to long, keeping only the columns from the masterfile
+
+        Args:
+            redcap_fields (ExtractInput): redcap data for a year of survey
+        """
         raw_data = pd.read_csv(redcap_fields.coded_data_path)
         labelled_data = pd.read_csv(redcap_fields.labelled_data_path)
         processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
         long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
-        long_with_names = self.add_school_names(long)
+        long_with_names = self._add_school_name_column(long)
         return long_with_names[masterfile_columns()].copy()
 
     @classmethod
     def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_file_path: pd.DataFrame) -> pd.DataFrame:
+        """
+        Process wide data before conversion to long.
+
+        - Some data is spread across multiple columns, so coalesce this data
+        - Type conversion for dates
+        - Convert wide columns to consistent format ({column}_v{student_number}
+        - Add in row number column for unique indexes
+        - Filter responses with no students
+
+        Args:
+            raw_data (pd.DataFrame): survey responses, with data given as codes
+            labelled_file_path (pd.DataFrame): survey responses, with data given as labels
+
+        Returns:
+            pd.DataFrame: survey data processed to allow for wide to long conversion, labels used for all data except school id
+        """
         processed_extract = labelled_file_path.copy(deep=True)
-        cls._fill_school_id_with_coersion(raw_data, processed_extract)
-        cls._fill_region_with_coersion(processed_extract)
+        cls._fill_school_id_with_coalesce(raw_data, processed_extract)
+        cls._fill_region_with_coalesce(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
         processed_extract["_row_number"] = np.arange(processed_extract.shape[0])
 
@@ -44,12 +84,12 @@ class RedcapReader:
         return cls._rename_wide_cols_with_student_number_suffix(filtered)
 
     @staticmethod
-    def _fill_school_id_with_coersion(raw_data, processed_extract):
+    def _fill_school_id_with_coalesce(raw_data, processed_extract):
         school_id_cols = [col for col in raw_data if col.startswith("entry_school_")]
         processed_extract["school_id"] = raw_data[school_id_cols].bfill(axis=1).iloc[:, 0]
 
     @staticmethod
-    def _fill_region_with_coersion(extract: pd.DataFrame):
+    def _fill_region_with_coalesce(extract: pd.DataFrame):
         rrcp_area_cols = [col for col in extract if col.startswith("rrcp_area_")]
         extract["rrcp_area"] = extract[rrcp_area_cols].bfill(axis=1).iloc[:, 0]
 
@@ -184,7 +224,7 @@ class RedcapReader:
         processed_data.insert(0, "pupil_no", pupil_no)
         return processed_data
 
-    def add_school_names(self, long_df: pd.DataFrame) -> pd.DataFrame:
+    def _add_school_name_column(self, long_df: pd.DataFrame) -> pd.DataFrame:
         named_schools = long_df.merge(self._school_list, left_on="school_id", right_on="RRED School ID", how="left")
         named_schools.rename({"School Name": "rrcp_school"}, axis=1, inplace=True)
         return named_schools
