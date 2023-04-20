@@ -10,8 +10,16 @@ from pandas_dataclasses import AsFrame, Data
 COL_NUMBER_AFTER_SLIMMING = 64
 
 
+class PandasDataFrame(AsFrame):
+    """Custom dataclass definition allowing us to add custom functionality"""
+
+    @classmethod
+    def fields(cls):
+        return [field.name for field in fields(cls)]
+
+
 @dataclass
-class Pupil(AsFrame):
+class Pupil(PandasDataFrame):
     """Pupil information"""
 
     pupil_no: Data[str]
@@ -79,36 +87,24 @@ class Pupil(AsFrame):
     month6_wv_result: Data[pd.Int32Dtype]
     month6_bas_result: Data[pd.Int32Dtype]
 
-    @classmethod
-    def fields(cls):
-        return [field.name for field in fields(cls)]
-
 
 @dataclass
-class Teacher(AsFrame):
+class Teacher(PandasDataFrame):
     """Teacher information, can link with Pupil df with rreduserID"""
 
     rred_user_id: Data[str]
     reg_rr_title: Data[str]
     school_id: Data[str]
 
-    @classmethod
-    def fields(cls):
-        return [field.name for field in fields(cls)]
-
 
 @dataclass
-class School(AsFrame):
+class School(PandasDataFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Data[str]
     rrcp_country: Data[str]
     rrcp_area: Data[str]
     rrcp_school: Data[str]
-
-    @classmethod
-    def fields(cls):
-        return [field.name for field in fields(cls)]
 
 
 def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
