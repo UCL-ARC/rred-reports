@@ -15,6 +15,7 @@ class PandasDataFrame(AsFrame):
 
     @classmethod
     def fields(cls):
+        """Helper method to get a list of all fields"""
         return [field.name for field in fields(cls)]
 
 
@@ -154,6 +155,7 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
 
 
 def masterfile_columns():
+    """List of all masterfile columns, in the expected order"""
     pupil_no, user_id, *other_pupil_fields = Pupil.fields()
     school_id, *other_school_fields = School.fields()
     user_id, *other_teacher_fields, school_id = Teacher.fields()

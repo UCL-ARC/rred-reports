@@ -18,6 +18,8 @@ class ExtractInput:
 
 
 class RedcapReader:
+    """Reads two years of redcap data, processing the files (wide to long, and others) and filtering to non-empty rows"""
+
     def __init__(self, school_list: Path):
         """
         Setup for reading from redcap
@@ -187,13 +189,22 @@ class RedcapReader:
     }
 
     def wide_to_long(self, wide_extract: pd.DataFrame, survey_period: str) -> pd.DataFrame:
+        """
+        Convert preprocessed wide extract to long, only keeping rows which have an entry date or exit date
+
+        Args:
+            wide_extract [pd.DataFrame]: processed wide extract
+            survey_period [str]: survey period to add to the `pupil_no`
+        Returns:
+            pd.DataFrame: long data
+        """
         entry_year_cols = [f"entry_year_{country}" for country in ["eng", "ire", "mal", "sco"]]
 
         export_data = self._create_long_data(entry_year_cols, wide_extract)
         processed_data = self._process_calculated_columns(entry_year_cols, export_data, survey_period)
         processed_data.rename(columns={"rrcp_rr_id": "rred_user_id"}, inplace=True)
 
-        return processed_data[processed_data["entry_date"].notnull()]
+        return processed_data[processed_data["entry_date"].notnull() | processed_data["exit_date"].notnull()]
 
     def _create_long_data(self, entry_year_cols: list[str], wide_extract: pd.DataFrame) -> pd.DataFrame:
         initial_long = self._long_and_merge(wide_extract, self._parsing_cols["wide_columns"][0])
