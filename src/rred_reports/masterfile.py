@@ -16,15 +16,15 @@ class Pupil(AsFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
-    assessi_engtest2: Data[pd.Int32Dtype]  # surprising that there isn't an engtest1 here, is this an accident?
+    assessi_engtest2: Data[pd.Int32Dtype]
     assessi_iretest1: Data[pd.Int32Dtype]
-    assessi_iretype1: Data[pd.Int32Dtype]
+    assessi_iretype1: Data[str]
     assessi_maltest1: Data[pd.Int32Dtype]
-    assessi_outcome: Data[pd.Int32Dtype]
+    assessi_outcome: Data[str]
     assessi_scotest1: Data[pd.Int32Dtype]
     assessi_scotest2: Data[pd.Int32Dtype]
     assessi_scotest3: Data[pd.Int32Dtype]
-    assessii_engcheck1: Data[pd.Int32Dtype]
+    assessii_engcheck1: Data[str]
     assessii_engtest4: Data[pd.Int32Dtype]
     assessii_engtest5: Data[pd.Int32Dtype]
     assessii_engtest6: Data[pd.Int32Dtype]
@@ -32,7 +32,7 @@ class Pupil(AsFrame):
     assessii_engtest8: Data[pd.Int32Dtype]
     assessii_scotest4: Data[pd.Int32Dtype]
     assessii_iretest2: Data[pd.Int32Dtype]
-    assessii_iretype2: Data[pd.Int32Dtype]
+    assessii_iretype2: Data[str]
     assessiii_engtest10: Data[pd.Int32Dtype]
     assessiii_engtest11: Data[pd.Int32Dtype]
     assessiii_engtest9: Data[pd.Int32Dtype]
@@ -102,8 +102,8 @@ class School(AsFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Data[str]
-    rrcp_country: Data[int]
-    rrcp_area: Data[int]
+    rrcp_country: Data[str]
+    rrcp_area: Data[str]
     rrcp_school: Data[str]
 
     @classmethod
