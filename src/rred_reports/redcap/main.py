@@ -1,6 +1,7 @@
 """Downloading and processing of redcap data"""
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
@@ -17,6 +18,8 @@ def preprocess_wide_data(raw_data: pd.DataFrame, labelled_file_path: pd.DataFram
     _fill_school_id_with_coersion(raw_data, processed_extract)
     _fill_region_with_coersion(processed_extract)
     _convert_timestamps_to_dates(processed_extract)
+    processed_extract["row_number"] = np.arange(processed_extract.shape[0])
+
     filtered = _filter_out_no_children_and_no_rr_id(processed_extract)
     return _rename_wide_cols_with_student_number_suffix(filtered)
 
@@ -154,7 +157,7 @@ def _create_long_data(entry_year_cols: list[str], wide_extract: pd.DataFrame) ->
 
 
 def _long_and_merge(wide_df: pd.DataFrame, column_prefix: str, long_df: pd.DataFrame = None):
-    transformed = pd.wide_to_long(wide_df, stubnames=column_prefix, i=["rrcp_rr_id"], j="student_id", sep="_v")
+    transformed = pd.wide_to_long(wide_df, stubnames=column_prefix, i=["rrcp_rr_id", "row_number"], j="student_id", sep="_v")
     if long_df is not None:
         return pd.concat([long_df, transformed[column_prefix]], axis=1)
     return transformed
