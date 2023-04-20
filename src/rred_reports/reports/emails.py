@@ -100,8 +100,8 @@ class ReportEmailer:
         Returns:
             bool: Did the message successfully send?
         """
-        local_datetime = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
-        now = local_datetime.strftime("%d/%m/%Y at %H:%M")
+        local_datetime_now = datetime.now(tz=pytz.timezone("EUROPE/LONDON"))
+        datetime_now_string = local_datetime_now.strftime("%d/%m/%Y at %H:%M")
 
         if cc_to is None:
             cc_to = []
@@ -112,7 +112,7 @@ class ReportEmailer:
             recipients=to_list,
             cc_recipients=cc_to,
             subject="RRED Report",
-            body=f"Report processed {now}.",
+            body=f"Report processed {datetime_now_string}.",
             attachment=report,
             attachment_filename="RRED_Processed_Report.docx",
         )

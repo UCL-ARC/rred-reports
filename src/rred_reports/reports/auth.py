@@ -29,7 +29,7 @@ class RREDAuthenticator:
             client_secret=self.settings.client_secret,
             tenant_id=self.settings.tenant_id,
             username=f"{self.settings.username}@ucl.ac.uk",
-            password=self.settings.auth_pass,
+            password=self.settings.password,
         )
 
     def get_config(self) -> Configuration:
