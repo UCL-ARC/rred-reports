@@ -1,7 +1,7 @@
 import pandas as pd
 
 from rred_reports.masterfile import masterfile_columns
-from rred_reports.redcap.main import RedcapReader
+from rred_reports.redcap.main import ExtractInput, RedcapReader
 
 
 def test_preprocess_wide_data(data_path):
@@ -33,14 +33,18 @@ def test_preprocess_wide_data(data_path):
 def test_read_recap_extract(data_path):
     """
     Given an extract from redcap with 3 valid rows
-    When the extract is processed
-    3 rows should exist, and the output columns should match what is in our masterfile definition
+    When the extract is processed, using the same extract as the current year and previous year
+    6 rows should exist, and the output columns should match what is in our masterfile definition
     """
+    school_list = data_path / "redcap" / "school_list.csv"
+    recap_reader = RedcapReader(school_list)
+
     raw_file_path = data_path / "redcap" / "extract.csv"
     labelled_file_path = data_path / "redcap" / "extract_labels.csv"
-    school_list = data_path / "redcap" / "school_list.csv"
 
-    recap_reader = RedcapReader(school_list)
-    extract = recap_reader.read_recap_extract(raw_file_path, labelled_file_path, "2021-2022")
-    assert extract.shape[0] == 3
+    current_year = ExtractInput(raw_file_path, labelled_file_path, "2021-2022")
+    previous_year = ExtractInput(raw_file_path, labelled_file_path, "2020-2021")
+
+    extract = recap_reader.read_redcap_data(current_year, previous_year)
+    assert extract.shape[0] == 6
     assert list(extract.columns.values) == masterfile_columns()

@@ -1,4 +1,5 @@
 """Downloading and processing of redcap data"""
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -7,26 +8,37 @@ import pandas as pd
 from rred_reports.masterfile import masterfile_columns
 
 
+@dataclass
+class ExtractInput:
+    coded_data_path: Path
+    labelled_data_path: Path
+    survey_period: str
+
+
 class RedcapReader:
     def __init__(self, school_list: Path):
-        self.school_list = pd.read_csv(school_list)
+        self._school_list = pd.read_csv(school_list)
 
-    def read_recap_extract(self, raw_file_path: Path, labelled_file_path: Path, survey_period: str) -> pd.DataFrame:
-        raw_data = pd.read_csv(raw_file_path)
-        labelled_data = pd.read_csv(labelled_file_path)
-        processed_wide = self.preprocess_wide_data(raw_data, labelled_data, survey_period)
-        long = self.wide_to_long(processed_wide)
+    def read_redcap_data(self, current_year: ExtractInput, previous_year: ExtractInput):
+        current_extract = self.read_single_redcap_year(current_year)
+        previous_extract = self.read_single_redcap_year(previous_year)
+        return pd.concat([current_extract, previous_extract], ignore_index=True)
+
+    def read_single_redcap_year(self, redcap_fields: ExtractInput) -> pd.DataFrame:
+        raw_data = pd.read_csv(redcap_fields.coded_data_path)
+        labelled_data = pd.read_csv(redcap_fields.labelled_data_path)
+        processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
+        long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
         long_with_names = self.add_school_names(long)
         return long_with_names[masterfile_columns()].copy()
 
     @classmethod
-    def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_file_path: pd.DataFrame, survey_period: str) -> pd.DataFrame:
+    def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_file_path: pd.DataFrame) -> pd.DataFrame:
         processed_extract = labelled_file_path.copy(deep=True)
         cls._fill_school_id_with_coersion(raw_data, processed_extract)
         cls._fill_region_with_coersion(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
         processed_extract["_row_number"] = np.arange(processed_extract.shape[0])
-        processed_extract["_survey_period"] = survey_period
 
         filtered = cls._filter_out_no_children_and_no_rr_id(processed_extract)
         return cls._rename_wide_cols_with_student_number_suffix(filtered)
@@ -134,11 +146,11 @@ class RedcapReader:
         ],
     }
 
-    def wide_to_long(self, wide_extract: pd.DataFrame) -> pd.DataFrame:
+    def wide_to_long(self, wide_extract: pd.DataFrame, survey_period: str) -> pd.DataFrame:
         entry_year_cols = [f"entry_year_{country}" for country in ["eng", "ire", "mal", "sco"]]
 
         export_data = self._create_long_data(entry_year_cols, wide_extract)
-        processed_data = self._process_calculated_columns(entry_year_cols, export_data)
+        processed_data = self._process_calculated_columns(entry_year_cols, export_data, survey_period)
         processed_data.rename(columns={"rrcp_rr_id": "rred_user_id"}, inplace=True)
 
         return processed_data[processed_data["entry_date"].notnull()]
@@ -156,23 +168,23 @@ class RedcapReader:
 
     @staticmethod
     def _long_and_merge(wide_df: pd.DataFrame, column_prefix: str, long_df: pd.DataFrame = None):
-        index_columns = ["_survey_period", "rrcp_rr_id", "_row_number"]
+        index_columns = ["rrcp_rr_id", "_row_number"]
         transformed = pd.wide_to_long(wide_df, stubnames=column_prefix, i=index_columns, j="student_id", sep="_v")
         if long_df is not None:
             return pd.concat([long_df, transformed[column_prefix]], axis=1)
         return transformed
 
-    def _process_calculated_columns(self, entry_year_cols: list[str], export_data: pd.DataFrame) -> pd.DataFrame:
+    def _process_calculated_columns(self, entry_year_cols: list[str], export_data: pd.DataFrame, survey_period: str) -> pd.DataFrame:
         processed_data = export_data.copy()
         entry_year = processed_data[entry_year_cols].bfill(axis=1).iloc[:, 0]
         processed_data["summer"] = pd.Series("")
         processed_data["entry_year"] = entry_year
         processed_data.reset_index(inplace=True)
-        pupil_no = processed_data["student_id"].astype(str) + "_" + processed_data["rrcp_rr_id"]
+        pupil_no = processed_data["student_id"].astype(str) + f"_{survey_period}"
         processed_data.insert(0, "pupil_no", pupil_no)
         return processed_data
 
     def add_school_names(self, long_df: pd.DataFrame) -> pd.DataFrame:
-        named_schools = long_df.merge(self.school_list, left_on="school_id", right_on="RRED School ID", how="left")
+        named_schools = long_df.merge(self._school_list, left_on="school_id", right_on="RRED School ID", how="left")
         named_schools.rename({"School Name": "rrcp_school"}, axis=1, inplace=True)
         return named_schools
