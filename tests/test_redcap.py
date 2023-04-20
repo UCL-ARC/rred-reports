@@ -1,7 +1,22 @@
 import pandas as pd
+import pytest
 
 from rred_reports.masterfile import masterfile_columns
 from rred_reports.redcap.main import ExtractInput, RedcapReader
+
+
+@pytest.fixture()
+def redcap_extract(data_path):
+    school_list = data_path / "redcap" / "school_list.csv"
+    recap_reader = RedcapReader(school_list)
+
+    raw_file_path = data_path / "redcap" / "extract.csv"
+    labelled_file_path = data_path / "redcap" / "extract_labels.csv"
+
+    current_year = ExtractInput(raw_file_path, labelled_file_path, "2021-2022")
+    previous_year = ExtractInput(raw_file_path, labelled_file_path, "2020-2021")
+
+    return recap_reader.read_redcap_data(current_year, previous_year)
 
 
 def test_preprocess_wide_data(data_path):
@@ -30,21 +45,27 @@ def test_preprocess_wide_data(data_path):
     assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103"])].size == 0
 
 
-def test_read_recap_extract(data_path):
+def test_read_recap_extract_rows_and_cols(redcap_extract):
     """
     Given an extract from redcap with 3 valid rows
     When the extract is processed, using the same extract as the current year and previous year
     6 rows should exist, and the output columns should match what is in our masterfile definition
     """
-    school_list = data_path / "redcap" / "school_list.csv"
-    recap_reader = RedcapReader(school_list)
 
-    raw_file_path = data_path / "redcap" / "extract.csv"
-    labelled_file_path = data_path / "redcap" / "extract_labels.csv"
+    assert redcap_extract.shape[0] == 6
+    assert list(redcap_extract.columns.values) == masterfile_columns()
 
-    current_year = ExtractInput(raw_file_path, labelled_file_path, "2021-2022")
-    previous_year = ExtractInput(raw_file_path, labelled_file_path, "2020-2021")
 
-    extract = recap_reader.read_redcap_data(current_year, previous_year)
-    assert extract.shape[0] == 6
-    assert list(extract.columns.values) == masterfile_columns()
+def test_redcap_calculated_columns(redcap_extract):
+    """
+    Given a redcap extract where the first 2021-2022 student was born in summer and should be ongoing,
+        and the second was born in winter and has a set exit outcome
+    When the extract is processed
+    Then the calculated `summer` and `exit_outcome` columns should be set correctly
+    """
+    summer_dob_and_ongoing = redcap_extract.loc[redcap_extract.pupil_no == "1_2021-2022"]
+    assert (summer_dob_and_ongoing["summer"] == "Yes").all()
+    assert (summer_dob_and_ongoing["exit_outcome"] == "Ongoing").all()
+    not_summer_dob_and_not_ongoing = redcap_extract.loc[redcap_extract.pupil_no == "2_2021-2022"]
+    assert (not_summer_dob_and_not_ongoing["summer"] == "No").all()
+    assert (not_summer_dob_and_not_ongoing["exit_outcome"] == "Discontinued").all()

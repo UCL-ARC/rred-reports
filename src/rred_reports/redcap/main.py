@@ -215,13 +215,28 @@ class RedcapReader:
         return transformed
 
     def _process_calculated_columns(self, entry_year_cols: list[str], export_data: pd.DataFrame, survey_period: str) -> pd.DataFrame:
+        """
+        Calculate columns, explained in section 1.2 of Data managers handbook
+        """
         processed_data = export_data.copy()
+
         entry_year = processed_data[entry_year_cols].bfill(axis=1).iloc[:, 0]
-        processed_data["summer"] = pd.Series("")
         processed_data["entry_year"] = entry_year
+
+        processed_data["summer"] = "No"
+        processed_data[["dob_year", "dob_month", "dob_day"]] = processed_data["entry_dob"].str.split("-", expand=True).apply(pd.to_numeric)
+        summer_dob = (processed_data["dob_month"] >= 4) & (processed_data["dob_month"] <= 8) & (processed_data["dob_day"] <= 31)
+        processed_data.loc[summer_dob, "summer"] = "Yes"
+
+        # add ongoing exit outcome
+        ongoing = processed_data["exit_outcome"].isna() & ~processed_data["entry_date"].isna() & processed_data["exit_date"].isna()
+        processed_data.loc[ongoing, "exit_outcome"] = "Ongoing"
+
+        # get the original index columns back and use them to create pupil number
         processed_data.reset_index(inplace=True)
         pupil_no = processed_data["student_id"].astype(str) + f"_{survey_period}"
         processed_data.insert(0, "pupil_no", pupil_no)
+
         return processed_data
 
     def _add_school_name_column(self, long_df: pd.DataFrame) -> pd.DataFrame:
