@@ -158,4 +158,4 @@ def masterfile_columns():
     school_id, *other_school_fields = School.fields()
     user_id, *other_teacher_fields, school_id = Teacher.fields()
 
-    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, *other_pupil_fields]
+    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
