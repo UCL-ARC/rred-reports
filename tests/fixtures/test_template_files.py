@@ -1,7 +1,9 @@
+import io
 from pathlib import Path
 
 import pandas as pd
 import pytest
+from docx import Document
 
 from rred_reports.reports.filler import TemplateFiller
 
@@ -22,6 +24,22 @@ def template_report_path(data_path) -> Path:
     Returns a Path object representing a test report template docx file
     """
     return data_path / "RRED_Report_Template_Single_Category.docx"
+
+
+@pytest.fixture()
+def template_report_bytes(template_report_path: Path) -> bytes:
+    """Return a bytes representation of a template report
+
+    Args:
+        template_report_path (Path): Path to the template report file
+
+    Returns:
+        bytes: Array of bytes representing the report
+    """
+    doc = Document(template_report_path)
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    return file_stream.getvalue()
 
 
 @pytest.fixture()

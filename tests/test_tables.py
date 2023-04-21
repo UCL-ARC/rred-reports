@@ -164,3 +164,8 @@ def test_remove_single_row(template_filler_populated_tables):
     rows_after_removal = len(second_table.rows)
 
     assert rows_before_removal - 1 == rows_after_removal
+
+
+def test_report_bytes(template_filler):
+    bytes_out = template_filler.report_bytes()
+    assert isinstance(bytes_out, bytes)
