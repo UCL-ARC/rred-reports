@@ -1,5 +1,5 @@
 """All functionality dealing with the RRED masterfile"""
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Literal
 
@@ -7,24 +7,33 @@ import pandas as pd
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
-COL_NUMBER_AFTER_SLIMMING = 65
+COL_NUMBER_AFTER_SLIMMING = 64
+
+
+class PandasDataFrame(AsFrame):
+    """Custom dataclass definition allowing us to add custom functionality"""
+
+    @classmethod
+    def fields(cls):
+        """Helper method to get a list of all fields"""
+        return [field.name for field in fields(cls)]
 
 
 @dataclass
-class Pupil(AsFrame):
+class Pupil(PandasDataFrame):
     """Pupil information"""
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
     assessi_engtest2: Data[pd.Int32Dtype]
     assessi_iretest1: Data[pd.Int32Dtype]
-    assessi_iretype1: Data[pd.Int32Dtype]
+    assessi_iretype1: Data[str]
     assessi_maltest1: Data[pd.Int32Dtype]
-    assessi_outcome: Data[pd.Int32Dtype]
+    assessi_outcome: Data[str]
     assessi_scotest1: Data[pd.Int32Dtype]
     assessi_scotest2: Data[pd.Int32Dtype]
     assessi_scotest3: Data[pd.Int32Dtype]
-    assessii_engcheck1: Data[pd.Int32Dtype]
+    assessii_engcheck1: Data[str]
     assessii_engtest4: Data[pd.Int32Dtype]
     assessii_engtest5: Data[pd.Int32Dtype]
     assessii_engtest6: Data[pd.Int32Dtype]
@@ -32,7 +41,7 @@ class Pupil(AsFrame):
     assessii_engtest8: Data[pd.Int32Dtype]
     assessii_scotest4: Data[pd.Int32Dtype]
     assessii_iretest2: Data[pd.Int32Dtype]
-    assessii_iretype2: Data[pd.Int32Dtype]
+    assessii_iretype2: Data[str]
     assessiii_engtest10: Data[pd.Int32Dtype]
     assessiii_engtest11: Data[pd.Int32Dtype]
     assessiii_engtest9: Data[pd.Int32Dtype]
@@ -78,11 +87,10 @@ class Pupil(AsFrame):
     month6_bl_result: Data[pd.Int32Dtype]
     month6_wv_result: Data[pd.Int32Dtype]
     month6_bas_result: Data[pd.Int32Dtype]
-    rred_qc_parameters: Data[str]
 
 
 @dataclass
-class Teacher(AsFrame):
+class Teacher(PandasDataFrame):
     """Teacher information, can link with Pupil df with rreduserID"""
 
     rred_user_id: Data[str]
@@ -91,13 +99,13 @@ class Teacher(AsFrame):
 
 
 @dataclass
-class School(AsFrame):
+class School(PandasDataFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Data[str]
+    rrcp_country: Data[str]
+    rrcp_area: Data[str]
     rrcp_school: Data[str]
-    rrcp_area: Data[int]
-    rrcp_country: Data[int]
 
 
 def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
@@ -114,7 +122,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     def clmnlist(i, data=full_data):
         return list(data.iloc[:, i])
 
-    all_schools_df = School.new(clmnlist(6), clmnlist(5), clmnlist(4), clmnlist(3))  # pylint: disable=E1121
+    all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
@@ -142,5 +150,16 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     Returns:
         pd.DataFrame: joined masterfile
     """
-    pupil_teachers = pd.merge(masterfile_dfs["pupils"], masterfile_dfs["teachers"], on="rred_user_id")
-    return pd.merge(pupil_teachers, masterfile_dfs["schools"], on="school_id")
+    teacher_schools = pd.merge(masterfile_dfs["teachers"], masterfile_dfs["schools"], on="school_id")
+    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
+
+
+def masterfile_columns():
+    """List of all masterfile columns, in the expected order"""
+    pupil_no, user_id, *other_pupil_fields = Pupil.fields()
+    _school_id, *other_school_fields = School.fields()
+    user_id, *other_teacher_fields, school_id = Teacher.fields()
+
+    assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
+
+    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
