@@ -8,7 +8,7 @@ from rred_reports.redcap.main import ExtractInput, RedcapReader
 @pytest.fixture()
 def redcap_extract(data_path):
     school_list = data_path / "redcap" / "school_list.csv"
-    recap_reader = RedcapReader(school_list)
+    redcap_reader = RedcapReader(school_list)
 
     raw_file_path = data_path / "redcap" / "extract.csv"
     labelled_file_path = data_path / "redcap" / "extract_labels.csv"
@@ -16,7 +16,7 @@ def redcap_extract(data_path):
     current_year = ExtractInput(raw_file_path, labelled_file_path, "2021-2022")
     previous_year = ExtractInput(raw_file_path, labelled_file_path, "2020-2021")
 
-    return recap_reader.read_redcap_data(current_year, previous_year)
+    return redcap_reader.read_redcap_data(current_year, previous_year)
 
 
 def test_preprocess_wide_data(data_path):
@@ -31,8 +31,8 @@ def test_preprocess_wide_data(data_path):
 
     extract_raw = pd.read_csv(raw_data_path)
     extract_labelled = pd.read_csv(labelled_data_path)
-    recap_reader = RedcapReader(school_list)
-    redcap = recap_reader.preprocess_wide_data(extract_raw, extract_labelled)
+    redcap_reader = RedcapReader(school_list)
+    redcap = redcap_reader.preprocess_wide_data(extract_raw, extract_labelled)
 
     # coerced variables filled
     same_coerced_values = redcap.loc[redcap["record_id"] == "AB9234"]
@@ -45,7 +45,7 @@ def test_preprocess_wide_data(data_path):
     assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103"])].size == 0
 
 
-def test_read_recap_extract_rows_and_cols(redcap_extract):
+def test_read_redcap_extract_rows_and_cols(redcap_extract):
     """
     Given an extract from redcap with 3 valid rows
     When the extract is processed, using the same extract as the current year and previous year
