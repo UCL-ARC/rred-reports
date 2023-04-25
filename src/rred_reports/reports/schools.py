@@ -199,9 +199,6 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_
         table_to_write = filtered[columns]
         template_filler.populate_table(index + 1, table_to_write)
 
-    if not output_path:
-        output_path = Path(f"output/reports/{school_id}.docx")
-
     return template_filler
 
 
