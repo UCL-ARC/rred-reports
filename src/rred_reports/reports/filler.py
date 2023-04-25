@@ -1,3 +1,4 @@
+import io
 from pathlib import Path
 
 import pandas as pd
@@ -185,3 +186,14 @@ class TemplateFiller:
             output_path (Path): Output file path
         """
         self.doc.save(output_path)
+
+    def report_bytes(self) -> bytes:
+        """Return a bytes representation of the report
+
+        Args:
+            file_stream.getvalue() (bytes): bytes representation of report
+        """
+
+        file_stream = io.BytesIO()
+        self.doc.save(file_stream)
+        return file_stream.getvalue()

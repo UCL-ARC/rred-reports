@@ -164,7 +164,6 @@ def summary_table(school_df: pd.DataFrame):
 
 
 def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id) -> TemplateFiller:
-
     """Function to fill the school template tables, saving them the file
 
     Args: school_filter(pd.DataFrame), Path, school_id
@@ -217,8 +216,7 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
             if school_placeholder in run.text:
                 run.text = run.text.replace(school_placeholder, school_name)
 
-
-   if not output_path:
+    if not output_path:
         output_path = Path(f"output/reports/{school_id}.docx")
     template_filler.save_document(output_path)
     return template_filler

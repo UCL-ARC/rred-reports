@@ -193,3 +193,8 @@ def test_table_with_merged_header(template_filler):
     assert second_row[2:5] == ["Year Group", "Entry", "Exit"]
     # ensure that values start being populated in the correct place
     assert third_row[2:5] == ["1", "1", "1"]
+
+
+def test_report_bytes(template_filler):
+    bytes_out = template_filler.report_bytes()
+    assert isinstance(bytes_out, bytes)
