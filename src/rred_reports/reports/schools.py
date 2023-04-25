@@ -218,5 +218,7 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
                 run.text = run.text.replace(school_placeholder, school_name)
 
 
+   if not output_path:
+        output_path = Path(f"output/reports/{school_id}.docx")
     template_filler.save_document(output_path)
     return template_filler
