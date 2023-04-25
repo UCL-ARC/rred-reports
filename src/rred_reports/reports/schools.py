@@ -163,13 +163,6 @@ def summary_table(school_df: pd.DataFrame):
     )
 
 
-def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
-    template_filler = populate_school_tables(school_df, template_path, school_id, output_path)
-    # edit text of word doc
-    template_filler.save_document(output_path)
-    return template_filler
-
-
 def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
     """Function to fill the school template tables, saving them the file
 
@@ -208,4 +201,30 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_
     if not output_path:
         output_path = Path(f"output/reports/{school_id}.docx")
 
+    return template_filler
+
+
+def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
+    """Function to populate and save the template with: name of school and filled tables
+
+    Args: school_filter(pd.DataFrame), Path, school_id
+
+    Returns: The template filler with populated data and appropriate school name saved in the output path"""
+
+    template_filler = populate_school_tables(school_df, template_path, school_id, output_path)
+    school_name = school_df["rrcp_school"].iloc[0]
+
+    # for the main text
+    for paragraph in template_filler.doc.paragraphs:
+        for run in paragraph.runs:
+            if "School A" in run.text:
+                run.text = run.text.replace("School A", school_name)
+
+    # for the heading
+    for paragraph in template_filler.doc.paragraphs:
+        if "School A" in paragraph.text:
+            paragraph.styles = template_filler.doc.styles["Heading 1"]
+            paragraph.text = paragraph.text.replace("School A", school_name)
+
+    template_filler.save_document(output_path)
     return template_filler
