@@ -204,7 +204,7 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_
     return template_filler
 
 
-def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None) -> TemplateFiller:
+def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None, school_placeholder="School A") -> TemplateFiller:
     """Function to populate and save the template with: name of school and filled tables
 
     Args: school_filter(pd.DataFrame), Path, school_id
@@ -216,8 +216,9 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
 
     for paragraph in template_filler.doc.paragraphs:
         for run in paragraph.runs:
-            if "School A" in run.text:
-                run.text = run.text.replace("School A", school_name)
+            if school_placeholder in run.text:
+                run.text = run.text.replace(school_placeholder, school_name)
+
 
     template_filler.save_document(output_path)
     return template_filler
