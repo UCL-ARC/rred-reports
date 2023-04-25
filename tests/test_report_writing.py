@@ -1,5 +1,5 @@
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
-from rred_reports.reports.tables import populate_school_data, school_filter
+from rred_reports.reports.schools import populate_school_data, school_filter
 
 
 def test_school_tables_filled(data_path, templates_dir, temp_out_dir):
