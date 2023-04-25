@@ -163,7 +163,7 @@ def summary_table(school_df: pd.DataFrame):
     )
 
 
-def populate_school_tables(school_df: pd.DataFrame, template_path: Path, school_id) -> TemplateFiller:
+def populate_school_tables(school_df: pd.DataFrame, template_path: Path) -> TemplateFiller:
     """Function to fill the school template tables, saving them the file
 
     Args: school_filter(pd.DataFrame), Path, school_id
