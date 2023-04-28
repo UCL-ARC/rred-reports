@@ -210,7 +210,8 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
 
     Returns: The template filler with populated data and appropriate school name saved in the output path"""
 
-    template_filler = populate_school_tables(school_df, template_path, school_id, output_path)
+    template_filler = populate_school_tables(school_df, template_path)
+
     school_name = school_df["rrcp_school"].iloc[0]
 
     for paragraph in template_filler.doc.paragraphs:
