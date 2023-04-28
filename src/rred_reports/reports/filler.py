@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from docx import Document
 from docx.table import Table, _Row
+from loguru import logger
 
 
 class TemplateFillerException(Exception):
@@ -23,9 +24,17 @@ class TemplateFiller:
     Provides save/loading, table modification and input verification.
     """
 
-    def __init__(self, template_path: Path):
-        self.doc = Document(template_path)
+    def __init__(self, template_path: Path, header_rows: list[int]):
+        """
+        Create a template filler, clean up repeated columns for tables which have a single header row
+
+        Args:
+            template_path (Path): Path to the template
+            header_rows (list[int]): list of the number of header rows for each table
+        """
+        self.doc: Document = Document(template_path)
         self.tables = self.doc.tables
+        self.header_rows = header_rows
         self.clean_tables()
 
     @staticmethod
@@ -45,41 +54,52 @@ class TemplateFiller:
         return table
 
     @staticmethod
-    def remove_all_rows(table: Table):
+    def remove_all_rows(table: Table, header_rows=1):
         """Remove all rows in a table except for title
 
         Args:
             table (Table): Table within a .docx file
+            header_rows int: number rows which make up the header
         """
         total_rows = len(table.rows) - 1
-        for row_number in range(total_rows, 0, -1):
+        starting_row = header_rows - 1
+        for row_number in range(total_rows, starting_row, -1):
             row = table.rows[row_number]
             row._element.getparent().remove(row._element)  # pylint: disable=protected-access
 
     @staticmethod
-    def view_header(table: Table) -> list[Table.row_cells]:
+    def view_header(table: Table, header_rows=1) -> list[Table.row_cells]:
         """View header text
         Can't read comments with python-docx
 
         Args:
             table (Table): Table object representing a table within a .docx file
+            header_rows int: number rows which make up the header
 
         Returns:
             list[Table.row_cells]: List of table row cells
         """
-        return table.row_cells(0)
+        return table.row_cells(header_rows - 1)
 
     def clean_tables(self):
         """Perform any necessary table cleaning steps"""
-        self.remove_duplicated_columns()
+        if len(self.tables) != len(self.header_rows):
+            message = f"Template filler initialised with {len(self.header_rows)} header rows but document has {len(self.tables)} tables"
+            raise TemplateFillerException(message)
+        self._remove_duplicated_columns()
 
-    def remove_duplicated_columns(self):
+    def _remove_duplicated_columns(self):
         """Remove duplicated columns in tables.
         Observed in some test tables, some tables contain columns that appear
         to be hidden when viewed in MS Word.
         """
         updated_tables = []
-        for table in self.tables:
+        for table, header_rows in zip(self.tables, self.header_rows):
+            if header_rows != 1:
+                logger.debug("Working out duplicate columns with multiple header rows is very fraught, should correct template")
+                updated_tables.append(table)
+                continue
+
             table_header = self.__class__.view_header(table)
             header_text = [cell.text.strip() for cell in table_header]
 
@@ -100,22 +120,26 @@ class TemplateFiller:
             updated_tables.append(table)
         self.tables = updated_tables
 
-    def populate_table(self, table: Table, data: pd.DataFrame):
+    def populate_table(self, table_index, data: pd.DataFrame):
         """Populate a table with the contents of a pandas dataframe
 
         Args:
             table (Table): Table object representing a table within a .docx file
             df (pd.DataFrame): Pandas dataframe of future table contents
         """
-        self.remove_all_rows(table)
-        self._verify_new_rows(table, data)
+        self._remove_duplicated_columns()
+
+        table = self.tables[table_index]
+        header_rows = self.header_rows[table_index]
+        self.remove_all_rows(table, header_rows)
+        self._verify_new_rows(table, data, header_rows)
 
         for i in range(data.shape[0]):
             table.add_row()
             for j in range(data.shape[-1]):
-                table.cell(i + 1, j).text = str(data.values[i, j])
+                table.cell(i + header_rows, j).text = str(data.values[i, j])
 
-    def _verify_new_rows(self, table: Table, data: pd.DataFrame):
+    def _verify_new_rows(self, table: Table, data: pd.DataFrame, header_rows=1):
         """Verify dimension of new rows to be added to existing table
         Pandas dataframe width should be the columnar dimension of the table
         i.e. the number of columns should match in both
@@ -123,29 +147,37 @@ class TemplateFiller:
         Args:
             table (Table): Table object representing a table within a .docx file
             df (pd.DataFrame): Pandas dataframe of future table contents
+            header_rows int: number rows which make up the header
 
         Raises:
             TemplateFillerException: DataFrame dimensions do not match table
         """
-        table_header = self.__class__.view_header(table)
+        table_header = self.__class__.view_header(table, header_rows)
         contents = [cell.text.strip() for cell in table_header]
-        message = f"Pandas dataframe with {data.shape[-1]} columns. Table has {len(table.columns)} columns - dimension mismatch. Table columns are {contents}."
+        message = (
+            f"Pandas dataframe with {data.shape[-1]} columns. Table has {len(table.columns)} columns - "
+            f"dimension mismatch. Table columns are {contents}."
+        )
         if not data.shape[1] == len(table.columns):
             raise TemplateFillerException(message)
 
-    def verify_tables_filled(self):
-        """Verify all cells in a table are filled
+    def verify_tables_filled(self) -> bool:
+        """Verify all cells in all table are filled
 
-        Args:
-            table (Table): Table object representing a table within a .docx file
+        Returns:
+            True if successful
+
+        Raises:
+            TemplateFillerException if not all cells are filled
         """
         for table_idx, table in enumerate(self.tables):
             for i, _row in enumerate(table.rows):
                 for j, _col in enumerate(table.columns):
                     cell_content = table.cell(i, j).text
                     if cell_content == "":
-                        message = f"Empty cell ({i},{j}) (row, col) found in table {table_idx+1}"
+                        message = f"Empty cell ({i},{j}) (row, col) found in table {table_idx + 1}"
                         raise TemplateFillerException(message)
+        return True
 
     def save_document(self, output_path: Path):
         """Save the document to the defined output path
