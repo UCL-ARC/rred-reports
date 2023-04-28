@@ -130,7 +130,8 @@ def summary_table(school_df: pd.DataFrame):
             (Pupil outcomes) Referred to school
             (Pupil outcomes) Incomplete
             (Pupil outcomes) Left School
-            (Pupil outcomes) Ongoining
+            (Pupil outcomes) Ongoing
+
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
