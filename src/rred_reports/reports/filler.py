@@ -23,18 +23,22 @@ class TemplateFiller:
     Provides save/loading, table modification and input verification.
     """
 
-    def __init__(self, template_path: Path, header_rows: list[int]):
+    def __init__(self, template_path: Path, header_rows: list[int], table_text_style="Table Note", table_grid_style="Table Grid"):
         """
         Create a template filler, clean up repeated columns for tables which have a single header row
 
         Args:
             template_path (Path): Path to the template
             header_rows (list[int]): list of the number of header rows for each table
+            table_text_style (str): text style for all new rows of table
+            table_grid_style (str): grid style for all tables
         """
         self.doc: Document = Document(template_path)
         self.tables = self.doc.tables
         self.header_rows = header_rows
         self.clean_tables()
+        self.table_text_style = self.doc.styles[table_text_style]
+        self.table_grid_style = self.doc.styles[table_grid_style]
 
     @staticmethod
     def remove_row(table: Table, row: _Row) -> Table:
@@ -58,7 +62,7 @@ class TemplateFiller:
 
         Args:
             table (Table): Table within a .docx file
-            header_rows int: number rows which make up the header
+            header_rows (int): number rows which make up the header
         """
         total_rows = len(table.rows) - 1
         starting_row = header_rows - 1
@@ -73,7 +77,7 @@ class TemplateFiller:
 
         Args:
             table (Table): Table object representing a table within a .docx file
-            header_rows int: number rows which make up the header
+            header_rows (int): number rows which make up the header
 
         Returns:
             list[Table.row_cells]: List of table row cells
@@ -123,8 +127,8 @@ class TemplateFiller:
         """Populate a table with the contents of a pandas dataframe
 
         Args:
-            table (Table): Table object representing a table within a .docx file
-            df (pd.DataFrame): Pandas dataframe of future table contents
+            table_index (Table): Index of the table to populate
+            data (pd.DataFrame): Pandas dataframe of future table contents
         """
         self._remove_duplicated_columns()
 
@@ -136,7 +140,13 @@ class TemplateFiller:
         for i in range(data.shape[0]):
             table.add_row()
             for j in range(data.shape[-1]):
-                table.cell(i + header_rows, j).text = str(data.values[i, j])
+                current_cell = table.cell(i + header_rows, j)
+                current_cell.text = str(data.values[i, j])
+                # manually set the style of the new text
+                current_cell.paragraphs[0].style = self.table_text_style
+
+        # override the style to deal with new rows sometimes not adding borders
+        table.style = self.table_grid_style
 
     def _verify_new_rows(self, table: Table, data: pd.DataFrame, header_rows=1):
         """Verify dimension of new rows to be added to existing table
@@ -145,7 +155,7 @@ class TemplateFiller:
 
         Args:
             table (Table): Table object representing a table within a .docx file
-            df (pd.DataFrame): Pandas dataframe of future table contents
+            data (pd.DataFrame): Pandas dataframe of future table contents
             header_rows int: number rows which make up the header
 
         Raises:
