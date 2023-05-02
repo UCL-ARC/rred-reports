@@ -46,6 +46,7 @@ class TemplateFiller:
 
         Args:
             table (Table): Table object representing a table within a .docx file
+            row (_Row): Row within a .docx file
 
         Returns:
             table (Table): Table object representing a table within a .docx file
@@ -123,7 +124,7 @@ class TemplateFiller:
             updated_tables.append(table)
         self.tables = updated_tables
 
-    def populate_table(self, table_index, data: pd.DataFrame):
+    def populate_table(self, table_index: int, data: pd.DataFrame):
         """Populate a table with the contents of a pandas dataframe
 
         Args:
