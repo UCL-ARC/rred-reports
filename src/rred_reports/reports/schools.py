@@ -71,7 +71,10 @@ table_six_columns = [
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
     """Function to filter school"""
-    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
+    teacher_filtered = whole_dataframe[
+        (whole_dataframe.reg_rr_title == "RR Teacher + Support Role") | (whole_dataframe.reg_rr_title == "RR Teacher + Class Leader")
+    ]
+    return teacher_filtered[teacher_filtered.school_id == school_id].copy()
 
 
 # specific filter for each table
