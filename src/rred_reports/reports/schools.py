@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
 table_one_columns = [
@@ -90,9 +91,12 @@ def filter_for_one_two_five(school_dataframe: pd.DataFrame):
 
 def filter_for_three_four(school_dataframe: pd.DataFrame):
     """Filter for table three and four: ONLY on pupils whose <exit_date> is after 31/7/21 and before 1/8/22.
-    Please also report ONLY on data for pupils with <Discontinued> OR <Referred to school>, in the <exit_outcome> column
+    ONLY on data for pupils with 'Discontinued' OR 'Referred to school' in the <exit_outcome> column
 
-    Args: school_filter(pd.DataFrame)"""
+    Args: school_filter(pd.DataFrame)
+
+    Returns: school_filter(pd.DataFrame) filtered by exit_outcome and exit_date
+    """
     return school_dataframe[(school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")][
         (school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01")
     ]
@@ -210,3 +214,12 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
         output_path = Path(f"output/reports/{school_id}.docx")
     template_filler.save_document(output_path)
     return template_filler
+
+
+nested_data = parse_masterfile("example_masterfile_with_test_date.xlsx")
+testing_df = join_masterfile_dfs(nested_data)
+testing_df
+out_of_date_school_data = school_filter(testing_df, "RRS2030220")
+populated_template = populate_school_data(
+    out_of_date_school_data, "/Users/katiebuntic/projects/RRED/rred-reports/input/templates/2021/2021-22_template.docx", "RRS2030220"
+)
