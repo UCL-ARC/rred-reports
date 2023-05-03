@@ -75,39 +75,27 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id):
 
 
 # specific filter for each table
-def filter_one(school_dataframe: pd.DataFrame):
-    """Filter for table one, for later use
+def filter_for_one_two_five(school_dataframe: pd.DataFrame):
+    """Filter for table one, two and five: <entry_date> OR <exit_date> is after 31/7/21 and before 1/8/22
+
+    Args: school_filter(pd.DataFrame)
+
+    Returns: school_filter(pd.DataFrame) filtered by the reporting year
+    """
+    return school_dataframe[
+        ((school_dataframe["entry_date"] > "2021-07-31") & (school_dataframe["entry_date"] < "2022-08-01"))
+        | ((school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01"))
+    ]
+
+
+def filter_for_three_four(school_dataframe: pd.DataFrame):
+    """Filter for table three and four: ONLY on pupils whose <exit_date> is after 31/7/21 and before 1/8/22.
+    Please also report ONLY on data for pupils with <Discontinued> OR <Referred to school>, in the <exit_outcome> column
 
     Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
-
-
-def filter_two(school_dataframe: pd.DataFrame):
-    """Filter for table two, for later use
-
-    Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
-
-
-def filter_three(school_dataframe: pd.DataFrame):
-    """Filter for table three, for later use
-
-    Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
-
-
-def filter_four(school_dataframe: pd.DataFrame):
-    """Filter for table four, for later use
-
-    Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
-
-
-def filter_five(school_dataframe: pd.DataFrame):
-    """Filter for table five, for later use
-
-    Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
+    return school_dataframe[(school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")][
+        (school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01")
+    ]
 
 
 def filter_six(school_dataframe: pd.DataFrame):
@@ -177,11 +165,11 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path) -> Temp
     school_df["total_lost_lessons"] = school_df[lost_lesson_cols].sum(axis=1)
 
     columns_and_filters = (
-        (table_one_columns, filter_one),
-        (table_two_columns, filter_two),
-        (table_three_columns, filter_three),
-        (table_four_columns, filter_four),
-        (table_five_columns, filter_five),
+        (table_one_columns, filter_for_one_two_five),
+        (table_two_columns, filter_for_one_two_five),
+        (table_three_columns, filter_for_three_four),
+        (table_four_columns, filter_for_three_four),
+        (table_five_columns, filter_for_one_two_five),
         (table_six_columns, filter_six),
     )
 
