@@ -70,7 +70,13 @@ table_six_columns = [
 
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
-    """Function to filter school"""
+    """Function to filter out the Teacher Leaders and by school
+
+    Args: pd.DataFrame, school_id
+
+    Returns: pd.DataFrame filtered to show only RR teachers data per school
+
+    """
     teacher_filtered = whole_dataframe[
         (whole_dataframe.reg_rr_title == "RR Teacher + Support Role") | (whole_dataframe.reg_rr_title == "RR Teacher + Class Leader")
     ]
