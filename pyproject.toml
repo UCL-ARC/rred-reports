@@ -57,7 +57,7 @@ Wiki = "https://github.com/UCL-ARC/rred-reports/wiki"
 Changelog = "https://github.com/UCL-ARC/rred-reports/releases"
 
 [project.scripts]
-rred = "rred_reports.cli:main"
+rred = "rred_reports.cli:app"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -102,7 +102,7 @@ target-version = "py39"
 typing-modules = ["rred_reports._compat.typing"]
 src = ["src"]
 unfixable = ["T20", "F841"]
-exclude = []
+exclude = ["cli.py"]
 
 [tool.ruff.per-file-ignores]
 "tests/**" = ["T20"]

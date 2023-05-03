@@ -1,21 +1,26 @@
+from typing import Optional
+
 import typer
-from loguru import logger
+
+from rred_reports import __version__
+
+app = typer.Typer()
 
 
-@logger.catch
-def console(example_input: str):
-    """Function to define the CLI interface.
-    :param example_input: Silly text to log, just to show that the CLI is working
-
-    Uncaught exceptions logged by loguru which uses `better exceptions`
-    """
-    logger.info(f"Running command '{example_input}'")
+@app.command()
+def report(level: str):
+    """Run the report generation pipeline"""
+    typer.echo(f"Creating a report for level: {level}")
 
 
-def main():
-    """Entry point of CLI application, wraps the console function with typer"""
-    typer.run(console)
+def version_callback(value: bool):
+    if value:
+        typer.echo(f"rred-reports v{__version__}")
+        raise typer.Exit()
 
 
-if __name__ == "__main__":
-    main()
+@app.callback()
+def main(
+    version: Optional[bool] = typer.Option(None, "--version", callback=version_callback, is_eager=True),
+):
+    return
