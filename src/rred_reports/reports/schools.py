@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
 table_one_columns = [
@@ -214,12 +213,3 @@ def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id
         output_path = Path(f"output/reports/{school_id}.docx")
     template_filler.save_document(output_path)
     return template_filler
-
-
-nested_data = parse_masterfile("example_masterfile_with_test_date.xlsx")
-testing_df = join_masterfile_dfs(nested_data)
-testing_df
-out_of_date_school_data = school_filter(testing_df, "RRS2030220")
-populated_template = populate_school_data(
-    out_of_date_school_data, "/Users/katiebuntic/projects/RRED/rred-reports/input/templates/2021/2021-22_template.docx", "RRS2030220"
-)
