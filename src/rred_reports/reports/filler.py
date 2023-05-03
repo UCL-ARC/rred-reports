@@ -128,7 +128,7 @@ class TemplateFiller:
         """Populate a table with the contents of a pandas dataframe
 
         Args:
-            table_index (Table): Index of the table to populate
+            table_index (int): Index of the table to populate
             data (pd.DataFrame): Pandas dataframe of future table contents
         """
         self._remove_duplicated_columns()
