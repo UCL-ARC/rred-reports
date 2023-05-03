@@ -105,7 +105,10 @@ def filter_six(school_dataframe: pd.DataFrame):
     """Filter for table six, for later use
 
     Args: school_filter(pd.DataFrame)"""
-    return school_dataframe
+    return school_dataframe[(school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")][
+        ((school_dataframe["month3_testdate"] > "2021-07-31") & (school_dataframe["month3_testdate"] < "2022-08-01"))
+        | ((school_dataframe["month6_testdate"] > "2021-07-31") & (school_dataframe["month6_testdate"] < "2022-08-01"))
+    ]
 
 
 def summary_table(school_df: pd.DataFrame):
