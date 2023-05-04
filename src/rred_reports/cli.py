@@ -6,6 +6,8 @@ from rred_reports import __version__
 
 app = typer.Typer()
 
+from rred_reports import __version__
+
 
 @app.command()
 def report(level: str):
