@@ -91,7 +91,7 @@ def filter_for_one_two_five(school_dataframe: pd.DataFrame):
 
     Returns: school_filter(pd.DataFrame) filtered by the reporting year
     """
-    return school_dataframe[
+    return school_dataframe.loc[
         ((school_dataframe["entry_date"] > "2021-07-31") & (school_dataframe["entry_date"] < "2022-08-01"))
         | ((school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01"))
     ]
@@ -105,18 +105,24 @@ def filter_for_three_four(school_dataframe: pd.DataFrame):
 
     Returns: school_filter(pd.DataFrame) filtered by exit_outcome and exit_date
     """
-    return school_dataframe[(school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")][
-        (school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01")
+    outcome_filtered = school_dataframe[
+        (school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")
     ]
+
+    return outcome_filtered[(outcome_filtered["exit_date"] > "2021-07-31") & (outcome_filtered["exit_date"] < "2022-08-01")]
 
 
 def filter_six(school_dataframe: pd.DataFrame):
     """Filter for table six, for later use
 
     Args: school_filter(pd.DataFrame)"""
-    return school_dataframe[(school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")][
-        ((school_dataframe["month3_testdate"] > "2021-07-31") & (school_dataframe["month3_testdate"] < "2022-08-01"))
-        | ((school_dataframe["month6_testdate"] > "2021-07-31") & (school_dataframe["month6_testdate"] < "2022-08-01"))
+    outcome_filtered = school_dataframe[
+        (school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")
+    ]
+
+    return outcome_filtered[
+        ((outcome_filtered["month3_testdate"] > "2021-07-31") & (outcome_filtered["month3_testdate"] < "2022-08-01"))
+        | ((outcome_filtered["month6_testdate"] > "2021-07-31") & (outcome_filtered["month6_testdate"] < "2022-08-01"))
     ]
 
 
