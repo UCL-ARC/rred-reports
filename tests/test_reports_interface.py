@@ -13,3 +13,19 @@ def test_report_type_enum_not_found():
     incorrect_enum = "beep"
     with pytest.raises(ValueError, match=f"'{incorrect_enum}' is not a valid ReportType"):
         ReportType(incorrect_enum)
+
+
+def test_validate_data_sources_passes():
+    pass
+
+
+def test_validate_data_sources_fails():
+    pass
+
+
+def test_cli_app_create():
+    pass
+
+
+def test_get_config():
+    pass
