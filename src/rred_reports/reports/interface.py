@@ -80,8 +80,12 @@ def get_config(config_toml: Path) -> dict:
     Returns:
         dict: Dictionary of config data
     """
-    with config_toml.open() as config_file:
-        return tomllib.load(config_file)
+    try:
+        with config_toml.open() as config_file:
+            return tomllib.load(config_file)
+    except FileNotFoundError as error:
+        logger.error(f"No report generation config file found at {config_file}. Exiting.")
+        raise error
 
 
 @app.callback()
