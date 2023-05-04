@@ -15,7 +15,7 @@ def test_school_tables_filled(data_path: Path, templates_dir: Path, temp_out_dir
     school_data = school_filter(testing_df, "RRS2030250")
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030250", output_doc)
+    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030250", 2022, output_doc)
 
     assert populated_template.verify_tables_filled()
     assert output_doc.exists()
@@ -32,7 +32,7 @@ def test_school_name_replaced_in_paragraphs(data_path: Path, templates_dir: Path
     school_data = school_filter(testing_df, "RRS2030250")
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030250", output_doc)
+    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030250", 2022, output_doc)
 
     output_paragraphs = []
     for paragraph in populated_template.doc.paragraphs:
@@ -42,7 +42,7 @@ def test_school_name_replaced_in_paragraphs(data_path: Path, templates_dir: Path
     assert "School A" not in output_paragraphs[0]
 
 
-def test_school_table_filters_applied(data_path: Path, templates_dir: Path):
+def test_school_table_filters_applied(data_path: Path, templates_dir: Path, temp_out_dir: Path):
     """
     Given a school that has data that is not within the date range
     When the template is populated with redcap data
@@ -55,12 +55,15 @@ def test_school_table_filters_applied(data_path: Path, templates_dir: Path):
     nested_data = parse_masterfile(data_path / "example_masterfile.xlsx")
     testing_df = join_masterfile_dfs(nested_data)
     test_pupils_school_data = school_filter(testing_df, "RRS2030220")
+    output_doc = temp_out_dir / "school.docx"
 
     # assert test_pupils_school_data [(test_pupils_school_data.reg_rr_title != "Teacher Leader") |
     #                                (test_pupils_school_data.reg_rr_title != "Teacher Leader + Support Role")|
     #                                (test_pupils_school_data.reg_rr_title != "Teacher Leader Only")]
 
-    return populate_school_data(test_pupils_school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220", 2022)
+    populated_template = populate_school_data(test_pupils_school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220", 2022, output_doc)
+
+    assert populated_template.verify_tables_filled()
 
 
 # test_school_table_filters_applied(Path(f"/Users/katiebuntic/projects/RRED/rred-reports/input/"), Path(f"/Users/katiebuntic/projects/RRED/rred-reports/input/templates/"))
