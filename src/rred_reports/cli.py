@@ -3,10 +3,10 @@ from typing import Optional
 import typer
 
 from rred_reports import __version__
-from rred_reports.reports import generate
+from rred_reports.reports import interface
 
 app = typer.Typer()
-app.add_typer(generate.app, name="report")
+app.add_typer(interface.app, name="report")
 
 
 def version_callback(value: bool):
