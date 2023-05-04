@@ -3,14 +3,10 @@ from typing import Optional
 import typer
 
 from rred_reports import __version__
+from rred_reports.reports import generate
 
 app = typer.Typer()
-
-
-@app.command()
-def report(level: str):
-    """Run the report generation pipeline"""
-    typer.echo(f"Creating a report for level: {level}")
+app.add_typer(generate.app, name="report")
 
 
 def version_callback(value: bool):
