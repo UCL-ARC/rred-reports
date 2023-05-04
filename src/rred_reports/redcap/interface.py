@@ -12,7 +12,6 @@ def extract(year: int):
         year (int): Year to process
     """
     typer.echo(f"Extracting data for year: {year}")
-    return
 
 
 @app.callback()

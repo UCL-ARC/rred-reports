@@ -8,11 +8,16 @@ from rred_reports.reports.generate import generate_report_school
 app = typer.Typer()
 
 
-class ReportType(str, Enum):
-    school = "school"
-    centre = "centre"
-    national = "national"
-    all = "all"
+class ReportType(Enum):
+    """ReportType class
+
+    Provides report types as enums
+    """
+
+    SCHOOL = "school"
+    CENTRE = "centre"
+    NATIONAL = "national"
+    ALL = "all"
 
 
 @app.command()
@@ -30,8 +35,6 @@ def create(level: ReportType, year: int):
     if selection == "school":
         school_ids = Path("/path/to/data")
         generate_report_school(school_ids, year)
-
-    return
 
 
 @app.callback()

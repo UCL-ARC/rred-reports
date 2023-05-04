@@ -1,3 +1,4 @@
+# pylint: disable=W0613
 from typing import Optional
 
 import typer
@@ -12,6 +13,14 @@ app.add_typer(reports, name="reports")
 
 
 def version_callback(value: bool):
+    """Prints the software version
+
+    Args:
+        value (bool): Boolean flag
+
+    Raises:
+        typer.Exit: Exits the program after printing version
+    """
     if value:
         typer.echo(f"rred-reports {__version__}")
         raise typer.Exit()
@@ -21,4 +30,9 @@ def version_callback(value: bool):
 def main(
     version: Optional[bool] = typer.Option(None, "--version", callback=version_callback, is_eager=True),
 ):
+    """RRED-Reports
+
+    Args:
+        version (Optional[bool], optional): Optional --version flag to print software version.
+    """
     return
