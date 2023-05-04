@@ -5,24 +5,17 @@ import pandas as pd
 from rred_reports.reports.schools import populate_school_data, school_filter
 
 
-def generate_report_school(school_ids: list[str], year: int) -> None:
+def generate_report_school(processed_data: pd.DataFrame, template_file: Path, output_dir: Path) -> None:
     """Generate a report at the school level given a list of school IDs
 
     Args:
-        school_ids (list[str]): List of school IDs
+        processed_data (pd.DataFrame): Pandas dataframe of processed data
         year (int): Year to process
     """
-
-    data_path = Path(__file__).resolve().parents[3] / "output" / "processed" / "year"
-    processed_data = pd.read_csv(data_path / "processed_data.csv")
-
-    output_path = Path(__file__).resolve().parents[3] / "output" / "reports" / "year" / "schools"
-    templates_dir = Path(__file__).resolve().parents[3] / "input" / "templates" / "year"
+    school_ids = processed_data.loc[:, "school_id"].unique().tolist()
 
     for school_id in school_ids:
-        school_out_dir = output_path / school_id
+        school_out_dir = output_dir / school_id
         school_data = school_filter(processed_data, school_id)
-        output_doc = school_out_dir / f"school_report_{school_id}.docx"
-
-        next_year_two_digit = int(str(year)[:2]) + 1
-        populate_school_data(school_data, templates_dir / f"{year}/{year}-{next_year_two_digit}_template.docx", school_id, output_doc)
+        output_doc = school_out_dir / f"{school_id}.docx"
+        populate_school_data(school_data, template_file, school_id, output_doc)
