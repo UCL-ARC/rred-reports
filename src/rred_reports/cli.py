@@ -8,7 +8,7 @@ from rred_reports.reports.interface import app as reports
 
 app = typer.Typer()
 app.add_typer(redcap, name="redcap")
-app.add_typer(reports, name="report")
+app.add_typer(reports, name="reports")
 
 
 def version_callback(value: bool):
