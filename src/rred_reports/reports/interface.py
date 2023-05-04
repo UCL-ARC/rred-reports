@@ -1,8 +1,8 @@
+import tomllib
 from enum import Enum
 from pathlib import Path
 
 import pandas as pd
-import tomllib
 import typer
 from loguru import logger
 
