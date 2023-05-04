@@ -2,6 +2,7 @@ from enum import Enum
 from pathlib import Path
 
 import pandas as pd
+import tomllib
 import typer
 from loguru import logger
 
@@ -22,16 +23,17 @@ class ReportType(Enum):
     ALL = "all"
 
 
-def validate_data_sources(year: int) -> dict:
+def validate_data_sources(year: int, template_file: Path) -> dict:
     """Perform some basic data source validation
     Args:
         year (int): Year to process
+        template_file_path (Path): Path to template file
 
     Returns:
         dict: Dictionary of validated data sources
     """
     data_path = Path(__file__).resolve().parents[3] / "output" / "processed" / str(year)
-    template_dir = Path(__file__).resolve().parents[3] / "input" / "templates" / str(year)
+    template_file_path = Path(__file__).resolve().parents[3] / template_file
     output_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
 
     try:
@@ -39,9 +41,6 @@ def validate_data_sources(year: int) -> dict:
     except FileNotFoundError as error:
         logger.error(f'No processed data file found at {data_path / "processed_data.csv"}. Exiting.')
         raise error
-
-    next_year_two_digit = int(str(year)[:2]) + 1
-    template_file_path = template_dir / f"{year}/{year}-{next_year_two_digit}_template.docx"
 
     try:
         assert template_file_path.is_file()
@@ -56,7 +55,7 @@ def validate_data_sources(year: int) -> dict:
 
 
 @app.command()
-def create(level: ReportType, year: int):
+def create(level: ReportType, year: int, config_file: str = "report_config.toml"):
     """Generate a report at the level specified
 
     Args:
@@ -64,12 +63,25 @@ def create(level: ReportType, year: int):
         year (int): Year to process
     """
     typer.echo(f"Creating a report for level: {level.value}")
-
-    selection = level.value
-    validated_data = validate_data_sources(year)
+    config = get_config(Path(__file__) / config_file)
+    template_file_path = config[level.value]["template"]
+    validated_data = validate_data_sources(year, template_file_path)
     processed_data, template_file, output_dir = validated_data.values()
-    if selection == "school":
+    if level.value.lower() == "school":
         generate_report_school(processed_data, template_file, output_dir)
+
+
+def get_config(config_toml: Path) -> dict:
+    """Load a toml config file
+
+    Args:
+        config_toml (Path): Path to config file
+
+    Returns:
+        dict: Dictionary of config data
+    """
+    with config_toml.open() as config_file:
+        return tomllib.load(config_file)
 
 
 @app.callback()

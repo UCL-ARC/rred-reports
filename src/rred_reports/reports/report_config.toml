@@ -1,0 +1,11 @@
+[school]
+template = "input/templates/2021/2021-22_template.docx"
+n_tables = 999
+
+[centre]
+template = "/path/to/file"
+n_tables = 999
+
+[national]
+template = "/path/to/file"
+n_tables = 999
