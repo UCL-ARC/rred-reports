@@ -23,24 +23,31 @@ class ReportType(Enum):
 
 
 def validate_data_sources(year: int) -> dict:
+    """Perform some basic data source validation
+    Args:
+        year (int): Year to process
+
+    Returns:
+        dict: Dictionary of validated data sources
+    """
     data_path = Path(__file__).resolve().parents[3] / "output" / "processed" / str(year)
     template_dir = Path(__file__).resolve().parents[3] / "input" / "templates" / str(year)
     output_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
 
     try:
         processed_data = pd.read_csv(data_path / "processed_data.csv")
-    except FileNotFoundError:
+    except FileNotFoundError as error:
         logger.error(f'No processed data file found at {data_path / "processed_data.csv"}. Exiting.')
-        typer.Exit()
+        raise error
 
     next_year_two_digit = int(str(year)[:2]) + 1
     template_file_path = template_dir / f"{year}/{year}-{next_year_two_digit}_template.docx"
 
     try:
         assert template_file_path.is_file()
-    except AssertionError:
+    except AssertionError as error:
         logger.error(f"No template file found at {template_file_path}. Exiting.")
-        typer.Exit()
+        raise error
 
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
@@ -62,7 +69,7 @@ def create(level: ReportType, year: int):
     validated_data = validate_data_sources(year)
     processed_data, template_file, output_dir = validated_data.values()
     if selection == "school":
-        generate_report_school(processed_data, year, template_file, output_dir)
+        generate_report_school(processed_data, template_file, output_dir)
 
 
 @app.callback()
