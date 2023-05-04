@@ -6,8 +6,6 @@ from rred_reports import __version__
 
 app = typer.Typer()
 
-from rred_reports import __version__
-
 
 @app.command()
 def report(level: str):
@@ -17,7 +15,7 @@ def report(level: str):
 
 def version_callback(value: bool):
     if value:
-        typer.echo(f"rred-reports v{__version__}")
+        typer.echo(f"rred-reports {__version__}")
         raise typer.Exit()
 
 
