@@ -56,6 +56,6 @@ def test_school_table_filters_applied(data_path: Path):
     testing_df = join_masterfile_dfs(nested_data)
     test_pupils_school_data = school_filter(testing_df, "RRS2030220")
 
-    assert test_pupils_school_data["reg_rr_title" != "Teacher Leader"]
+    assert (test_pupils_school_data["reg_rr_title"] != "Teacher Leader").any()
     assert (test_pupils_school_data["entry_date"] < "2022-8-1").any()
     assert (test_pupils_school_data["exit_date"] > "2021-7-31").any()
