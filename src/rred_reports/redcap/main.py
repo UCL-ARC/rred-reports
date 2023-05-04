@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from rred_reports.dispatch_list import get_unique_schools
 from rred_reports.masterfile import masterfile_columns
 
 
@@ -25,9 +26,9 @@ class RedcapReader:
         Setup for reading from redcap
 
         Args:
-            school_list: path to csv file defining a mapping of all school ids to their names
+            school_list: path to Excel dispatch list file
         """
-        self._school_list = pd.read_csv(school_list)
+        self._school_list = get_unique_schools(school_list)
 
     def read_redcap_data(self, current_year: ExtractInput, previous_year: ExtractInput) -> pd.DataFrame:
         """
