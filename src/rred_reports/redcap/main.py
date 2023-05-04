@@ -82,7 +82,7 @@ class RedcapReader:
         cls._convert_timestamps_to_dates(processed_extract)
         processed_extract["_row_number"] = np.arange(processed_extract.shape[0])
 
-        filtered = cls._filter_out_no_children_and_no_rr_id(processed_extract)
+        filtered = cls._filter_non_entry_and_test_rows(processed_extract)
         return cls._rename_wide_cols_with_student_number_suffix(filtered)
 
     @staticmethod
@@ -106,9 +106,10 @@ class RedcapReader:
         extract[timestamp_cols] = dates
 
     @staticmethod
-    def _filter_out_no_children_and_no_rr_id(extract: pd.DataFrame) -> pd.DataFrame:
-        filtered = extract[extract["no_rr_children"].notnull() & extract["no_rr_children"] != 0]
-        return filtered[filtered["rrcp_rr_id"].notnull()]
+    def _filter_non_entry_and_test_rows(extract: pd.DataFrame) -> pd.DataFrame:
+        no_children = extract[extract["no_rr_children"].notnull() & extract["no_rr_children"] != 0]
+        has_id = no_children[no_children["rrcp_rr_id"].notnull()]
+        return has_id[~has_id["record_id"].str.startswith("Sandbox")]
 
     @staticmethod
     def _rename_wide_cols_with_student_number_suffix(extract: pd.DataFrame) -> pd.DataFrame:
