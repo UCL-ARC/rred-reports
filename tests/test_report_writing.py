@@ -60,7 +60,7 @@ def test_school_table_filters_applied(data_path: Path, templates_dir: Path):
     #                                (test_pupils_school_data.reg_rr_title != "Teacher Leader + Support Role")|
     #                                (test_pupils_school_data.reg_rr_title != "Teacher Leader Only")]
 
-    return populate_school_data(test_pupils_school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220")
+    return populate_school_data(test_pupils_school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220", 2022)
 
 
 # test_school_table_filters_applied(Path(f"/Users/katiebuntic/projects/RRED/rred-reports/input/"), Path(f"/Users/katiebuntic/projects/RRED/rred-reports/input/templates/"))

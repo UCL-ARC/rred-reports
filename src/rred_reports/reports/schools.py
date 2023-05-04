@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -69,6 +70,12 @@ table_six_columns = [
 ]
 
 
+def set_dates(report_year):
+    start_date = datetime(2000, 7, 31)
+    end_date = datetime(2001, 8, 1)
+    return start_date.replace(year=report_year - 1), end_date.replace(year=report_year)
+
+
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
     """Function to filter out the Teacher Leaders and by school
 
@@ -77,52 +84,53 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id):
     Returns: pd.DataFrame filtered to show only RR teachers data per school
 
     """
-    teacher_filtered = whole_dataframe[
-        (whole_dataframe.reg_rr_title == "RR Teacher + Support Role") | (whole_dataframe.reg_rr_title == "RR Teacher + Class Leader")
-    ]
+    teacher_filtered = whole_dataframe[(whole_dataframe["reg_rr_title"].isin(["RR Teacher + Support Role", "RR Teacher + Class Leader"]))]
     return teacher_filtered[teacher_filtered.school_id == school_id].copy()
 
 
 # specific filter for each table
-def filter_for_one_two_five(school_dataframe: pd.DataFrame):
-    """Filter for table one, two and five: <entry_date> OR <exit_date> is after 31/7/21 and before 1/8/22
+def filter_for_one_two_five(school_dataframe: pd.DataFrame, report_year):
+    """Filter for table one, two and five: <entry_date> OR <exit_date> is after 31/7 and before 1/8
 
     Args: school_filter(pd.DataFrame)
 
     Returns: school_filter(pd.DataFrame) filtered by the reporting year
     """
+    report_start, report_end = set_dates(report_year)
+
     return school_dataframe.loc[
-        ((school_dataframe["entry_date"] > "2021-07-31") & (school_dataframe["entry_date"] < "2022-08-01"))
-        | ((school_dataframe["exit_date"] > "2021-07-31") & (school_dataframe["exit_date"] < "2022-08-01"))
+        ((school_dataframe["entry_date"] > report_start) & (school_dataframe["entry_date"] < report_end))
+        | ((school_dataframe["exit_date"] > report_start) & (school_dataframe["exit_date"] < report_end))
     ]
 
 
-def filter_for_three_four(school_dataframe: pd.DataFrame):
-    """Filter for table three and four: ONLY on pupils whose <exit_date> is after 31/7/21 and before 1/8/22.
+def filter_for_three_four(school_dataframe: pd.DataFrame, report_year):
+    """Filter for table three and four: ONLY on pupils whose <exit_date> is after 31/7 and before 1/8
     ONLY on data for pupils with 'Discontinued' OR 'Referred to school' in the <exit_outcome> column
 
     Args: school_filter(pd.DataFrame)
 
     Returns: school_filter(pd.DataFrame) filtered by exit_outcome and exit_date
     """
-    outcome_filtered = school_dataframe[
-        (school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")
-    ]
+    report_start, report_end = set_dates(report_year)
 
-    return outcome_filtered[(outcome_filtered["exit_date"] > "2021-07-31") & (outcome_filtered["exit_date"] < "2022-08-01")]
+    outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
+
+    return outcome_filtered[(outcome_filtered["exit_date"] > report_start) & (outcome_filtered["exit_date"] < report_end)]
 
 
-def filter_six(school_dataframe: pd.DataFrame):
+def filter_six(school_dataframe: pd.DataFrame, report_year):
     """Filter for table six, for later use
 
     Args: school_filter(pd.DataFrame)"""
-    outcome_filtered = school_dataframe[
-        (school_dataframe["exit_outcome"] == "Discontinued") | (school_dataframe["exit_outcome"] == "Referred to school")
-    ]
+
+    report_start, report_end = set_dates(report_year)
+
+    outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
 
     return outcome_filtered[
-        ((outcome_filtered["month3_testdate"] > "2021-07-31") & (outcome_filtered["month3_testdate"] < "2022-08-01"))
-        | ((outcome_filtered["month6_testdate"] > "2021-07-31") & (outcome_filtered["month6_testdate"] < "2022-08-01"))
+        ((outcome_filtered["month3_testdate"] > report_start) & (outcome_filtered["month3_testdate"] < report_end))
+        | ((outcome_filtered["month6_testdate"] > report_start) & (outcome_filtered["month6_testdate"] < report_end))
     ]
 
 
@@ -173,7 +181,7 @@ def summary_table(school_df: pd.DataFrame):
     )
 
 
-def populate_school_tables(school_df: pd.DataFrame, template_path: Path) -> TemplateFiller:
+def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_year) -> TemplateFiller:
     """Function to fill the school template tables, saving them the file
 
     Args: school_filter(pd.DataFrame), Path, school_id
@@ -204,21 +212,23 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path) -> Temp
     # now adding other tables
     for index, column_and_filter in enumerate(columns_and_filters):
         columns, filter_function = column_and_filter
-        filtered = filter_function(school_df)
+        filtered = filter_function(school_df, report_year)
         table_to_write = filtered[columns]
         template_filler.populate_table(index + 1, table_to_write)
 
     return template_filler
 
 
-def populate_school_data(school_df: pd.DataFrame, template_path: Path, school_id, output_path=None, school_placeholder="School A") -> TemplateFiller:
+def populate_school_data(
+    school_df: pd.DataFrame, template_path: Path, school_id, report_year, output_path=None, school_placeholder="School A"
+) -> TemplateFiller:
     """Function to populate and save the template with: name of school and filled tables
 
-    Args: school_filter(pd.DataFrame), Path, school_id
+    Args: school_filter(pd.DataFrame), Path, school_id, report_year
 
     Returns: The template filler with populated data and appropriate school name saved in the output path"""
 
-    template_filler = populate_school_tables(school_df, template_path)
+    template_filler = populate_school_tables(school_df, template_path, report_year)
 
     school_name = school_df["rrcp_school"].iloc[0]
 
