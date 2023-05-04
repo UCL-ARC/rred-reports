@@ -1,5 +1,5 @@
 import tomllib
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +11,7 @@ from rred_reports.reports.generate import generate_report_school
 app = typer.Typer()
 
 
-class ReportType(Enum):
+class ReportType(StrEnum):
     """ReportType class
 
     Provides report types as enums
