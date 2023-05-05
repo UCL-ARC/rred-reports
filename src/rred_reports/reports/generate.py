@@ -10,7 +10,8 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
 
     Args:
         processed_data (pd.DataFrame): Pandas dataframe of processed data
-        year (int): Year to process
+        template_file (Path): The template file to be used
+        output_dir (Path): Output directory for saved files
     """
     school_ids = processed_data.loc[:, "school_id"].unique().tolist()
 

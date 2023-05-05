@@ -26,9 +26,16 @@ class ReportType(str, Enum):
 
 def validate_data_sources(year: int, template_file: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
+
     Args:
         year (int): Year to process
-        template_file_path (Path): Path to template file
+        template_file (Path): Template file
+        top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
+            data can be found. Defaults to None.
+
+    Raises:
+        processed_data_missing_error: FileNotFound error for missing processed data case
+        FileNotFoundError: FileNotFoundError for missing template file
 
     Returns:
         dict: Dictionary of validated data sources
@@ -42,9 +49,9 @@ def validate_data_sources(year: int, template_file: Path, top_level_dir: Optiona
 
     try:
         processed_data = pd.read_csv(data_path / "processed_data.csv")
-    except FileNotFoundError as error:
+    except FileNotFoundError as processed_data_missing_error:
         logger.error(f'No processed data file found at {data_path / "processed_data.csv"}. Exiting.')
-        raise error
+        raise processed_data_missing_error
 
     try:
         assert template_file_path.is_file()
