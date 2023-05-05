@@ -33,6 +33,7 @@ dependencies = [
   "pandas == 1.5.3",
   "pandas-dataclasses == 0.12.0",
   "python-docx == 0.8.11",
+  "tomli == 2.0.1",
   "typer == 0.7.0",
 ]
 

@@ -1,4 +1,4 @@
-import tomllib
+import tomli
 from enum import StrEnum
 from pathlib import Path
 
@@ -63,7 +63,8 @@ def create(level: ReportType, year: int, config_file: str = "report_config.toml"
         year (int): Year to process
     """
     typer.echo(f"Creating a report for level: {level.value}")
-    config = get_config(Path(__file__) / config_file)
+    config = get_config(Path(__file__) / config_file) if config_file == "report_config.toml" else get_config(config_file)
+
     template_file_path = config[level.value]["template"]
     validated_data = validate_data_sources(year, template_file_path)
     processed_data, template_file, output_dir = validated_data.values()
@@ -82,7 +83,7 @@ def get_config(config_toml: Path) -> dict:
     """
     try:
         with config_toml.open() as config_file:
-            return tomllib.load(config_file)
+            return tomli.load(config_file)
     except FileNotFoundError as error:
         logger.error(f"No report generation config file found at {config_file}. Exiting.")
         raise error
