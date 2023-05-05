@@ -74,7 +74,7 @@ def create(level: ReportType, year: int, config_file: str = "report_config.toml"
         year (int): Year to process
     """
     typer.echo(f"Creating a report for level: {level.value}")
-    config = get_config(Path(__file__) / config_file) if config_file == "report_config.toml" else get_config(config_file)
+    config = get_config(Path(config_file))
 
     template_file_path = config[level.value]["template"]
     validated_data = validate_data_sources(year, template_file_path)
