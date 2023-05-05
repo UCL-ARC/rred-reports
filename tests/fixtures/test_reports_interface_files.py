@@ -19,7 +19,7 @@ def temp_config_file(temp_out_dir: Path) -> Path:
     return temp_out_dir / "test_config.toml"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def temp_data_directories(tmp_path_factory: pytest.TempPathFactory) -> Path:
     top_level_dir = tmp_path_factory.mktemp("temp_top_level_dir")
     output_dir = top_level_dir / "output"

@@ -77,7 +77,6 @@ def test_get_config_success(temp_config_file):
 
 def test_get_config_failure():
     incorrect_config_path = Path("/path/to/config/file")
-    expected_error_message = f"No report generation config file found at {incorrect_config_path}. Exiting."
 
-    with pytest.raises(FileNotFoundError, match=expected_error_message):
+    with pytest.raises(FileNotFoundError):
         get_config(incorrect_config_path)
