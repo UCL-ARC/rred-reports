@@ -78,9 +78,10 @@ def set_dates(report_year):
     Returns: start_date and end_date in datetime format
 
     """
-    start_date = datetime(2000, 7, 31)
-    end_date = datetime(2001, 8, 1)
-    return start_date.replace(year=report_year - 1), end_date.replace(year=report_year)
+    start_date = datetime(report_year - 1, 7, 31)
+    end_date = datetime(report_year, 8, 1)
+    return start_date, end_date
+
 
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
