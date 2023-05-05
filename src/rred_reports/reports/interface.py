@@ -66,13 +66,14 @@ def validate_data_sources(year: int, template_file: Path, top_level_dir: Optiona
 
 
 @app.command()
-def create(level: ReportType, year: int, config_file: str = "report_config.toml"):
+def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml"):
     """Generate a report at the level specified
 
     Args:
         level (ReportType): school, centre, national
         year (int): Year to process
     """
+    typer.echo(f"Using config file at {Path(config_file).resolve()}")
     typer.echo(f"Creating a report for level: {level.value}")
     config = get_config(Path(config_file))
 
