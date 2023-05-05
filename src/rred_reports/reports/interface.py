@@ -1,8 +1,8 @@
-import tomli
 from enum import Enum
 from pathlib import Path
 
 import pandas as pd
+import tomli
 import typer
 from loguru import logger
 
