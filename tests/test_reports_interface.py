@@ -1,6 +1,9 @@
-import pytest
+from pathlib import Path
 
-from rred_reports.reports.interface import ReportType
+import pytest
+import tomli
+
+from rred_reports.reports.interface import ReportType, get_config
 
 
 def test_report_type_enum():
@@ -27,5 +30,21 @@ def test_cli_app_create():
     pass
 
 
-def test_get_config():
-    pass
+def test_get_config_success(temp_config_file):
+    config = get_config(temp_config_file)
+    expected_str = """
+    school = "/path/to/data/school"
+    centre = "/path/to/data/centre"
+    national = "/path/to/data/national"
+    """
+    expected_toml = tomli.loads(expected_str)
+
+    assert config == expected_toml
+
+
+def test_get_config_failure():
+    incorrect_config_path = Path("/path/to/config/file")
+    expected_error_message = f"No report generation config file found at {incorrect_config_path}. Exiting."
+
+    with pytest.raises(FileNotFoundError, match=expected_error_message):
+        get_config(incorrect_config_path)

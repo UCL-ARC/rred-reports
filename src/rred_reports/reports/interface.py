@@ -1,5 +1,5 @@
 import tomli
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +11,7 @@ from rred_reports.reports.generate import generate_report_school
 app = typer.Typer()
 
 
-class ReportType(StrEnum):
+class ReportType(str, Enum):
     """ReportType class
 
     Provides report types as enums
@@ -82,10 +82,10 @@ def get_config(config_toml: Path) -> dict:
         dict: Dictionary of config data
     """
     try:
-        with config_toml.open() as config_file:
+        with config_toml.open(mode="rb") as config_file:
             return tomli.load(config_file)
     except FileNotFoundError as error:
-        logger.error(f"No report generation config file found at {config_file}. Exiting.")
+        logger.error(f"No report generation config file found at {config_toml}. Exiting.")
         raise error
 
 
