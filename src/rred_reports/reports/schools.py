@@ -73,7 +73,8 @@ table_six_columns = [
 def set_dates(report_year):
     """Function to set the start and end dates for reporting
 
-    Args: report_year
+    Args:
+        report_year (int): Year of report end
 
     Returns: start_date and end_date in datetime format
 
@@ -83,11 +84,12 @@ def set_dates(report_year):
     return start_date, end_date
 
 
-
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
     """Function to filter out the Teacher Leaders and by school
 
-    Args: pd.DataFrame, school_id
+    Args:
+        whole_dataframe (pd.DataFrame)
+        school_id (string): School ID
 
     Returns: pd.DataFrame filtered to show only RR teachers data per school
 
@@ -100,7 +102,9 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id):
 def filter_for_one_two_five(school_dataframe: pd.DataFrame, report_year):
     """Filter for table one, two and five: <entry_date> OR <exit_date> is after 31/7 and before 1/8
 
-    Args: school_filter(pd.DataFrame)
+    Args:
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        report_year (int): Year of report end
 
     Returns: school_filter(pd.DataFrame) filtered by the reporting year
     """
@@ -116,7 +120,9 @@ def filter_for_three_four(school_dataframe: pd.DataFrame, report_year):
     """Filter for table three and four: ONLY on pupils whose <exit_date> is after 31/7 and before 1/8
     ONLY on data for pupils with 'Discontinued' OR 'Referred to school' in the <exit_outcome> column
 
-    Args: school_filter(pd.DataFrame)
+    Args:
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        report_year (int): Year of report end
 
     Returns: school_filter(pd.DataFrame) filtered by exit_outcome and exit_date
     """
@@ -128,9 +134,14 @@ def filter_for_three_four(school_dataframe: pd.DataFrame, report_year):
 
 
 def filter_six(school_dataframe: pd.DataFrame, report_year):
-    """Filter for table six, for later use
+    """Filter for table six ONLY those pupils who have 3 or 6 month follow up test dates after 31/7 and before 1/8/
+    ONLY on data for pupils with 'Discontinued' OR 'Referred to school'
 
-    Args: school_filter(pd.DataFrame)"""
+    Args:
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        report_year (int): Year of report end
+
+    Returns: school_filter(pd.DataFrame) filtered by month3_testdate and month6_testdate"""
 
     report_start, report_end = set_dates(report_year)
 
@@ -145,7 +156,7 @@ def filter_six(school_dataframe: pd.DataFrame, report_year):
 def summary_table(school_df: pd.DataFrame):
     """
     Args:
-        school_filter(pd.DataFrame)
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
 
     Returns:
         table with the following columns
@@ -163,7 +174,7 @@ def summary_table(school_df: pd.DataFrame):
     def filter_summary_table(school_df):
         """Filter for summary table
 
-        Args: school_filter(pd.DataFrame)
+        Args: school_filter (pd.DataFrame)
         """
         return school_df
 
@@ -192,7 +203,10 @@ def summary_table(school_df: pd.DataFrame):
 def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_year) -> TemplateFiller:
     """Function to fill the school template tables, saving them the file
 
-    Args: school_filter(pd.DataFrame), Path, school_id
+    Args:
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        template_path (Path): Location of template
+        report_year (int): Year of report end
 
     Returns: The template filler with populated data
     """
@@ -232,7 +246,13 @@ def populate_school_data(
 ) -> TemplateFiller:
     """Function to populate and save the template with: name of school and filled tables
 
-    Args: school_filter(pd.DataFrame), Path, school_id, report_year
+    Args:
+        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        template_path (Path): Location of template
+        school_id (string): School ID
+        report_year (int): Year of the report end
+        output_path (Path): Location of the report
+        school_placeholder (string): Placeholder for test
 
     Returns: The template filler with populated data and appropriate school name saved in the output path"""
 
