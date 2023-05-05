@@ -29,7 +29,16 @@ def get_unique_schools(dispatch_path: Path) -> pd.DataFrame:
     return unique_schools
 
 
-def _raise_if_school_duplicated(schools):
+def _raise_if_school_duplicated(schools) -> None:
+    """
+    Ensures that a school is unique (e.g. the same school ID doesn't have two different names)
+
+    Args:
+        schools (Path): path to dispatch file
+
+    Raises:
+        DispatchListException: If non-unique school name found
+    """
     school_id_check = schools["RRED School ID"].duplicated(keep=False)
     duplicated_schools = schools[school_id_check]
     if not duplicated_schools.empty:
