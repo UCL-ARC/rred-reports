@@ -59,10 +59,6 @@ def test_validate_data_sources_fails_template_file_missing(temp_data_directories
         validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
 
 
-def test_cli_app_create():
-    pass
-
-
 def test_get_config_success(temp_config_file):
     config = get_config(temp_config_file)
     expected_str = """

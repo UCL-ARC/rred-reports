@@ -15,7 +15,7 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
     school_ids = processed_data.loc[:, "school_id"].unique().tolist()
 
     for school_id in school_ids:
-        school_out_dir = output_dir / school_id
+        school_out_dir = output_dir / str(school_id)
         school_data = school_filter(processed_data, school_id)
-        output_doc = school_out_dir / f"{school_id}.docx"
+        output_doc = school_out_dir / f"{str(school_id)}.docx"
         populate_school_data(school_data, template_file, school_id, output_doc)
