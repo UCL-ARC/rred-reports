@@ -73,9 +73,8 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
         level (ReportType): school, centre, national
         year (int): Year to process
     """
-    typer.echo(f"Using config file at {Path(config_file).resolve()}")
     typer.echo(f"Creating a report for level: {level.value}")
-    config = get_config(Path(config_file))
+    config = get_config(config_file)
 
     template_file_path = config[level.value]["template"]
     validated_data = validate_data_sources(year, template_file_path)
