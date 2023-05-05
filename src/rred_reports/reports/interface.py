@@ -1,10 +1,10 @@
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import tomli
 import typer
-from typing import Optional
 from loguru import logger
 
 from rred_reports.reports.generate import generate_report_school
