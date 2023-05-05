@@ -57,5 +57,5 @@ def test_school_table_filters_applied(data_path: Path):
     test_pupils_school_data = school_filter(testing_df, "RRS2030220")
 
     assert (~test_pupils_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
-    assert (test_pupils_school_data["entry_date"] < "2022-8-1").any()
+    assert (test_pupils_school_data["entry_date"] < "2022-8-1").all()
     assert (test_pupils_school_data["exit_date"] > "2021-7-31").any()
