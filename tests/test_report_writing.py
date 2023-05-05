@@ -12,10 +12,10 @@ def test_school_tables_filled(data_path: Path, templates_dir: Path, temp_out_dir
     """
     nested_data = parse_masterfile(data_path / "example_masterfile.xlsx")
     testing_df = join_masterfile_dfs(nested_data)
-    school_data = school_filter(testing_df, "RRS4030010")
+    school_data = school_filter(testing_df, "RRS2030220")
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS4030010", 2022, output_doc)
+    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220", 2022, output_doc)
 
     assert populated_template.verify_tables_filled()
     assert output_doc.exists()
