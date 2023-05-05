@@ -1,9 +1,10 @@
 from pathlib import Path
 
+import pandas as pd
 import pytest
 import tomli
 
-from rred_reports.reports.interface import ReportType, get_config
+from rred_reports.reports.interface import ReportType, get_config, validate_data_sources
 
 
 def test_report_type_enum():
@@ -18,12 +19,44 @@ def test_report_type_enum_not_found():
         ReportType(incorrect_enum)
 
 
-def test_validate_data_sources_passes():
-    pass
+def test_validate_data_sources_passes(temp_data_directories):
+    top_level_dir = temp_data_directories["top_level"]
+    data_directory = temp_data_directories["year"]
+
+    example_processed_data = {"item 1": 1, "item 2": 2}
+    processed_data_path = data_directory / "processed_data.csv"
+    template_file_standin_path = top_level_dir / "template_file_standin.csv"
+    processed_df = pd.DataFrame.from_dict([example_processed_data])
+    processed_df.to_csv(processed_data_path)
+    processed_df.to_csv(template_file_standin_path)
+    validated_data = validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+    assert isinstance(validated_data, dict)
+    assert len(validated_data) == 3
 
 
-def test_validate_data_sources_fails():
-    pass
+def test_validate_data_sources_fails_processed_data_missing(temp_data_directories):
+    top_level_dir = temp_data_directories["top_level"]
+
+    example_processed_data = {"item 1": 1, "item 2": 2}
+    template_file_standin_path = top_level_dir / "template_file_standin.csv"
+    processed_df = pd.DataFrame.from_dict([example_processed_data])
+    processed_df.to_csv(template_file_standin_path)
+
+    with pytest.raises(FileNotFoundError):
+        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+
+
+def test_validate_data_sources_fails_template_file_missing(temp_data_directories):
+    top_level_dir = temp_data_directories["top_level"]
+    data_directory = temp_data_directories["year"]
+
+    example_processed_data = {"item 1": 1, "item 2": 2}
+    processed_data_path = data_directory / "processed_data.csv"
+    template_file_standin_path = top_level_dir / "template_file_standin.csv"
+    processed_df = pd.DataFrame.from_dict([example_processed_data])
+    processed_df.to_csv(processed_data_path)
+    with pytest.raises(FileNotFoundError):
+        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
 
 
 def test_cli_app_create():

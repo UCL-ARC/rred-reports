@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import tomli
 import typer
+from typing import Optional
 from loguru import logger
 
 from rred_reports.reports.generate import generate_report_school
@@ -23,7 +24,7 @@ class ReportType(str, Enum):
     ALL = "all"
 
 
-def validate_data_sources(year: int, template_file: Path) -> dict:
+def validate_data_sources(year: int, template_file: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
     Args:
         year (int): Year to process
@@ -32,9 +33,12 @@ def validate_data_sources(year: int, template_file: Path) -> dict:
     Returns:
         dict: Dictionary of validated data sources
     """
-    data_path = Path(__file__).resolve().parents[3] / "output" / "processed" / str(year)
-    template_file_path = Path(__file__).resolve().parents[3] / template_file
-    output_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
+    if top_level_dir is None:
+        top_level_dir = Path(__file__).resolve().parents[3]
+
+    data_path = top_level_dir / "output" / "processed" / str(year)
+    template_file_path = top_level_dir / template_file
+    output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     try:
         processed_data = pd.read_csv(data_path / "processed_data.csv")
@@ -46,7 +50,7 @@ def validate_data_sources(year: int, template_file: Path) -> dict:
         assert template_file_path.is_file()
     except AssertionError as error:
         logger.error(f"No template file found at {template_file_path}. Exiting.")
-        raise error
+        raise FileNotFoundError from error
 
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
