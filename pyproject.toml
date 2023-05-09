@@ -33,6 +33,8 @@ dependencies = [
   "pandas == 1.5.3",
   "pandas-dataclasses == 0.12.0",
   "python-docx == 0.8.11",
+  "tomli == 2.0.1",
+  "tomli-w == 1.0.0",
   "typer == 0.7.0",
 ]
 
@@ -57,7 +59,7 @@ Wiki = "https://github.com/UCL-ARC/rred-reports/wiki"
 Changelog = "https://github.com/UCL-ARC/rred-reports/releases"
 
 [project.scripts]
-rred = "rred_reports.cli:main"
+rred = "rred_reports.cli:app"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -102,11 +104,12 @@ target-version = "py39"
 typing-modules = ["rred_reports._compat.typing"]
 src = ["src"]
 unfixable = ["T20", "F841"]
-exclude = []
+exclude = ["cli.py"]
 
 [tool.ruff.per-file-ignores]
 "tests/**" = ["T20"]
 "noxfile.py" = ["T20"]
+"src/rred_reports/reports/interface.py" = ["I001"]
 
 
 [tool.pylint]
