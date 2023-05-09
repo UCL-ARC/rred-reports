@@ -3,8 +3,8 @@ from pathlib import Path
 import typer
 from loguru import logger
 
+from rred_reports import get_config
 from rred_reports.redcap.main import ExtractInput, RedcapReader
-from rred_reports.reports.interface import get_config
 
 top_level_dir = Path(__file__).resolve().parents[3]
 

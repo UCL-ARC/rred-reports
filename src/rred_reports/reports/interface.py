@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import tomli
 import typer
 from loguru import logger
 
+from rred_reports import get_config
 from rred_reports.reports.generate import generate_report_school
 
 app = typer.Typer()
@@ -81,23 +81,6 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
     processed_data, template_file, output_dir = validated_data.values()
     if level.value.lower() == "school":
         generate_report_school(processed_data, template_file, output_dir)
-
-
-def get_config(config_toml: Path) -> dict:
-    """Load a toml config file
-
-    Args:
-        config_toml (Path): Path to config file
-
-    Returns:
-        dict: Dictionary of config data
-    """
-    try:
-        with config_toml.open(mode="rb") as config_file:
-            return tomli.load(config_file)
-    except FileNotFoundError as error:
-        logger.error(f"No report generation config file found at {config_toml}. Exiting.")
-        raise error
 
 
 @app.callback()
