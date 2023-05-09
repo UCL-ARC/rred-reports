@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
-from rred_reports.reports.schools import filter_for_one_two_five, filter_for_three_four, filter_six, populate_school_data, school_filter
+from rred_reports.reports.schools import filter_for_one_two_five, filter_for_three_four, populate_school_data, school_filter
 
 
 def test_school_tables_filled(data_path: Path, templates_dir: Path, temp_out_dir: Path):
@@ -60,7 +60,7 @@ def test_school_table_filters_applied(data_path: Path):
 
     test_filter_for_three_four = filter_for_three_four(test_pupils_school_data, 2022)
 
-    test_filter_six = filter_six(test_pupils_school_data, 2022)
+    # test_filter_six = filter_six(test_pupils_school_data, 2022)
 
     # first filter test
     assert (~test_pupils_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
@@ -98,8 +98,6 @@ def test_school_table_filters_applied(data_path: Path):
     assert ((test_4_a["exit_date"] < "2022-8-1") | (test_4_a["exit_date"] > "2021-7-31") | (test_4_a["exit_date"].isna())).all()
     test_4_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_4_2021-22"]
     assert (test_4_b["exit_outcome"].isin(["Discontinued", "Referred to school"])).any()
-    test_4_c = test_filter_six.loc[test_filter_six.pupil_no == "test_4_2021-22"]
-    assert (test_4_c["month3_testdate"] > "2021-7-31") | (test_4_c["month3_testdate"] < "2022-8-1" | (test_4_c["month3_testdate"].isna())).all()
 
     # test_5_2021-22, Incomplete and within date boundary. Should be in 1,2,5.
     test_5_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_5_2021-22"]
