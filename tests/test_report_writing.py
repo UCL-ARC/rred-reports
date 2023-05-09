@@ -106,5 +106,5 @@ def test_school_table_filters_applied(data_path: Path):
 
     # test_6_2021-22, Ongoing and entry date within boundary and NA exit date. Should be in 1,2,5.
     test_6_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_6_2021-22"]
-    assert ((test_6_a["entry_date"] < "2022-8-1") | (test_5_a["entry_date"] > "2021-7-31")).all()
+    assert ((test_6_a["entry_date"] < "2022-8-1") | (test_6_a["entry_date"] > "2021-7-31")).all()
     assert (test_6_a["exit_date"].isna()).all()
