@@ -7,9 +7,6 @@ from rred_reports.redcap.main import ExtractInput, RedcapReader
 from rred_reports.reports.interface import get_config
 
 top_level_dir = Path(__file__).resolve().parents[3]
-parent_2 = Path(__file__).resolve().parents[2]
-parent_1 = Path(__file__).resolve().parents[1]
-current_file = Path(__file__).resolve()
 
 
 app = typer.Typer()

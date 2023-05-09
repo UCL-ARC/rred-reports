@@ -110,6 +110,7 @@ exclude = ["cli.py"]
 "tests/**" = ["T20"]
 "noxfile.py" = ["T20"]
 "src/rred_reports/reports/interface.py" = ["I001"]
+"tests/test_redcap_interface.py" = ["PT004", "ARG001"]
 
 
 [tool.pylint]

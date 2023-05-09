@@ -1,9 +1,24 @@
+from pathlib import Path
+
+import pytest
 import tomli_w
 
-from rred_reports.redcap.interface import current_file, extract, parent_1, parent_2, top_level_dir
+from rred_reports.redcap import interface
+from rred_reports.redcap.interface import extract
 
 
-def test_cli_writes_file(temp_out_dir):
+@pytest.fixture()
+def set_top_level_dir() -> None:
+    """
+    Manually set the top level directory for running in CI, and revert it on teardown
+    """
+    original_value = interface.top_level_dir
+    interface.top_level_dir = Path(__file__).parents[1]
+    yield
+    interface.top_level_dir = original_value
+
+
+def test_cli_writes_file(temp_out_dir, set_top_level_dir):
     """
     Given a config file pointing to valid test data
     When the extract CLI command is run, with an output to a temporary directory
@@ -24,17 +39,6 @@ def test_cli_writes_file(temp_out_dir):
         }
     }
     config_path = temp_out_dir / "config.toml"
-    repo_dir = top_level_dir
-    dir_contents = "__".join([str(x) for x in repo_dir.glob("*")])
-
-    current = current_file
-    parent_one = parent_1
-    parent_two = parent_2
-
-    print(current)
-    print(parent_one)
-    print(parent_two)
-    print(dir_contents)
     with config_path.open("wb") as handle:
         tomli_w.dump(test_config, handle)
     extract(2021, config_file=config_path, output_dir=temp_out_dir)
