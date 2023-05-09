@@ -99,7 +99,7 @@ def test_school_table_filters_applied(data_path: Path):
     test_4_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_4_2021-22"]
     assert (~test_4_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
     test_4_c = test_filter_six.loc[test_filter_six.pupil_no == "test_4_2021-22"]
-    assert (test_4_c["month3_date"] > "2021-7-31") | (test_4_c["month3_date"] < "2022-8-1" | (test_4_c["month3_date"].isna())).all()
+    assert (test_4_c["month3_testdate"] > "2021-7-31") | (test_4_c["month3_testdate"] < "2022-8-1" | (test_4_c["month3_testdate"].isna())).all()
 
     # test_5_2021-22, Incomplete and within date boundary. Should be in 1,2,5.
     test_5_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_5_2021-22"]
