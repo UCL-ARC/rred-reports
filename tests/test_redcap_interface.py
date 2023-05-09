@@ -25,7 +25,7 @@ def test_cli_writes_file(temp_out_dir):
     }
     config_path = temp_out_dir / "config.toml"
     repo_dir = top_level_dir
-    dir_contents = "__".join(list(repo_dir.glob("*")))
+    dir_contents = "__".join([str(x) for x in repo_dir.glob("*")])
 
     current = current_file
     parent_one = parent_1
