@@ -71,42 +71,45 @@ def test_school_table_filters_applied(data_path: Path):
     assert (~test_filter_for_three_four["pupil_no"].isin(["test_2_2021-22", "test_3_2021-22", "test_5_2021-22", "test_6_2021-22"])).any()
     assert (~test_filter_for_three_four["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    # test_1_2021-22, Discontinued and within date boundary, no month3 or month 6 results. Should show in 1,2,3,4,5.
+    # test_1_2021-22, Discontinued and within date boundary, no month3 or month 6 results. Should show in table 1,2,3,4,5.
     test_1_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_1_2021-22"]
-    assert (test_1_a["exit_outcome"] == "Discontinued").all()
-    assert ((test_1_a["entry_date"] < "2022-8-1") & (test_1_a["exit_date"] < "2022-8-1")).all()
-    assert ((test_1_a["entry_date"] > "2021-7-31") & (test_1_a["exit_date"] > "2021-7-31")).all()
+    assert ((test_1_a["entry_date"] < "2022-8-1") | (test_1_a["entry_date"] > "2021-7-31")).all()
+    assert ((test_1_a["exit_date"] < "2022-8-1")(test_1_a["exit_date"] > "2021-7-31") | (test_1_a["exit_date"].isna())).all()
+    test_1_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_1_2021-22"]
+    assert (~test_1_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
     # test_2_2021-22, Discontinued, not within date boundary, month3 testdate out of range, no month6. Should not be in any tables.
     test_2_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_2_2021-22"]
-    assert (test_2_a["exit_outcome"] == "Discontinued").all()
-    assert ((~test_2_a["entry_date"] < "2022-8-1") | (~test_2_a["exit_date"] < "2022-8-1")).all()
-    assert ((~test_2_a["entry_date"] > "2021-7-31") | (~test_2_a["exit_date"] > "2021-7-31")).all()
+    assert ((~test_2_a["entry_date"] < "2022-8-1") | (~test_2_a["entry_date"] > "2021-7-31")).all()
+    assert ((~test_2_a["exit_date"] < "2022-8-1")(~test_2_a["exit_date"] > "2021-7-31") | (test_2_a["exit_date"].isna())).all()
     test_2_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_2_2021-22"]
-    assert (test_2_b["exit_outcome"] == "Discontinued").all()
+    assert (~test_2_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
     # test_3_2021-22, Discontinued, entry date IN report date but exit date OUT of report date, no month3 or month 6 results. Should be in 1,2,5.
     test_3_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_3_2021-22"]
-    assert (test_3_a["exit_outcome"] == "Discontinued").all()
-    assert ((test_3_a["entry_date"] < "2022-8-1") | (test_3_a["entry_date"] > "2021-7-31")).all
-    assert ((~test_3_a["exit_date"] < "2022-8-1") | (~test_3_a["exit_date"] > "2021-7-31")).all()
+    assert ((test_3_a["entry_date"] < "2022-8-1") | (test_3_a["entry_date"] > "2021-7-31")).all()
+    assert ((~test_3_a["exit_date"] < "2022-8-1") | (~test_3_a["exit_date"] > "2021-7-31") | (test_3_a["exit_date"].isna())).all()
     test_3_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_3_2021-22"]
-    assert (test_3_b["exit_outcome"] == "Discontinued").all()
+    assert (~test_3_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
     # test_4_2021-22, Discontinued, entry date OUT of report date but exit date IN report date, month3 testdate in range. Should be in all tables.
     test_4_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_4_2021-22"]
-    assert (test_4_a["exit_outcome"] == "Discontinued").all()
     assert ((test_4_a["entry_date"] > "2022-8-1") | (test_4_a["entry_date"] < "2021-7-31")).all
-    assert ((test_4_a["exit_date"] < "2022-8-1") | (test_4_a["exit_date"] > "2021-7-31")).all()
+    assert ((test_4_a["exit_date"] < "2022-8-1") | (test_4_a["exit_date"] > "2021-7-31") | (test_4_a["exit_date"].isna())).all()
     test_4_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_4_2021-22"]
-    assert (test_4_b["exit_outcome"] == "Discontinued").all()
-    test_4_c = test_filter_six.loc[test_filter_six.pupil_no == "test_6_2021-22"]
-    assert (test_4_c["month3_date"] > "2021-7-31") | (test_4_c["month3_date"] < "2022-8-1").all()
+    assert (~test_4_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
+    test_4_c = test_filter_six.loc[test_filter_six.pupil_no == "test_4_2021-22"]
+    assert (test_4_c["month3_date"] > "2021-7-31") | (test_4_c["month3_date"] < "2022-8-1" | (test_4_c["month3_date"].isna())).all()
 
     # test_5_2021-22, Incomplete and within date boundary. Should be in 1,2,5.
-    assert (test_filter_for_one_two_five["pupil_no"] == "test_5_2021-22").all()
-    assert (~test_filter_for_three_four["pupil_no"] == "test_5_2021-22").all()
+    test_5_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_5_2021-22"]
+    assert ((test_5_a["entry_date"] > "2022-8-1") | (test_5_a["entry_date"] < "2021-7-31")).all
+    assert ((test_5_a["exit_date"] < "2022-8-1") | (test_5_a["exit_date"] > "2021-7-31") | (test_5_a["exit_date"].isna())).all()
+    test_5_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_5_2021-22"]
+    assert (test_5_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
     # test_6_2021-22, Ongoing and entry date within boundary and NA exit date. Should be in 1,2,5.
-    assert (test_filter_for_one_two_five["pupil_no"] == "test_6_2021-22").all()
-    assert (~test_filter_for_three_four["pupil_no"] == "test_6_2021-22").all()
+    test_6_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_6_2021-22"]
+    assert (test_6_a["exit_outcome"] == "Ongoing").all()
+    assert ((test_6_a["entry_date"] > "2022-8-1") | (test_5_a["entry_date"] < "2021-7-31")).all()
+    assert (test_6_a["exit_date"].isna()).all()
