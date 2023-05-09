@@ -1,6 +1,6 @@
 import tomli_w
 
-from rred_reports.redcap.interface import extract, top_level_dir
+from rred_reports.redcap.interface import current_file, extract, parent_1, parent_2, top_level_dir
 
 
 def test_cli_writes_file(temp_out_dir):
@@ -25,7 +25,15 @@ def test_cli_writes_file(temp_out_dir):
     }
     config_path = temp_out_dir / "config.toml"
     repo_dir = top_level_dir
-    dir_contents = list(repo_dir.glob("*"))
+    dir_contents = "__".join(list(repo_dir.glob("*")))
+
+    current = current_file
+    parent_one = parent_1
+    parent_two = parent_2
+
+    print(current)
+    print(parent_one)
+    print(parent_two)
     print(dir_contents)
     with config_path.open("wb") as handle:
         tomli_w.dump(test_config, handle)
