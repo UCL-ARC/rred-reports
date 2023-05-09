@@ -22,7 +22,7 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
         config_file (Path): Path to config file
         output_dir (Path): Path to output directory where the long CSV data will be saved
     """
-    typer.echo(f"Extracting data for year: {year}")
+    typer.echo(f"Extracting data for {year} and the previous year's surveys")
     config = get_config(config_file)[str(year)]
 
     end_year = str(year + 1)[-2:]
@@ -43,8 +43,8 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
     )
     long_data = parser.read_redcap_data(current_year, previous_year)
     output_file = output_dir / f"masterfile_{current_period}.csv"
-    long_data.to_csv(output_file)
-    typer.echo(f"Output written to {output_file}")
+    long_data.to_csv(output_file, index=False)
+    typer.echo(f"Output written to: {output_file}")
 
 
 @app.callback()

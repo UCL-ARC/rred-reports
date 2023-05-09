@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from rred_reports.dispatch_list import get_unique_schools
 from rred_reports.masterfile import masterfile_columns
@@ -52,15 +53,16 @@ class RedcapReader:
         Args:
             redcap_fields (ExtractInput): redcap data for a year of survey
         """
-        raw_data = pd.read_csv(redcap_fields.coded_data_path)
-        labelled_data = pd.read_csv(redcap_fields.labelled_data_path)
+        logger.info("Processing survey period: {period}", period=redcap_fields.survey_period)
+        raw_data = pd.read_csv(redcap_fields.coded_data_path, low_memory=False)
+        labelled_data = pd.read_csv(redcap_fields.labelled_data_path, low_memory=False)
         processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
         long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
         long_with_names = self._add_school_name_column(long)
         return long_with_names[masterfile_columns()].copy()
 
     @classmethod
-    def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_file_path: pd.DataFrame) -> pd.DataFrame:
+    def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_data: pd.DataFrame) -> pd.DataFrame:
         """
         Process wide data before conversion to long.
 
@@ -72,18 +74,23 @@ class RedcapReader:
 
         Args:
             raw_data (pd.DataFrame): survey responses, with data given as codes
-            labelled_file_path (pd.DataFrame): survey responses, with data given as labels
+            labelled_data (pd.DataFrame): survey responses, with data given as labels
 
         Returns:
             pd.DataFrame: survey data processed to allow for wide to long conversion, labels used for all data except school id
         """
-        processed_extract = labelled_file_path.copy(deep=True)
+        logger.info("Pre-processing wide data")
+        processed_extract = labelled_data.copy(deep=True)
+        # Unify on using the raw_data column names, labelled uses the questions given on the survey as column names
+        processed_extract.columns = labelled_data.columns
         cls._fill_school_id_with_coalesce(raw_data, processed_extract)
         cls._fill_region_with_coalesce(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
-        processed_extract["_row_number"] = np.arange(processed_extract.shape[0])
+        # Making a copy, so we have a de-fragmented frame for adding row number, was getting a performance warning
+        converted_data = processed_extract.copy()
+        converted_data["_row_number"] = np.arange(converted_data.shape[0])
 
-        filtered = cls._filter_out_no_children_and_no_rr_id(processed_extract)
+        filtered = cls._filter_out_no_children_and_no_rr_id(converted_data)
         return cls._rename_wide_cols_with_student_number_suffix(filtered)
 
     @staticmethod
@@ -199,6 +206,7 @@ class RedcapReader:
         Returns:
             pd.DataFrame: long data
         """
+        logger.info("Converting data from wide to long, this can take a couple of minutes")
         entry_year_cols = [f"entry_year_{country}" for country in ["eng", "ire", "mal", "sco"]]
 
         export_data = self._create_long_data(entry_year_cols, wide_extract)
