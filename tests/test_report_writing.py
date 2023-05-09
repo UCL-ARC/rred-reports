@@ -74,7 +74,7 @@ def test_school_table_filters_applied(data_path: Path):
     # test_1_2021-22, Discontinued and within date boundary, no month3 or month 6 results. Should show in table 1,2,3,4,5.
     test_1_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_1_2021-22"]
     assert ((test_1_a["entry_date"] < "2022-8-1") | (test_1_a["entry_date"] > "2021-7-31")).all()
-    assert ((test_1_a["exit_date"] < "2022-8-1")(test_1_a["exit_date"] > "2021-7-31") | (test_1_a["exit_date"].isna())).all()
+    assert ((test_1_a["exit_date"] < "2022-8-1") | (test_1_a["exit_date"] > "2021-7-31") | (test_1_a["exit_date"].isna())).all()
     test_1_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_1_2021-22"]
     assert (~test_1_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
