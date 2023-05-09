@@ -4,7 +4,8 @@ import pandas as pd
 import pytest
 import tomli
 
-from rred_reports.reports.interface import ReportType, get_config, validate_data_sources
+from rred_reports import get_config
+from rred_reports.reports.interface import ReportType, validate_data_sources
 
 
 def test_report_type_enum():
