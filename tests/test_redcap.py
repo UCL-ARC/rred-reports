@@ -42,7 +42,7 @@ def test_preprocess_wide_data(data_path):
     # missing date converted to 0001-01-01
     assert (redcap.loc[redcap["record_id"] == "AB100"].get("_test_timestamp") == pd.Timestamp.date(pd.NaT)).all()
     # missing values filtered out
-    assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103"])].size == 0
+    assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103", "Sandbox1"])].size == 0
 
 
 def test_read_redcap_extract_rows_and_cols(redcap_extract):

@@ -44,7 +44,7 @@ class ReportEmailer:
             content (EmailContent): EmailContent object
 
         Returns:
-            message: Email (optionally with attachment) as exchangelib Message
+            Message: Email (optionally with attachment) as exchangelib Message
         """
 
         recipients = [Mailbox(email_address=x) for x in mail_content.recipients]
