@@ -1,7 +1,22 @@
 from pathlib import Path
 
+import pytest
+
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
-from rred_reports.reports.schools import filter_for_one_two_five, filter_for_three_four, populate_school_data, school_filter
+from rred_reports.reports.schools import (
+    filter_for_one_two_five,
+    filter_for_three_four,
+    filter_six,
+    populate_school_data,
+    school_filter,
+)
+
+
+@pytest.fixture(scope="module")
+def example_school_data(data_path: Path):
+    nested_data = parse_masterfile(data_path / "example_masterfile.xlsx")
+    testing_df = join_masterfile_dfs(nested_data)
+    return school_filter(testing_df, "RRS2030220")
 
 
 def test_school_tables_filled(data_path: Path, templates_dir: Path, temp_out_dir: Path):
@@ -42,69 +57,79 @@ def test_school_name_replaced_in_paragraphs(data_path: Path, templates_dir: Path
     assert "School A" not in output_paragraphs[0]
 
 
-def test_school_table_filters_applied(data_path: Path):
+def test_first_filter(example_school_data):
     """
     Given a school that has data that is not within the date range
     When the template is populated with redcap data
     Then this template should be filled with the following:
     Table 1, 2, 5: test_1_2021-22, test_3_2021-22, test_4_2021-22, test_5_2021-22, test_6_2021-22
-    Table 3&4: test_1_2021-22, test_4_2021-22
-    Table 6: No data
     """
-
-    nested_data = parse_masterfile(data_path / "example_masterfile.xlsx")
-    testing_df = join_masterfile_dfs(nested_data)
-    test_pupils_school_data = school_filter(testing_df, "RRS2030220")
-
-    test_filter_for_one_two_five = filter_for_one_two_five(test_pupils_school_data, 2022)
-
-    test_filter_for_three_four = filter_for_three_four(test_pupils_school_data, 2022)
-
-    # test_filter_six = filter_six(test_pupils_school_data, 2022)
-
+    test_filter_for_one_two_five = filter_for_one_two_five(example_school_data, 2022)
     # first filter test
-    assert (~test_pupils_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
-    assert (test_pupils_school_data["entry_date"] < "2022-8-1").all()
+    assert (~example_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
+    assert (example_school_data["entry_date"] < "2022-8-1").all()
     assert (
-        (test_pupils_school_data["exit_date"].isna())
-        | (test_pupils_school_data["exit_date"] > "2021-7-31")
-        | (test_pupils_school_data["exit_date"] < "2022-8-1")
+        (example_school_data["exit_date"].isna()) | (example_school_data["exit_date"] > "2021-7-31") | (example_school_data["exit_date"] < "2022-8-1")
     ).all()
 
+    # test_1_2021-22, Discontinued and within date boundary, no month3 or month 6 results. Should show in table 1,2,3,4,5.
+    pupil_1 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_1_2021-22"]
+    assert ((pupil_1["entry_date"] < "2022-8-1") | (pupil_1["entry_date"] > "2021-7-31")).all()
+    assert ((pupil_1["exit_date"] < "2022-8-1") | (pupil_1["exit_date"] > "2021-7-31") | (pupil_1["exit_date"].isna())).all()
+
+    # test_2_2021-22, Discontinued, not within date boundary, month3 testdate out of range, no month6. Should not be in any tables.
+    pupil_2 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_2_2021-22"]
+    assert ((~pupil_2["entry_date"] < "2022-8-1") | (~pupil_2["entry_date"] > "2021-7-31")).all()
+    assert ((~pupil_2["exit_date"] < "2022-8-1") | (~pupil_2["exit_date"] > "2021-7-31") | (pupil_2["exit_date"].isna())).all()
+
+    # test_3_2021-22, Discontinued, entry date IN report date but exit date OUT of report date, no month3 or month 6 results. Should be in 1,2,5.
+    pupil_3 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_3_2021-22"]
+    assert ((pupil_3["entry_date"] < "2022-8-1") | (pupil_3["entry_date"] > "2021-7-31")).all()
+    assert ((pupil_3["exit_date"] > "2022-8-1") | (pupil_3["exit_date"] < "2021-7-31") | (pupil_3["exit_date"].isna())).all()
+
+    # test_4_2021-22, Discontinued, entry date OUT of report date but exit date IN report date, month3 testdate in range. Should be in all tables.
+    pupil_4 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_4_2021-22"]
+    assert ((pupil_4["entry_date"] > "2022-8-1") | (pupil_4["entry_date"] < "2021-7-31")).all
+    assert ((pupil_4["exit_date"] < "2022-8-1") | (pupil_4["exit_date"] > "2021-7-31") | (pupil_4["exit_date"].isna())).all()
+
+    # test_5_2021-22, Incomplete and within date boundary. Should be in 1,2,5.
+    pupil_5 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_5_2021-22"]
+    assert ((pupil_5["entry_date"] > "2022-8-1") | (pupil_5["entry_date"] < "2021-7-31")).all
+    assert ((pupil_5["exit_date"] < "2022-8-1") | (pupil_5["exit_date"] > "2021-7-31") | (pupil_5["exit_date"].isna())).all()
+
+    # test_6_2021-22, Ongoing and entry date within boundary and NA exit date. Should be in 1,2,5.
+    pupil_6 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_6_2021-22"]
+    assert ((pupil_6["entry_date"] < "2022-8-1") | (pupil_6["entry_date"] > "2021-7-31")).all()
+    assert (pupil_6["exit_date"].isna()).all()
+
+
+def test_table_3_4_filter(example_school_data):
+    """
+    Given a school that has data that is not within the date range
+    When the template is populated with redcap data
+    Then this template should be filled with the following:
+    Table 3&4: test_1_2021-22, test_4_2021-22
+    """
+    test_filter_for_three_four = filter_for_three_four(example_school_data, 2022)
     # testing filter for table 3,4 applied
     assert (~test_filter_for_three_four["pupil_no"].isin(["test_2_2021-22", "test_3_2021-22", "test_5_2021-22", "test_6_2021-22"])).any()
     assert (~test_filter_for_three_four["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    # test_1_2021-22, Discontinued and within date boundary, no month3 or month 6 results. Should show in table 1,2,3,4,5.
-    test_1_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_1_2021-22"]
-    assert ((test_1_a["entry_date"] < "2022-8-1") | (test_1_a["entry_date"] > "2021-7-31")).all()
-    assert ((test_1_a["exit_date"] < "2022-8-1") | (test_1_a["exit_date"] > "2021-7-31") | (test_1_a["exit_date"].isna())).all()
-    test_1_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_1_2021-22"]
-    assert (~test_1_b["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
+    pupil_1 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_1_2021-22"]
+    assert (~pupil_1["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    # test_2_2021-22, Discontinued, not within date boundary, month3 testdate out of range, no month6. Should not be in any tables.
-    test_2_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_2_2021-22"]
-    assert ((~test_2_a["entry_date"] < "2022-8-1") | (~test_2_a["entry_date"] > "2021-7-31")).all()
-    assert ((~test_2_a["exit_date"] < "2022-8-1") | (~test_2_a["exit_date"] > "2021-7-31") | (test_2_a["exit_date"].isna())).all()
+    pupil_4 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_4_2021-22"]
+    assert (pupil_4["exit_outcome"].isin(["Discontinued", "Referred to school"])).any()
 
-    # test_3_2021-22, Discontinued, entry date IN report date but exit date OUT of report date, no month3 or month 6 results. Should be in 1,2,5.
-    test_3_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_3_2021-22"]
-    assert ((test_3_a["entry_date"] < "2022-8-1") | (test_3_a["entry_date"] > "2021-7-31")).all()
-    assert ((test_3_a["exit_date"] > "2022-8-1") | (test_3_a["exit_date"] < "2021-7-31") | (test_3_a["exit_date"].isna())).all()
 
-    # test_4_2021-22, Discontinued, entry date OUT of report date but exit date IN report date, month3 testdate in range. Should be in all tables.
-    test_4_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_4_2021-22"]
-    assert ((test_4_a["entry_date"] > "2022-8-1") | (test_4_a["entry_date"] < "2021-7-31")).all
-    assert ((test_4_a["exit_date"] < "2022-8-1") | (test_4_a["exit_date"] > "2021-7-31") | (test_4_a["exit_date"].isna())).all()
-    test_4_b = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test_4_2021-22"]
-    assert (test_4_b["exit_outcome"].isin(["Discontinued", "Referred to school"])).any()
+def test_table_6_filter(example_school_data):
+    """
+    Given a school that has data that is not within the date range
+    When the template is populated with redcap data
+    Then this template should be filled with the following:
+    Table 6: test_1_2021-22, test_4_2021-22
+    """
+    test_filter_six = filter_six(example_school_data, 2022)
 
-    # test_5_2021-22, Incomplete and within date boundary. Should be in 1,2,5.
-    test_5_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_5_2021-22"]
-    assert ((test_5_a["entry_date"] > "2022-8-1") | (test_5_a["entry_date"] < "2021-7-31")).all
-    assert ((test_5_a["exit_date"] < "2022-8-1") | (test_5_a["exit_date"] > "2021-7-31") | (test_5_a["exit_date"].isna())).all()
-
-    # test_6_2021-22, Ongoing and entry date within boundary and NA exit date. Should be in 1,2,5.
-    test_6_a = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_6_2021-22"]
-    assert ((test_6_a["entry_date"] < "2022-8-1") | (test_6_a["entry_date"] > "2021-7-31")).all()
-    assert (test_6_a["exit_date"].isna()).all()
+    six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["test_1_2021-22", "test_4_2021-22"])]
+    assert six_filter.shape[0] == 2
