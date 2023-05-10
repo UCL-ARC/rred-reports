@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from docx2pdf import convert
-from pypdf import PdfReader
+from pypdf import PdfMerger, PdfReader
 from pypdf.errors import EmptyFileError, PdfReadError
 
 from rred_reports.reports.schools import populate_school_data, school_filter
@@ -70,3 +70,27 @@ def convert_single_report(docx_report_path: Path, output_pdf_path: Path) -> None
     if not validate_pdf(output_pdf_path):
         message = "Report conversion failed - invalid PDF produced"
         raise ReportConversionException(message)
+
+
+def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, output_file_name: str = "result") -> None:
+    """Concatenate PDF reports and write output to file as a single PDF
+
+    Args:
+        report_collection (list[Path]): List of individual PDFs
+        output_dir (Path): Output result file directory
+        output_file_name (str, optional): Optional output filename. Defaults to "result".
+    """
+    merger = PdfMerger()
+
+    try:
+        for pdf in report_collection:
+            merger.append(pdf)
+    except FileNotFoundError as error:
+        message = f"Concatenation error - {str(error)}"
+        raise ReportConversionException(message) from error
+    except EmptyFileError as error:
+        message = "Concatenation error - empty file included in concatenation"
+        raise ReportConversionException(message) from error
+
+    merger.write(output_dir / f"{output_file_name}.pdf")
+    merger.close()

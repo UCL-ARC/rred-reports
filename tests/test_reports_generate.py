@@ -5,7 +5,13 @@ import pytest
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
-from rred_reports.reports.generate import ReportConversionException, convert_single_report, generate_report_school, validate_pdf
+from rred_reports.reports.generate import (
+    ReportConversionException,
+    concatenate_pdf_reports,
+    convert_single_report,
+    generate_report_school,
+    validate_pdf,
+)
 
 
 def test_generate_report_school(temp_data_directories, data_path, mocker):
@@ -49,3 +55,30 @@ def test_validate_pdf_failure_no_metadata(mocker, template_report_pdf_path):
     with pytest.raises(ReportConversionException) as error:
         validate_pdf(template_report_pdf_path)
     assert error.value.message == "Report conversion failed - error reading resulting PDF"
+
+
+def test_concatenate_pdf_reports_success(template_report_pdf_path: Path, temp_out_dir: Path):
+    # Original template file is 2 pages long
+    files_to_concat = [template_report_pdf_path] * 5
+    concatenate_pdf_reports(files_to_concat, temp_out_dir)
+    expected_output_file_path = temp_out_dir / "result.pdf"
+    assert (expected_output_file_path).is_file()
+
+    # Expect 5 copies of the original file to contain 10 pages
+    assert len(PdfReader(expected_output_file_path).pages) == 10
+
+
+def test_concatenate_pdf_reports_failure_file_not_found(temp_out_dir: Path):
+    files_to_concat = [Path("test/failure/path.pdf")]
+    with pytest.raises(ReportConversionException) as error:
+        concatenate_pdf_reports(files_to_concat, temp_out_dir)
+    expected_error_message = "No such file or directory: PosixPath('test/failure/path.pdf')"
+    assert expected_error_message in error.value.message
+
+
+def test_concatenate_pdf_reports_failure_empty_file_included(temp_out_dir: Path, template_report_pdf_path, template_report_empty_pdf_path):
+    files_to_concat = [template_report_pdf_path, template_report_empty_pdf_path]
+    with pytest.raises(ReportConversionException) as error:
+        concatenate_pdf_reports(files_to_concat, temp_out_dir)
+    expected_error_message = "Concatenation error - empty file included in concatenation"
+    assert expected_error_message == error.value.message
