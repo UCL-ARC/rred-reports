@@ -9,7 +9,10 @@ def test_generate_report_school(temp_data_directories, data_path, mocker):
     populate_school_data_mock = mocker.patch("rred_reports.reports.generate.populate_school_data")
 
     template_file_path = data_path / "RRED_Report_Template_Single_Category.docx"
-    example_processed_data = {"school_id": [1, 2, 3, 4]}
+    example_processed_data = {
+        "school_id": [1, 2, 3, 4],
+        "reg_rr_title": ["RR Teacher + Support Role", "RR Teacher + Class Leader", "RR Teacher + Support Role", "RR Teacher + Class Leader"],
+    }
     test_dataframe = pd.DataFrame.from_dict(example_processed_data)
 
     generate_report_school(test_dataframe, template_file_path, output_dir)
