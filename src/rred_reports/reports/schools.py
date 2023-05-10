@@ -94,11 +94,8 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id):
     Returns: pd.DataFrame filtered to show only RR teachers data per school
 
     """
-    return whole_dataframe.loc[
-        (whole_dataframe["reg_rr_title"].isin(["RR Teacher + Support Role", "RR Teacher + Class Leader"]))
-        & (whole_dataframe["school_id"] == school_id),
-        :,
-    ].copy()
+    teacher_filtered = whole_dataframe[(whole_dataframe["reg_rr_title"].isin(["RR Teacher + Support Role", "RR Teacher + Class Leader"]))]
+    return teacher_filtered[teacher_filtered.school_id == school_id].copy()
 
 
 # specific filter for each table
