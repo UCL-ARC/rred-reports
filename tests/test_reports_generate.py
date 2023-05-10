@@ -14,3 +14,7 @@ def test_generate_report_school(temp_data_directories, data_path, mocker):
 
     generate_report_school(test_dataframe, template_file_path, output_dir)
     assert populate_school_data_mock.call_count == len(example_processed_data["school_id"])
+
+
+def test_convert_single_report():
+    pass
