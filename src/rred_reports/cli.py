@@ -1,21 +1,38 @@
+# pylint: disable=W0613
+from typing import Optional
+
 import typer
-from loguru import logger
+
+from rred_reports import __version__
+from rred_reports.redcap.interface import app as redcap
+from rred_reports.reports.interface import app as reports
+
+app = typer.Typer()
+app.add_typer(redcap, name="redcap")
+app.add_typer(reports, name="reports")
 
 
-@logger.catch
-def console(example_input: str):
-    """Function to define the CLI interface.
-    :param example_input: Silly text to log, just to show that the CLI is working
+def version_callback(value: bool):
+    """Prints the software version
 
-    Uncaught exceptions logged by loguru which uses `better exceptions`
+    Args:
+        value (bool): Boolean flag
+
+    Raises:
+        typer.Exit: Exits the program after printing version
     """
-    logger.info(f"Running command '{example_input}'")
+    if value:
+        typer.echo(f"rred-reports {__version__}")
+        raise typer.Exit()
 
 
-def main():
-    """Entry point of CLI application, wraps the console function with typer"""
-    typer.run(console)
+@app.callback()
+def main(
+    version: Optional[bool] = typer.Option(None, "--version", callback=version_callback, is_eager=True),
+):
+    """RRED-Reports
 
-
-if __name__ == "__main__":
-    main()
+    Args:
+        version (Optional[bool], optional): Optional --version flag to print software version.
+    """
+    return

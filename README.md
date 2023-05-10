@@ -29,6 +29,8 @@ automated sending of reports via email
   pip install -e .
   ```
 - The `rred` CLI will now exist within this conda environment
+- For running the steps in the DSH, follow the instructions in
+  [src/rred_reports/redcap/README.md](src/rred_reports/redcap/README.md)
 
 ## Sending emails from a delegated mailbox with Office 365
 
