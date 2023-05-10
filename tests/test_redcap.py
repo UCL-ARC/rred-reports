@@ -7,7 +7,7 @@ from rred_reports.redcap.main import ExtractInput, RedcapReader
 
 @pytest.fixture()
 def redcap_extract(data_path):
-    school_list = data_path / "redcap" / "school_list.csv"
+    school_list = data_path / "dispatch_list.xlsx"
     redcap_reader = RedcapReader(school_list)
 
     raw_file_path = data_path / "redcap" / "extract.csv"
@@ -27,7 +27,7 @@ def test_preprocess_wide_data(data_path):
     """
     raw_data_path = data_path / "redcap" / "extract.csv"
     labelled_data_path = data_path / "redcap" / "extract_labels.csv"
-    school_list = data_path / "redcap" / "school_list.csv"
+    school_list = data_path / "dispatch_list.xlsx"
 
     extract_raw = pd.read_csv(raw_data_path)
     extract_labelled = pd.read_csv(labelled_data_path)

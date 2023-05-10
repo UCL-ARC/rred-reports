@@ -34,7 +34,11 @@ class TemplateFiller:
             table_text_style (str): text style for all new rows of table
             table_grid_style (str): grid style for all tables
         """
-        self.doc: Document = Document(template_path)
+        try:
+            self.doc = Document(template_path)
+        except FileNotFoundError:
+            message = f"Template file not found at {template_path}"
+            raise TemplateFillerException(message) from FileNotFoundError
         self.tables = self.doc.tables
         self.header_rows = header_rows
         self.clean_tables()
