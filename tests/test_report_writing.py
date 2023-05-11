@@ -87,8 +87,10 @@ def test_first_filter_kept(example_school_data, pupil_id):
         (example_school_data["exit_date"].isna()) | (example_school_data["exit_date"] > "2021-7-31") | (example_school_data["exit_date"] < "2022-8-1")
     ).all()
     pupil = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == pupil_id]
-    assert ((pupil["entry_date"] < "2022-8-1") | (pupil["entry_date"] > "2021-7-31")).all()
-    assert ((pupil["exit_date"] < "2022-8-1") | (pupil["exit_date"] > "2021-7-31") | (pupil["exit_date"].isna())).all()
+    assert (
+        ((pupil["entry_date"] < "2022-8-1") & (pupil["entry_date"] > "2021-7-31"))
+        | ((pupil["exit_date"] < "2022-8-1") & (pupil["exit_date"] > "2021-7-31"))
+    ).all()
 
 
 def test_first_filter_removed(example_school_data):
