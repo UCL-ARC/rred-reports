@@ -79,12 +79,3 @@ def test_concatenate_pdf_reports_failure_file_not_found(temp_out_dir: Path):
         concatenate_pdf_reports(files_to_concat, temp_out_dir)
     expected_error_message = "No such file or directory: PosixPath('test/failure/path.pdf')"
     assert expected_error_message in error.value.message
-
-
-def test_concatenate_pdf_reports_failure_empty_file_included(mocker, temp_out_dir: Path, template_report_pdf_path):
-    mocker.patch.object(PdfReader, "__init__", side_effect=EmptyFileError)
-    files_to_concat = [template_report_pdf_path]
-    with pytest.raises(ReportConversionException) as error:
-        concatenate_pdf_reports(files_to_concat, temp_out_dir)
-    expected_error_message = "Concatenation error - empty file included in concatenation"
-    assert expected_error_message == error.value.message

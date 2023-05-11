@@ -47,7 +47,7 @@ def validate_pdf(pdf_file_path: Path) -> None:
         message = "Report conversion failed - output PDF does not exist"
         raise ReportConversionException(message)
 
-    with pdf_file_path.open("rb") as converted_report:
+    with pdf_file_path.open("r") as converted_report:
         try:
             PdfReader(converted_report)
         except EmptyFileError as error:
@@ -86,10 +86,8 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
         for pdf in report_collection:
             merger.append(pdf)
     except FileNotFoundError as error:
+        merger.close()
         message = f"Concatenation error - {str(error)}"
-        raise ReportConversionException(message) from error
-    except EmptyFileError as error:
-        message = "Concatenation error - empty file included in concatenation"
         raise ReportConversionException(message) from error
 
     merger.write(output_dir / f"{output_file_name}.pdf")
