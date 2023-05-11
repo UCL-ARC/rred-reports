@@ -149,4 +149,7 @@ input/processed
 !input/*/.gitkeep
 output/**
 !output/*/.gitkeep
+
+output/dispatch_lists/*.xls*
+
 **/.DS_Store
