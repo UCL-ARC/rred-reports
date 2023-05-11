@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 from pypdf import PdfReader
-from pypdf.errors import PdfReadError
+from pypdf.errors import EmptyFileError, PdfReadError
 
 from rred_reports.reports.generate import (
     ReportConversionException,
@@ -43,9 +43,11 @@ def test_validate_pdf_failure_missing_file():
     assert error.value.message == "Report conversion failed - output PDF does not exist"
 
 
-def test_validate_pdf_failure_empty_file(template_report_empty_pdf_path):
+def test_validate_pdf_failure_empty_file(mocker, template_report_pdf_path):
+    mocker.patch.object(PdfReader, "__init__", side_effect=EmptyFileError)
+
     with pytest.raises(ReportConversionException) as error:
-        validate_pdf(template_report_empty_pdf_path)
+        validate_pdf(template_report_pdf_path)
 
     assert error.value.message == "Report conversion failed - empty PDF produced"
 
