@@ -78,8 +78,9 @@ def test_concatenate_pdf_reports_failure_file_not_found(temp_out_dir: Path):
     assert expected_error_message in error.value.message
 
 
-def test_concatenate_pdf_reports_failure_empty_file_included(temp_out_dir: Path, template_report_pdf_path, template_report_empty_pdf_path):
-    files_to_concat = [template_report_pdf_path, template_report_empty_pdf_path]
+def test_concatenate_pdf_reports_failure_empty_file_included(mocker, temp_out_dir: Path, template_report_pdf_path):
+    mocker.patch.object(PdfReader, "__init__", side_effect=EmptyFileError)
+    files_to_concat = [template_report_pdf_path]
     with pytest.raises(ReportConversionException) as error:
         concatenate_pdf_reports(files_to_concat, temp_out_dir)
     expected_error_message = "Concatenation error - empty file included in concatenation"
