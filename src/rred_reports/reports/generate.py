@@ -87,7 +87,12 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
             merger.append(pdf)
     except FileNotFoundError as error:
         merger.close()
-        message = f"Concatenation error - {str(error)}"
+        message = "Concatenation error - one or more provided PDFs does not exist"
+        raise ReportConversionException(message) from error
+    except EmptyFileError as error:
+        pdf.open().close()
+        merger.close()
+        message = "Concatenation error - empty file included in concatenation"
         raise ReportConversionException(message) from error
 
     merger.write(output_dir / f"{output_file_name}.pdf")

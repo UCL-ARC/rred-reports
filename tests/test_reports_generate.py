@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from pypdf import PdfReader
+from pypdf import PdfMerger, PdfReader
 from pypdf.errors import EmptyFileError, PdfReadError
 
 from rred_reports.reports.generate import (
@@ -73,9 +73,23 @@ def test_concatenate_pdf_reports_success(template_report_pdf_path: Path, temp_ou
     assert len(PdfReader(expected_output_file_path).pages) == 10
 
 
-def test_concatenate_pdf_reports_failure_file_not_found(temp_out_dir: Path):
-    files_to_concat = [Path("test/failure/path.pdf")]
+def test_concatenate_pdf_reports_failure_file_not_found(mocker, template_report_pdf_path: Path, temp_out_dir: Path):
+    mocker.patch.object(PdfMerger, "append", side_effect=FileNotFoundError)
+
+    files_to_concat = [template_report_pdf_path]
+
     with pytest.raises(ReportConversionException) as error:
         concatenate_pdf_reports(files_to_concat, temp_out_dir)
-    expected_error_message = "No such file or directory: PosixPath('test/failure/path.pdf')"
+    expected_error_message = "Concatenation error - one or more provided PDFs does not exist"
+    assert expected_error_message in error.value.message
+
+
+def test_concatenate_pdf_reports_failure_empty_file(mocker, template_report_pdf_path: Path, temp_out_dir: Path):
+    mocker.patch.object(PdfMerger, "append", side_effect=EmptyFileError)
+
+    files_to_concat = [template_report_pdf_path]
+
+    with pytest.raises(ReportConversionException) as error:
+        concatenate_pdf_reports(files_to_concat, temp_out_dir)
+    expected_error_message = "Concatenation error - empty file included in concatenation"
     assert expected_error_message in error.value.message
