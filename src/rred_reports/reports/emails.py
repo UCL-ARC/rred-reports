@@ -211,6 +211,6 @@ class ReportEmailer:
             attachment=report,
             attachment_filename="RRED_Processed_Report.docx",
         )
-        email = self.build_email(email_content)
+        email = self.__class__.build_email(email_content)
 
-        return self.send_email(email, save=save_email)
+        return self.__class__.send_email(email, save=save_email)
