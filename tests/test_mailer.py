@@ -67,8 +67,10 @@ def test_run_success(mock_ews_account, template_report_bytes, mocker):
     to_list = ["recipient@domain.com"]
     cc_to = ["recipient-in-cc@domain.com"]
     report = template_report_bytes
-
-    output = report_emailer.run(to_list, cc_to, report)
+    school_name = "test_school"
+    start_year = 3000
+    end_year = 3020
+    output = report_emailer.run(school_name, start_year, end_year, to_list, cc_to, report)
     assert output is True
 
 
@@ -81,9 +83,12 @@ def test_run_failure_no_email_saving(mock_ews_account, template_report_bytes, mo
     to_list = ["recipient@domain.com"]
     cc_to = ["recipient-in-cc@domain.com"]
     report = template_report_bytes
+    school_name = "test_school"
+    start_year = 3000
+    end_year = 3020
 
     with pytest.raises(ReportEmailerException):
-        report_emailer.run(to_list, cc_to, report)
+        report_emailer.run(school_name, start_year, end_year, to_list, cc_to, report)
 
 
 def test_run_failure_email_saving(mock_ews_account, template_report_bytes, mocker):
@@ -96,8 +101,13 @@ def test_run_failure_email_saving(mock_ews_account, template_report_bytes, mocke
     cc_to = ["recipient-in-cc@domain.com"]
     report = template_report_bytes
 
+    report = template_report_bytes
+    school_name = "test_school"
+    start_year = 3000
+    end_year = 3020
+
     with pytest.raises(ReportEmailerException):
-        report_emailer.run(to_list, cc_to, report, save_email=True)
+        report_emailer.run(school_name, start_year, end_year, to_list, cc_to, report, save_email=True)
 
 
 def test_run_success_no_cc_list(mock_ews_account, template_report_bytes, mocker):
@@ -109,8 +119,11 @@ def test_run_success_no_cc_list(mock_ews_account, template_report_bytes, mocker)
     to_list = ["recipient@domain.com"]
 
     report = template_report_bytes
+    school_name = "test_school"
+    start_year = 3000
+    end_year = 3020
+    output = report_emailer.run(school_name, start_year, end_year, to_list, report)
 
-    output = report_emailer.run(to_list, report=report)
     assert output is True
 
 
