@@ -1,6 +1,7 @@
 """Reading and use of the RRED dispatch list"""
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
@@ -44,3 +45,61 @@ def _raise_if_school_duplicated(schools) -> None:
     if not duplicated_schools.empty:
         message = f"Schools of the same ID which have different names:\n{duplicated_schools.sort_values(by='RRED School ID')}"
         raise DispatchListException(message)
+
+
+def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
+    """Obtain the mailing info for a single school ID
+
+    Args:
+        school_id (str): RRED School ID
+        dispatch_list (Path): Path to dispatch list excel file
+
+    Raises:
+        ReportDispatchException: If no contact email is found
+
+    Returns:
+        dict: Dictionary containing mailing information for a single school
+    """
+
+    dispatch_df = pd.read_excel(dispatch_list)
+
+    # pare down the DF
+    dispatch_df = dispatch_df.loc[dispatch_df["RRED School ID"].str.match(rred_school_id)]
+    dispatch_df = dispatch_df.loc[:, ["RRED School ID", "School Label", "Email", "TL Email"]]
+
+    # Case 1: Find no teacher email instance - replace with TL if that exists
+
+    dispatch_df.loc[:, "Mailing List"] = np.nan
+    dispatch_df.loc[(~dispatch_df["Email"].isna()), "Mailing List"] = dispatch_df["Email"]
+    dispatch_df.loc[(dispatch_df["Email"].isna()) & (~dispatch_df["TL Email"].isna()), "Mailing List"] = dispatch_df["TL Email"]
+
+    # Drop any null email instances and report them out
+    missing_email = dispatch_df.loc[dispatch_df["Mailing List"].isna()]
+    try:
+        assert len(missing_email) == 0
+    except AssertionError as error:
+        missing_ids = missing_email["RRED School ID"].tolist()
+        message = f"Missing contact ID for schools with RRED IDs: {missing_ids}. Exiting."
+        raise DispatchListException(message) from error
+
+    # Case 2: Find instances of multiple teacher emails
+    # Remove any space-delimited lists and replace with comma separated
+    cleaned_mailing_list = dispatch_df.loc[:, "Mailing List"].str.replace(" ", ",").str.replace(",,", ",")
+    dispatch_df.loc[:, "Mailing List"] = cleaned_mailing_list
+    mailing_info = dispatch_df.loc[:, ["RRED School ID", "School Label", "Mailing List"]]
+
+    # Teacher emails may be entered on separate rows, in which case this DF will have multiple rows
+
+    try:
+        assert len(mailing_info["School Label"].unique()) == 1
+    except AssertionError as error:
+        message = "Multiple school labels in resulting DataFrame"
+        raise DispatchListException(message) from error
+
+    school_id = mailing_info["RRED School ID"].unique()[0]
+    school_label = mailing_info["School Label"].tolist()
+    mailing_list = mailing_info["Mailing List"].tolist()
+
+    mailing_info = {"rred_school_id": school_id, "school_label": school_label, "mailing_list": mailing_list}
+
+    return mailing_info
