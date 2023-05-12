@@ -150,6 +150,6 @@ input/processed
 output/**
 !output/*/.gitkeep
 
-output/dispatch_lists/*.xls*
+input/dispatch_lists/*.xls*
 
 **/.DS_Store
