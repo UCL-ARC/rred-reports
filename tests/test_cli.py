@@ -32,11 +32,11 @@ def test_reports_create_subcommand_args():
     result = runner.invoke(app, ["reports", "create", "--help"])
     assert result.exit_code == 0
     assert "level" in result.stdout
-    assert "LEVEL:{school|centre|national|all}" in result.stdout
+    assert "LEVEL:{school|centre|national}" in result.stdout
     assert "year" in result.stdout
 
 
 def test_reports_create_subcommand_failure_on_incorrect_level():
     result = runner.invoke(app, ["reports", "create", "beep"])
     assert result.exit_code == 2
-    assert "Invalid value for 'LEVEL:{school|centre|national|all}'" in result.stdout
+    assert "Invalid value for 'LEVEL:{school|centre|national}'" in result.stdout

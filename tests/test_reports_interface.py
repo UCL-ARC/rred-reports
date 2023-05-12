@@ -5,12 +5,12 @@ import pytest
 import tomli
 
 from rred_reports import get_config
-from rred_reports.reports.interface import ReportType, validate_data_sources
+from rred_reports.reports.interface import ReportType, generate, validate_data_sources
 
 
 def test_report_type_enum():
     report_type_contents = [item.name for item in ReportType]
-    expected_contents = ["SCHOOL", "CENTRE", "NATIONAL", "ALL"]
+    expected_contents = ["SCHOOL", "CENTRE", "NATIONAL"]
     assert expected_contents == report_type_contents
 
 
@@ -77,3 +77,20 @@ def test_get_config_failure():
 
     with pytest.raises(FileNotFoundError):
         get_config(incorrect_config_path)
+
+
+def test_generate_school_reports(mocker, temp_data_directories):
+    mocker.patch("rred_reports.reports.interface.generate_report_school")
+    top_level_dir = temp_data_directories["top_level"]
+    data_directory = temp_data_directories["year"]
+
+    example_processed_data = {"item 1": 1, "item 2": 2}
+    processed_data_path = data_directory / "processed_data.csv"
+    template_file_standin_path = top_level_dir / "template_file_standin.csv"
+    processed_df = pd.DataFrame.from_dict([example_processed_data])
+    processed_df.to_csv(processed_data_path)
+    processed_df.to_csv(template_file_standin_path)
+    test_config_file = Path("tests/data/report_config.toml")
+
+    result = generate(ReportType("school"), 2099, config_file=test_config_file, top_level_dir=top_level_dir)
+    assert "output/reports/2099/schools" in str(result)
