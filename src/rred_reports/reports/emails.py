@@ -1,9 +1,11 @@
 """Emailing of reports to users"""
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
+from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.reports.auth import RREDAuthenticator
 
 
@@ -28,7 +30,7 @@ def formatted_mail_content(school_name: str, start_year: int, end_year) -> dict:
     body_html = HTMLBody(
         f"""<html>
     <body>
-    Dear Reading Recovery Teacher
+    Dear Reading Recovery Teacher<br>
 
     Please find attached the Reading Recovery Annual Report for your school for {start_year}-{end_year_short}.
     The report outlines the progress that pupils have made in Reading Recovery in your school during the year {start_year}-{end_year_short}.<br><br>
@@ -110,8 +112,8 @@ class EmailContent:
     cc_recipients: Optional[list[str]]
     subject: str
     body: str
-    attachment: Optional[bytes]
-    attachment_filename: Optional[str]
+    attachment_path: Optional[Path]
+    attachment_name: Optional[str]
 
 
 class ReportEmailer:
@@ -137,8 +139,11 @@ class ReportEmailer:
             cc_recipients=mail_content.cc_recipients,
         )
 
-        if mail_content.attachment is not None:
-            attachment = FileAttachment(name=mail_content.attachment_filename, content=mail_content.attachment)
+        if mail_content.attachment_path is not None and mail_content.attachment_name is not None:
+            attachment = FileAttachment()
+            attachment.name = mail_content.attachment_name
+            with mail_content.attachment_path.open(mode="rb") as pdf_attachment:
+                attachment.content = pdf_attachment.read()
             message.attach(attachment)
         return message
 
@@ -179,7 +184,8 @@ class ReportEmailer:
         end_year: int,
         to_list: list[str],
         cc_to: Optional[list[str]] = None,
-        report: Optional[bytes] = None,
+        report: Optional[Path] = None,
+        report_name: Optional[str] = "RRED_Processed_Report.pdf",
         save_email: bool = False,
     ) -> bool:
         """Prepare, construct and send an email
@@ -190,7 +196,8 @@ class ReportEmailer:
             end_year (int): Report end year
             to_list (list[str]): List of direct email recipients
             cc_to (Optional[list[str]], optional): List of email recipients in CC. Defaults to None.
-            report (Optional[bytes], optional): Report to attach. Defaults to None.
+            report (Optional[Path], optional): Path to the report to attach. Defaults to None.
+            report_name (Optional[str], optional): Name of the attached file as viewed by recipient. Defaults to RRED_Processed_Report.pdf.
             save_email (bool, optional): Adds the email to the 'sent' mailbox of the authenticated account. Defaults to False.
 
         Returns:
@@ -199,7 +206,6 @@ class ReportEmailer:
 
         if cc_to is None:
             cc_to = []
-
         content_template = formatted_mail_content(school_name, start_year, end_year)
         authenticator = RREDAuthenticator()
         email_content = EmailContent(
@@ -208,9 +214,41 @@ class ReportEmailer:
             cc_recipients=cc_to,
             subject=content_template["subject"],
             body=content_template["body_html"],
-            attachment=report,
-            attachment_filename="RRED_Processed_Report.docx",
+            attachment_path=report,
+            attachment_name=report_name,
         )
+
         email = self.__class__.build_email(email_content)
 
         return self.__class__.send_email(email, save=save_email)
+
+
+def rred_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str = "RRED_report.pdf"):
+    """Wrapper mailing function
+
+    Args:
+        school_id (str): School ID
+        dispatch_list (Path): Path to dispatch list
+    """
+    mail_info = get_mailing_info(school_id, dispatch_list)
+    emailer = ReportEmailer()
+    reports_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
+
+    try:
+        assert reports_dir.exists()
+    except AssertionError as error:
+        message = f"Report directory {reports_dir} not found. Exiting."
+        raise ReportEmailerException(message) from error
+
+    report_path = reports_dir / f"report_{school_id}.pdf"
+
+    emailer.run(
+        school_name=mail_info["school_label"],
+        start_year=year,
+        end_year=year + 1,
+        to_list=mail_info["mailing_list"],
+        cc_to=None,
+        report=report_path,
+        report_name=report_name,
+        save_email=True,
+    )
