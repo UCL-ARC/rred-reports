@@ -1,6 +1,7 @@
 [school]
 template = "template_file_standin.csv"
 n_tables = 7
+dispatch_list = "tests/data/dispatch_list_single_test_school.xlsx"
 
 ### The below aren't yet implemented and just contain placeholder values!
 [centre]

@@ -135,8 +135,9 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 def send_school(
     year: int,
     id_list: Optional[list[str]] = None,
-    attachment: str = "RRED_report.pdf",
+    attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
+    top_level_dir: Optional[Path] = None,
 ):
     """Send reports to school contacts via RRED school ID
 
@@ -144,11 +145,15 @@ def send_school(
         year (int): Report start year
         id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
         attachment (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
+        top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
+            data can be found. Defaults to None.
     """
     config = get_config(config_file)
-    dispatch_list = config["dispatch_list"]
+    dispatch_list = Path(config["school"]["dispatch_list"]).resolve()
 
-    top_level_dir = Path(__file__).resolve().parents[6]
+    if top_level_dir is not None:
+        top_level_dir = Path(__file__).resolve().parents[6]
+
     if id_list is None:
         id_list = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
@@ -156,7 +161,7 @@ def send_school(
             id_list.append(report_path.stem.split("_")[-1])
 
     for school_id in id_list:
-        school_mailer(school_id, dispatch_list, year, report_name=attachment)
+        school_mailer(school_id, dispatch_list, year, report_name=attachment_name)
 
 
 @app.callback()

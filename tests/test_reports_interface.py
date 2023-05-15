@@ -5,7 +5,7 @@ import pytest
 import tomli
 
 from rred_reports import get_config
-from rred_reports.reports.interface import ReportType, convert, create, generate, validate_data_sources
+from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
 
 
 def test_report_type_enum():
@@ -122,3 +122,13 @@ def test_create(mocker):
 
     generate_patch.assert_called_once()
     convert_patch.assert_called_once()
+
+
+def test_send_school(mocker, temp_data_directories):
+    school_mailer = mocker.patch("rred_reports.reports.interface.school_mailer")
+    top_level_dir = temp_data_directories["top_level"]
+    test_config_file = Path("tests/data/report_config.toml")
+
+    id_list = ["AAAAA"]
+    send_school(2021, id_list, attachment_name="test.pdf", config_file=test_config_file, top_level_dir=top_level_dir)
+    school_mailer.assert_called_once()
