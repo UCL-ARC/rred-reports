@@ -223,13 +223,23 @@ class ReportEmailer:
         return self.__class__.send_email(email, save=save_email)
 
 
-def rred_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str = "RRED_report.pdf"):
+def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str):
     """Wrapper mailing function
 
     Args:
         school_id (str): School ID
         dispatch_list (Path): Path to dispatch list
+
+    Args:
+        school_id (str): School ID
+        dispatch_list (Path): Path to dispatch list
+        year (int): Starting year of report coverage
+        report_name (str, optional): Name of attached file. Defaults to "RRED_report.pdf".
+
+    Raises:
+        ReportEmailerException: Exception raised if report directory does not exist.
     """
+
     mail_info = get_mailing_info(school_id, dispatch_list)
     emailer = ReportEmailer()
     reports_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
