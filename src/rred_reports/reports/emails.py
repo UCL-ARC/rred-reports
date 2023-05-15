@@ -223,7 +223,7 @@ class ReportEmailer:
         return self.__class__.send_email(email, save=save_email)
 
 
-def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str):
+def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str, reports_dir: Path = None):
     """Wrapper mailing function
 
     Args:
@@ -242,7 +242,9 @@ def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: s
 
     mail_info = get_mailing_info(school_id, dispatch_list)
     emailer = ReportEmailer()
-    reports_dir = Path(__file__).resolve().parents[3] / "output" / "reports" / str(year) / "schools"
+
+    if reports_dir is None:
+        reports_dir = Path(__file__).resolve().parents[6] / "output" / "reports" / str(year) / "schools"
 
     try:
         assert reports_dir.exists()

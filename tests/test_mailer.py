@@ -1,8 +1,10 @@
+from pathlib import Path
+
 import pytest
 from exchangelib import Message
 
 from rred_reports.reports.auth import RREDAuthenticator
-from rred_reports.reports.emails import EmailContent, ReportEmailer, ReportEmailerException
+from rred_reports.reports.emails import EmailContent, ReportEmailer, ReportEmailerException, school_mailer
 
 
 def test_build_email_with_report(mock_ews_account, template_report_path):
@@ -131,3 +133,29 @@ def test_custom_report_emailer_exception():
     exception = ReportEmailerException(test_message)
 
     assert repr(exception) == test_message
+
+
+def test_school_mailer_success(mocker, dispatch_list):
+    runner = mocker.patch.object(ReportEmailer, "run")
+    school_id = "AAAAA"
+    year = 2021
+    report_name = "test_report_name.pdf"
+
+    reports_dir = Path(__file__).resolve().parents[0] / "data" / "output" / "reports" / "2021" / "schools"
+
+    school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
+
+    runner.assert_called_once()
+
+
+def test_school_mailer_failure(dispatch_list):
+    school_id = "AAAAA"
+    year = 2021
+    report_name = "test_report_name.pdf"
+
+    reports_dir = Path(__file__).resolve().parents[0] / "data" / "nothing"
+
+    with pytest.raises(ReportEmailerException) as error:
+        school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
+
+    assert "not found" in error.value.message
