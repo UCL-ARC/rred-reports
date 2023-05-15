@@ -93,7 +93,7 @@ def test_generate_school_reports(mocker, temp_data_directories: dict):
     test_config_file = Path("tests/data/report_config.toml")
 
     result = generate(ReportType("school"), 2099, config_file=test_config_file, top_level_dir=top_level_dir)
-    assert "output/reports/2099/schools" in str(result)
+    assert "output/reports/2099/schools" in "/".join(result.parts)
 
 
 def test_convert(mocker, temp_out_dir: Path):
