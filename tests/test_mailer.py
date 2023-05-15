@@ -5,7 +5,7 @@ from rred_reports.reports.auth import RREDAuthenticator
 from rred_reports.reports.emails import EmailContent, ReportEmailer, ReportEmailerException
 
 
-def test_build_email_with_report(mock_ews_account, template_report_bytes):
+def test_build_email_with_report(mock_ews_account, template_report_path):
     report_emailer = ReportEmailer()
 
     mail_content = EmailContent(
@@ -14,15 +14,15 @@ def test_build_email_with_report(mock_ews_account, template_report_bytes):
         cc_recipients=None,
         subject="Test",
         body="Test",
-        attachment=template_report_bytes,
-        attachment_filename="test_report.docx",
+        attachment_path=template_report_path,
+        attachment_name="test_report.pdf",
     )
 
     test_email = report_emailer.build_email(mail_content)
 
     assert mail_content.subject == test_email.subject
     assert mail_content.recipients[0] == test_email.to_recipients[0].email_address
-    assert mail_content.attachment_filename == test_email.attachments[0].name
+    assert mail_content.attachment_name == test_email.attachments[0].name
 
 
 def test_build_email_without_report(mock_ews_account):
@@ -34,8 +34,8 @@ def test_build_email_without_report(mock_ews_account):
         cc_recipients=None,
         subject="Test",
         body="Test",
-        attachment=None,
-        attachment_filename="test_report.docx",
+        attachment_path=None,
+        attachment_name="test_report.pdf",
     )
 
     test_email = report_emailer.build_email(mail_content)
@@ -58,7 +58,7 @@ def test_send_email_with_save(mocker, mock_message):
     send_and_save_mock.assert_called_once()
 
 
-def test_run_success(mock_ews_account, template_report_bytes, mocker):
+def test_run_success(mock_ews_account, template_report_path, mocker):
     mocker.patch("exchangelib.Message.send")
     mocker.patch.object(RREDAuthenticator, "get_account", return_value=mock_ews_account)
 
@@ -66,7 +66,7 @@ def test_run_success(mock_ews_account, template_report_bytes, mocker):
 
     to_list = ["recipient@domain.com"]
     cc_to = ["recipient-in-cc@domain.com"]
-    report = template_report_bytes
+    report = template_report_path
     school_name = "test_school"
     start_year = 3000
     end_year = 3020
@@ -74,7 +74,7 @@ def test_run_success(mock_ews_account, template_report_bytes, mocker):
     assert output is True
 
 
-def test_run_failure_no_email_saving(mock_ews_account, template_report_bytes, mocker):
+def test_run_failure_no_email_saving(mock_ews_account, template_report_path, mocker):
     mocker.patch.object(Message, "send", side_effect=ReportEmailerException("test exception!"))
     mocker.patch.object(RREDAuthenticator, "get_account", return_value=mock_ews_account)
 
@@ -82,7 +82,7 @@ def test_run_failure_no_email_saving(mock_ews_account, template_report_bytes, mo
 
     to_list = ["recipient@domain.com"]
     cc_to = ["recipient-in-cc@domain.com"]
-    report = template_report_bytes
+    report = template_report_path
     school_name = "test_school"
     start_year = 3000
     end_year = 3020
@@ -91,7 +91,7 @@ def test_run_failure_no_email_saving(mock_ews_account, template_report_bytes, mo
         report_emailer.run(school_name, start_year, end_year, to_list, cc_to, report)
 
 
-def test_run_failure_email_saving(mock_ews_account, template_report_bytes, mocker):
+def test_run_failure_email_saving(mock_ews_account, template_report_path, mocker):
     mocker.patch.object(Message, "send_and_save", side_effect=ReportEmailerException("test exception!"))
     mocker.patch.object(RREDAuthenticator, "get_account", return_value=mock_ews_account)
 
@@ -99,9 +99,8 @@ def test_run_failure_email_saving(mock_ews_account, template_report_bytes, mocke
 
     to_list = ["recipient@domain.com"]
     cc_to = ["recipient-in-cc@domain.com"]
-    report = template_report_bytes
+    report = template_report_path
 
-    report = template_report_bytes
     school_name = "test_school"
     start_year = 3000
     end_year = 3020
