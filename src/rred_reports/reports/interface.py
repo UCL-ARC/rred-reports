@@ -132,7 +132,12 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 
 
 @app.command()
-def send_school(year: int, id_list: Optional[list[str]] = None, attachment: str = "RRED_report.pdf"):
+def send_school(
+    year: int,
+    id_list: Optional[list[str]] = None,
+    attachment: str = "RRED_report.pdf",
+    config_file: Path = "src/rred_reports/reports/report_config.toml",
+):
     """Send reports to school contacts via RRED school ID
 
     Args:
@@ -140,7 +145,7 @@ def send_school(year: int, id_list: Optional[list[str]] = None, attachment: str 
         id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
         attachment (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
     """
-    config = get_config()
+    config = get_config(config_file)
     dispatch_list = config["dispatch_list"]
 
     top_level_dir = Path(__file__).resolve().parents[6]
