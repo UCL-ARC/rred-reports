@@ -93,3 +93,11 @@ def test_concatenate_pdf_reports_failure_empty_file(mocker, template_report_pdf_
         concatenate_pdf_reports(files_to_concat, temp_out_dir)
     expected_error_message = "Concatenation error - empty file included in concatenation"
     assert expected_error_message in error.value.message
+
+
+def test_concatenate_pdf_reports_failure_empty_list_passed(temp_out_dir: Path):
+    files_to_concat = []
+    with pytest.raises(ReportConversionException) as error:
+        concatenate_pdf_reports(files_to_concat, temp_out_dir)
+    expected_error_message = "Concatenation error - no PDFs provided"
+    assert expected_error_message in error.value.message

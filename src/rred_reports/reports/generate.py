@@ -81,7 +81,9 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
         output_file_name (str, optional): Optional output filename. Defaults to "result".
     """
     merger = PdfMerger()
-
+    if len(report_collection) == 0:
+        message = "Concatenation error - no PDFs provided"
+        raise ReportConversionException(message)
     try:
         for pdf in report_collection:
             merger.append(pdf)
