@@ -8,6 +8,7 @@ from loguru import logger
 
 from rred_reports import get_config
 from rred_reports.reports.generate import generate_report_school, convert_single_report, concatenate_pdf_reports
+from rred_reports.reports.emails import school_mailer
 
 app = typer.Typer()
 
@@ -128,6 +129,29 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
     report_dir = generate(level, year, config_file)
 
     convert(report_dir, output)
+
+
+@app.command()
+def send_school(year: int, id_list: Optional[list[str]] = None, attachment: str = "RRED_report.pdf"):
+    """Send reports to school contacts via RRED school ID
+
+    Args:
+        year (int): Report start year
+        id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
+        attachment (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
+    """
+    config = get_config()
+    dispatch_list = config["dispatch_list"]
+
+    top_level_dir = Path(__file__).resolve().parents[6]
+    if id_list is None:
+        id_list = []
+        report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
+        for report_path in report_directory.glob("report_*.pdf"):
+            id_list.append(report_path.stem.split("_")[-1])
+
+    for school_id in id_list:
+        school_mailer(school_id, dispatch_list, year, report_name=attachment)
 
 
 @app.callback()
