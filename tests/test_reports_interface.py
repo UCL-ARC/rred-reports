@@ -25,12 +25,12 @@ def test_validate_data_sources_passes(temp_data_directories: dict):
     data_directory = temp_data_directories["year"]
 
     example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
+    processed_df.to_excel(processed_data_path)
     processed_df.to_csv(template_file_standin_path)
-    validated_data = validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+    validated_data = validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
     assert isinstance(validated_data, dict)
     assert len(validated_data) == 3
 
@@ -42,9 +42,10 @@ def test_validate_data_sources_fails_processed_data_missing(temp_data_directorie
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     processed_df = pd.DataFrame.from_dict([example_processed_data])
     processed_df.to_csv(template_file_standin_path)
+    missing_processed_data = top_level_dir / "nope.xlsx"
 
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, missing_processed_data, top_level_dir=top_level_dir)
 
 
 def test_validate_data_sources_fails_template_file_missing(temp_data_directories: dict):
@@ -52,12 +53,12 @@ def test_validate_data_sources_fails_template_file_missing(temp_data_directories
     data_directory = temp_data_directories["year"]
 
     example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
+    processed_df.to_excel(processed_data_path)
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
 
 
 def test_get_config_success(temp_config_file: Path):
@@ -82,13 +83,12 @@ def test_get_config_failure():
 def test_generate_school_reports(mocker, temp_data_directories: dict, data_path):
     mocker.patch("rred_reports.reports.interface.generate_report_school")
     top_level_dir = temp_data_directories["top_level"]
-    data_directory = temp_data_directories["year"]
 
     example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = top_level_dir / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
+    processed_df.to_excel(processed_data_path)
     processed_df.to_csv(template_file_standin_path)
     test_config_file = data_path / "report_config.toml"
 

@@ -24,12 +24,13 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
         year (int): Year to process
         template_file (Path): Template file
+        masterfile_path (Path): Masterfile file
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
 
@@ -43,14 +44,14 @@ def validate_data_sources(year: int, template_file: Path, top_level_dir: Optiona
     if top_level_dir is None:
         top_level_dir = Path(__file__).resolve().parents[6]
 
-    data_path = top_level_dir / "output" / "processed" / str(year)
+    data_path = top_level_dir / masterfile_path
     template_file_path = top_level_dir / template_file
     output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     try:
-        processed_data = pd.read_csv(data_path / "processed_data.csv")
+        processed_data = pd.read_excel(data_path)
     except FileNotFoundError as processed_data_missing_error:
-        logger.error(f'No processed data file found at {data_path / "processed_data.csv"}. Exiting.')
+        logger.error(f"No processed data file found at {data_path}. Exiting.")
         raise processed_data_missing_error
 
     try:
@@ -84,7 +85,8 @@ def generate(
     config = get_config(config_file)
 
     template_file_path = config[level.value]["template"]
-    validated_data = validate_data_sources(year, template_file_path, top_level_dir=top_level_dir)
+    masterfile_path = config[level.value]["masterfile"]
+    validated_data = validate_data_sources(year, template_file_path, masterfile_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
     if level.value.lower() == "school":

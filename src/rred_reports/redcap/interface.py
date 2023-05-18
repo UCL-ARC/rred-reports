@@ -45,8 +45,8 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
         f"{year -1}-{str(year)[-2:]}",
     )
     long_data = parser.read_redcap_data(current_year, previous_year)
-    output_file = output_dir / f"masterfile_{current_period}.csv"
-    long_data.to_csv(output_file, index=False)
+    output_file = output_dir / f"masterfile_{current_period}.xlsx"
+    long_data.to_excel(output_file, index=False)
     typer.echo(f"Output written to: {output_file}")
 
 

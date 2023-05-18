@@ -43,5 +43,5 @@ def test_cli_writes_file(temp_out_dir, set_top_level_dir):
         tomli_w.dump(test_config, handle)
     extract(2021, config_file=config_path, output_dir=temp_out_dir)
 
-    expected_file = temp_out_dir / "masterfile_2021-22.csv"
+    expected_file = temp_out_dir / "masterfile_2021-22.xlsx"
     assert expected_file.exists()
