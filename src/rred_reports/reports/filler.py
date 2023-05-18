@@ -105,7 +105,7 @@ class TemplateFiller:
         updated_tables = []
         for table, header_rows in zip(self.tables, self.header_rows):
             if header_rows != 1:
-                logger.debug("Working out duplicate columns with multiple header rows is very fraught, should correct template")
+                logger.trace("Working out duplicate columns with multiple header rows is very fraught, should correct template")
                 updated_tables.append(table)
                 continue
 
