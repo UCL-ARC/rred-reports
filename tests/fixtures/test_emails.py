@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from exchangelib import Account
 
@@ -35,6 +33,6 @@ def mock_mailing_info(mocker):
 
 
 @pytest.fixture()
-def dispatch_list():
-    test_config_file = Path("tests/data/report_config.toml")
-    return Path(get_config(test_config_file)["school"]["dispatch_list"]).resolve()
+def dispatch_list(data_path, repo_root):
+    test_config_file = data_path / "report_config.toml"
+    return repo_root / get_config(test_config_file)["school"]["dispatch_list"]

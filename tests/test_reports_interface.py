@@ -79,7 +79,7 @@ def test_get_config_failure():
         get_config(incorrect_config_path)
 
 
-def test_generate_school_reports(mocker, temp_data_directories: dict):
+def test_generate_school_reports(mocker, temp_data_directories: dict, data_path):
     mocker.patch("rred_reports.reports.interface.generate_report_school")
     top_level_dir = temp_data_directories["top_level"]
     data_directory = temp_data_directories["year"]
@@ -90,7 +90,7 @@ def test_generate_school_reports(mocker, temp_data_directories: dict):
     processed_df = pd.DataFrame.from_dict([example_processed_data])
     processed_df.to_csv(processed_data_path)
     processed_df.to_csv(template_file_standin_path)
-    test_config_file = Path("tests/data/report_config.toml")
+    test_config_file = data_path / "report_config.toml"
 
     result = generate(ReportType("school"), 2099, config_file=test_config_file, top_level_dir=top_level_dir)
     assert "output/reports/2099/schools" in "/".join(result.parts)
@@ -124,10 +124,10 @@ def test_create(mocker):
     convert_patch.assert_called_once()
 
 
-def test_send_school(mocker, temp_data_directories):
+def test_send_school(mocker, temp_data_directories, data_path):
     school_mailer = mocker.patch("rred_reports.reports.interface.school_mailer")
     top_level_dir = temp_data_directories["top_level"]
-    test_config_file = Path("tests/data/report_config.toml")
+    test_config_file = data_path / "report_config.toml"
 
     id_list = ["AAAAA"]
     send_school(2021, id_list, attachment_name="test.pdf", config_file=test_config_file, top_level_dir=top_level_dir)

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from exchangelib import Message
 
@@ -135,25 +133,25 @@ def test_custom_report_emailer_exception():
     assert repr(exception) == test_message
 
 
-def test_school_mailer_success(mocker, dispatch_list):
+def test_school_mailer_success(mocker, data_path, dispatch_list):
     runner = mocker.patch.object(ReportEmailer, "run")
     school_id = "AAAAA"
     year = 2021
     report_name = "test_report_name.pdf"
 
-    reports_dir = Path(__file__).resolve().parents[0] / "data" / "output" / "reports" / "2021" / "schools"
+    reports_dir = data_path / "output" / "reports" / "2021" / "schools"
 
     school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
 
     runner.assert_called_once()
 
 
-def test_school_mailer_failure(dispatch_list):
+def test_school_mailer_failure(data_path, dispatch_list):
     school_id = "AAAAA"
     year = 2021
     report_name = "test_report_name.pdf"
 
-    reports_dir = Path(__file__).resolve().parents[0] / "data" / "nothing"
+    reports_dir = data_path / "nothing"
 
     with pytest.raises(ReportEmailerException) as error:
         school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
