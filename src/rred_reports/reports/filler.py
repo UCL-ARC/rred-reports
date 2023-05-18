@@ -24,7 +24,7 @@ class TemplateFiller:
     Provides save/loading, table modification and input verification.
     """
 
-    def __init__(self, template_path: Path, header_rows: list[int], table_text_style="Table Note", table_grid_style="Table Grid"):
+    def __init__(self, template_path: Path, header_rows: list[int], table_text_style="Table Note", table_grid_style="Grid Table 1 Light"):
         """
         Create a template filler, clean up repeated columns for tables which have a single header row
 
