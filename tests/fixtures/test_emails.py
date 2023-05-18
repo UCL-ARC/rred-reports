@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import pytest
 from exchangelib import Account
+
+from rred_reports import get_config
 
 
 @pytest.fixture()
@@ -17,3 +21,20 @@ def mock_message(mocker):
     mocker.patch("exchangelib.Message", new=message_mock)
 
     return message_mock
+
+
+@pytest.fixture()
+def mock_mailing_info(mocker):
+    info_mock = mocker.MagicMock(name="info_mock")
+
+    mocker.patch("rred_reports.dispatch_list.get_mailing_info", new=info_mock)
+
+    info_mock.return_value = {"rred_school_id": "AAAAA", "school_label": "Test School", "mailing_list": "teacher1@null.com"}
+
+    return info_mock
+
+
+@pytest.fixture()
+def dispatch_list():
+    test_config_file = Path("tests/data/report_config.toml")
+    return Path(get_config(test_config_file)["school"]["dispatch_list"]).resolve()

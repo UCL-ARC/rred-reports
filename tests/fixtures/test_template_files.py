@@ -43,6 +43,14 @@ def template_report_bytes(template_report_path: Path) -> bytes:
 
 
 @pytest.fixture()
+def template_report_pdf_path(data_path) -> Path:
+    """
+    Returns a Path object representing a test report template PDF file
+    """
+    return data_path / "report_template_pdf.pdf"
+
+
+@pytest.fixture()
 def template_filler(data_path) -> Path:
     """
     Returns a TemplateFiller object to avoid boilerplate in tests
