@@ -153,3 +153,4 @@ output/**
 input/dispatch_lists/*.xls*
 
 **/.DS_Store
+**/~$*.docx
