@@ -148,8 +148,10 @@ class TemplateFiller:
             for j in range(data.shape[-1]):
                 current_cell = table.cell(i + header_rows, j)
                 current_cell.text = str(data.values[i, j])
-                # manually set the style of the new text
-                current_cell.paragraphs[0].style = self.table_text_style
+                # manually set the style of the new text, and don't break table over multiple lines
+                current_paragraph = current_cell.paragraphs[0]
+                current_paragraph.style = self.table_text_style
+                current_paragraph.paragraph_format.keep_with_next = True
 
         # override the style to deal with new rows sometimes not adding borders
         table.style = self.table_grid_style
