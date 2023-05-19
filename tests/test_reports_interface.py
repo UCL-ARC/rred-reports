@@ -97,7 +97,7 @@ def test_generate_school_reports(mocker, temp_data_directories: dict, data_path)
 
 
 def test_convert(mocker, temp_out_dir: Path):
-    convert_single_patch = mocker.patch("rred_reports.reports.interface.convert_single_report")
+    convert_single_patch = mocker.patch("rred_reports.reports.interface.convert_all_reports")
     concatenate_patch = mocker.patch("rred_reports.reports.interface.concatenate_pdf_reports")
 
     # Create a single docx file in a temporary test directory

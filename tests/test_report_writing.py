@@ -30,7 +30,7 @@ def test_school_tables_filled(data_path: Path, templates_dir: Path, temp_out_dir
     school_data = school_filter(testing_df, "RRS2030220")
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030220", 2022, output_doc)
+    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", 2022, output_doc)
 
     assert populated_template.verify_tables_filled()
     assert output_doc.exists()
@@ -47,7 +47,7 @@ def test_school_name_replaced_in_paragraphs(data_path: Path, templates_dir: Path
     school_data = school_filter(testing_df, "RRS2030250")
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", "RRS2030250", 2022, output_doc)
+    populated_template = populate_school_data(school_data, templates_dir / "2021/2021-22_template.docx", 2022, output_doc)
 
     output_paragraphs = []
     for paragraph in populated_template.doc.paragraphs:

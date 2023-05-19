@@ -26,7 +26,7 @@ def test_generate_report_school(temp_data_directories, data_path, mocker):
     }
     test_dataframe = pd.DataFrame.from_dict(example_processed_data)
 
-    generate_report_school(test_dataframe, template_file_path, output_dir)
+    generate_report_school(test_dataframe, template_file_path, output_dir, 2021)
     assert populate_school_data_mock.call_count == len(example_processed_data["school_id"])
 
 
@@ -34,7 +34,7 @@ def test_convert_single_report_success(mocker, template_report_path: Path, temp_
     output_file_path = temp_out_dir / "converted_report.pdf"
     pdf_conversion_mock = mocker.patch("rred_reports.reports.generate.convert")
     pdf_validity_check_mock = mocker.patch("rred_reports.reports.generate.validate_pdf")
-    convert_all_reports(template_report_path, output_file_path)
+    convert_all_reports([template_report_path], [output_file_path])
     pdf_conversion_mock.assert_called_once()
     pdf_validity_check_mock.assert_called_once()
 
