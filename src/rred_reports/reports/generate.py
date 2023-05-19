@@ -41,7 +41,7 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
             schools_with_no_data.append(school_id)
             continue
 
-        output_doc = output_dir / f"{str(school_id)}.docx"
+        output_doc = output_dir / f"report_{str(school_id)}.docx"
         populate_school_data(school_data, template_file, report_year, output_path=output_doc)
     if schools_with_no_data:
         logger.warning(
@@ -97,7 +97,7 @@ def convert_all_reports(docx_report_paths: list[Path], output_pdf_paths: list[Pa
             raise ReportConversionException(message)
 
 
-def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, output_file_name: str = "result") -> None:
+def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, output_file_name: str = "uat_combined") -> None:
     """Concatenate PDF reports and write output to file as a single PDF
 
     Args:
@@ -126,4 +126,4 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
     output_path = output_dir / f"{output_file_name}.pdf"
     merger.write(output_path)
     merger.close()
-    logger.success("UAT pdf written to {path}!", path=output_path)
+    logger.success("UAT pdf written to {path} !", path=output_path)
