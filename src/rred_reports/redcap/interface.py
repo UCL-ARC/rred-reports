@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import typer
-from loguru import logger
 
 from rred_reports import get_config
 from rred_reports.redcap.main import ExtractInput, RedcapReader
@@ -30,8 +29,6 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
     current_period = f"{year}-{end_year}"
 
     dispatch_path = top_level_dir / config["dispatch_list"]
-    logger.debug(top_level_dir)
-    logger.debug(list(top_level_dir.glob("*")))
 
     parser = RedcapReader(dispatch_path)
     current_year = ExtractInput(
