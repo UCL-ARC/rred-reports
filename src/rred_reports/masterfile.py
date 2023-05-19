@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
+from loguru import logger
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
@@ -163,3 +164,26 @@ def masterfile_columns():
     assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
 
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
+
+
+def read_and_sort_masterfile(data_path: Path):
+    """
+    Reads masterfile from path and sort by school, year range and the pupil entry number
+
+    Args:
+        data_path (Path): path to masterfile
+    Returns:
+        pd.DataFrame: masterfile
+    Raises:
+        FileNotFoundError if the masterfile doesn't exist
+    """
+    try:
+        masterfile_data = pd.read_excel(data_path)
+    except FileNotFoundError as processed_data_missing_error:
+        logger.error(f"No processed data file found at {data_path}. Exiting.")
+        raise processed_data_missing_error
+    processed_data = masterfile_data.copy()
+    processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
+    processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
+    processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
+    return processed_data
