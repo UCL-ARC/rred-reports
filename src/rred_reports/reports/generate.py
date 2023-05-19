@@ -123,5 +123,7 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
         message = "Concatenation error - empty file included in concatenation"
         raise ReportConversionException(message) from error
 
-    merger.write(output_dir / f"{output_file_name}.pdf")
+    output_path = output_dir / f"{output_file_name}.pdf"
+    merger.write(output_path)
     merger.close()
+    logger.success("UAT pdf written to {path}!", path=output_path)
