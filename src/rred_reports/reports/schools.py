@@ -70,8 +70,8 @@ table_six_columns = [
 ]
 
 
-def set_dates(report_year):
-    """Function to set the start and end dates for reporting
+def trial_period_dates(report_year):
+    """Function to get the start and end dates for reporting
 
     Args:
         report_year (int): Year of report end
@@ -79,36 +79,34 @@ def set_dates(report_year):
     Returns: start_date and end_date in datetime format
 
     """
-    start_date = datetime(report_year - 1, 7, 31)
-    end_date = datetime(report_year, 8, 1)
+    start_date = datetime(report_year, 7, 31)
+    end_date = datetime(report_year + 1, 8, 1)
     return start_date, end_date
 
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
-    """Function to filter out the Teacher Leaders and by school
+    """Function to filter by school
 
     Args:
         whole_dataframe (pd.DataFrame)
         school_id (string): School ID
 
-    Returns: pd.DataFrame filtered to show only RR teachers data per school
+    Returns: pd.DataFrame filtered to show data per school
 
     """
-    teacher_filtered = whole_dataframe[(whole_dataframe["reg_rr_title"].isin(["RR Teacher + Support Role", "RR Teacher + Class Leader"]))]
-    return teacher_filtered[teacher_filtered.school_id == school_id].copy()
+    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
 
 
-# specific filter for each table
-def filter_for_one_two_five(school_dataframe: pd.DataFrame, report_year):
-    """Filter for table one, two and five: <entry_date> OR <exit_date> is after 31/7 and before 1/8
+def filter_by_entry_and_exit(school_dataframe: pd.DataFrame, report_year):
+    """Filter for tables: summary, table one, two and five: <entry_date> OR <exit_date> is after 31/7 and before 1/8
 
     Args:
-        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        school_dataframe (pd.DataFrame): pd.DataFrame filtered with school_filter()
         report_year (int): Year of report end
 
     Returns: school_filter(pd.DataFrame) filtered by the reporting year
     """
-    report_start, report_end = set_dates(report_year)
+    report_start, report_end = trial_period_dates(report_year)
 
     return school_dataframe.loc[
         ((school_dataframe["entry_date"] > report_start) & (school_dataframe["entry_date"] < report_end))
@@ -121,12 +119,12 @@ def filter_for_three_four(school_dataframe: pd.DataFrame, report_year):
     ONLY on data for pupils with 'Discontinued' OR 'Referred to school' in the <exit_outcome> column
 
     Args:
-        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        school_dataframe (pd.DataFrame): pd.DataFrame filtered with school_filter()
         report_year (int): Year of report end
 
     Returns: school_filter(pd.DataFrame) filtered by exit_outcome and exit_date
     """
-    report_start, report_end = set_dates(report_year)
+    report_start, report_end = trial_period_dates(report_year)
 
     outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
 
@@ -138,12 +136,12 @@ def filter_six(school_dataframe: pd.DataFrame, report_year):
     ONLY on data for pupils with 'Discontinued' OR 'Referred to school'
 
     Args:
-        school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        school_dataframe (pd.DataFrame): pd.DataFrame filtered with school_filter()
         report_year (int): Year of report end
 
     Returns: school_filter(pd.DataFrame) filtered by month3_testdate and month6_testdate"""
 
-    report_start, report_end = set_dates(report_year)
+    report_start, report_end = trial_period_dates(report_year)
 
     outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
 
@@ -153,10 +151,11 @@ def filter_six(school_dataframe: pd.DataFrame, report_year):
     ]
 
 
-def summary_table(school_df: pd.DataFrame):
+def summary_table(school_df: pd.DataFrame, report_year: int):
     """
     Args:
         school_df (pd.DataFrame): pd.DataFrame filtered with school_filter()
+        report_year (int): starting year for the report
 
     Returns:
         table with the following columns
@@ -171,20 +170,13 @@ def summary_table(school_df: pd.DataFrame):
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
-    def filter_summary_table(school_df):
-        """Filter for summary table
-
-        Args: school_filter (pd.DataFrame)
-        """
-        return school_df
-
     def get_outcome_from_summary(school_df, outcome_type):
         try:
             return school_df["exit_outcome"].value_counts()[outcome_type]
         except KeyError:
             return 0
 
-    filtered = filter_summary_table(school_df)
+    filtered = filter_by_entry_and_exit(school_df, report_year)
     filtered_summary_table = filtered[columns_used]
 
     return pd.DataFrame(
@@ -216,11 +208,11 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
     school_df["total_lost_lessons"] = school_df[lost_lesson_cols].sum(axis=1)
 
     columns_and_filters = (
-        (table_one_columns, filter_for_one_two_five),
-        (table_two_columns, filter_for_one_two_five),
+        (table_one_columns, filter_by_entry_and_exit),
+        (table_two_columns, filter_by_entry_and_exit),
         (table_three_columns, filter_for_three_four),
         (table_four_columns, filter_for_three_four),
-        (table_five_columns, filter_for_one_two_five),
+        (table_five_columns, filter_by_entry_and_exit),
         (table_six_columns, filter_six),
     )
 
@@ -228,7 +220,7 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
 
     # adding in summary table first
     template_filler = TemplateFiller(template_path, header_rows)
-    add_in_summary_table = summary_table(school_df)
+    add_in_summary_table = summary_table(school_df, report_year)
     template_filler.populate_table(0, add_in_summary_table)
 
     # now adding other tables

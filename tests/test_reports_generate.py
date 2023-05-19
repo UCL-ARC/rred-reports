@@ -66,7 +66,7 @@ def test_concatenate_pdf_reports_success(template_report_pdf_path: Path, temp_ou
     # Original template file is 2 pages long
     files_to_concat = [template_report_pdf_path] * 5
     concatenate_pdf_reports(files_to_concat, temp_out_dir)
-    expected_output_file_path = temp_out_dir / "result.pdf"
+    expected_output_file_path = temp_out_dir / "uat_combined.pdf"
     assert (expected_output_file_path).is_file()
 
     # Expect 5 copies of the original file to contain 10 pages

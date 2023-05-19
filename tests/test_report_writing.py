@@ -4,7 +4,7 @@ import pytest
 
 from rred_reports.masterfile import join_masterfile_dfs, parse_masterfile
 from rred_reports.reports.schools import (
-    filter_for_one_two_five,
+    filter_by_entry_and_exit,
     filter_for_three_four,
     filter_six,
     populate_school_data,
@@ -79,7 +79,7 @@ def test_first_filter_kept(example_school_data, pupil_id):
     Then this template should be filled with the following:
     Table 1, 2, 5: test_1_2021-22, test_3_2021-22, test_4_2021-22, test_5_2021-22, test_6_2021-22
     """
-    test_filter_for_one_two_five = filter_for_one_two_five(example_school_data, 2022)
+    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2022)
     # first filter test
     assert (~example_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
     assert (example_school_data["entry_date"] < "2022-8-1").all()
@@ -99,7 +99,7 @@ def test_first_filter_removed(example_school_data):
     When the template is populated with redcap data
     Then this template should not have pupil test_2_2021-22
     """
-    test_filter_for_one_two_five = filter_for_one_two_five(example_school_data, 2022)
+    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2022)
     # test_2_2021-22, Discontinued, not within date boundary, month3 testdate out of range, no month6. Should not be in any tables.
     pupil_2 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test_2_2021-22"]
     assert ((~pupil_2["entry_date"] < "2022-8-1") | (~pupil_2["entry_date"] > "2021-7-31")).all()

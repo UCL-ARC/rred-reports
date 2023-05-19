@@ -29,7 +29,7 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
         template_file (Path): The template file to be used
         output_dir (Path): Output directory for saved files
     """
-    school_ids: list[str] = processed_data.loc[:, "school_id"].unique().tolist()
+    school_ids: list[str] = processed_data.loc[:, "school_id"].sort_values(ascending=True).unique().tolist()
     logger.info("Generating reports for {total_schools} schools", total_schools=len(school_ids))
     schools_with_no_data = []
 

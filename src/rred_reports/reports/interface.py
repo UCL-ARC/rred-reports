@@ -125,7 +125,7 @@ def convert(report_dir: Path, output: str = "result") -> Path:
 
 
 @app.command()
-def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", output: str = "result"):
+def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", output: str = "uat_combined"):
     """Generate reports at the level specified, convert to PDF and concatenate
 
     Args:
