@@ -183,6 +183,12 @@ def read_and_sort_masterfile(data_path: Path):
         logger.error(f"No processed data file found at {data_path}. Exiting.")
         raise processed_data_missing_error
     processed_data = masterfile_data.copy()
+    # convert to dates
+    date_cols = [col for col in processed_data if col.endswith("date")]
+    date_cols.append("entry_dob")
+    dates = processed_data[date_cols].applymap(pd.to_datetime, format="%Y-%m-%d", errors="coerce")
+    # sort data
+    processed_data[date_cols] = dates
     processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
     processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
     processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
