@@ -103,7 +103,7 @@ def concatenate_pdf_reports(report_collection: list[Path], output_dir: Path, out
     Args:
         report_collection (list[Path]): List of individual PDFs
         output_dir (Path): Output result file directory
-        output_file_name (str, optional): Optional output filename. Defaults to "result".
+        output_file_name (str, optional): Optional output filename
     """
     logger.info("Combining PDFs for user acceptance")
     merger = PdfMerger()
