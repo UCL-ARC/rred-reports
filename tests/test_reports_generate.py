@@ -23,10 +23,11 @@ def test_generate_report_school(temp_data_directories, data_path, mocker):
     example_processed_data = {
         "school_id": [1, 2, 3, 4],
         "reg_rr_title": ["RR Teacher + Support Role", "RR Teacher + Class Leader", "RR Teacher + Support Role", "RR Teacher + Class Leader"],
+        "rrcp_school": [f"RRS{x}" for x in range(4)],
     }
-    test_dataframe = pd.DataFrame.from_dict(example_processed_data)
+    example_masterfile_df = pd.DataFrame.from_dict(example_processed_data)
 
-    generate_report_school(test_dataframe, template_file_path, output_dir, 2021)
+    generate_report_school(example_masterfile_df, template_file_path, output_dir, 2021)
     assert populate_school_data_mock.call_count == len(example_processed_data["school_id"])
 
 
