@@ -85,16 +85,17 @@ def trial_period_dates(report_year):
 
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id):
-    """Function to filter by school
+    """Function to filter out the Teacher Leaders and by school
 
     Args:
         whole_dataframe (pd.DataFrame)
         school_id (string): School ID
 
-    Returns: pd.DataFrame filtered to show data per school
+    Returns: pd.DataFrame filtered to show only RR teachers data per school
 
     """
-    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
+    teacher_filtered = whole_dataframe[~whole_dataframe["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])]
+    return teacher_filtered[teacher_filtered.school_id == school_id].copy()
 
 
 def filter_by_entry_and_exit(school_dataframe: pd.DataFrame, report_year):
