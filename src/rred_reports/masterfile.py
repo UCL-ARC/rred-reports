@@ -166,9 +166,9 @@ def masterfile_columns():
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
 
 
-def read_and_sort_masterfile(data_path: Path):
+def read_and_process_masterfile(data_path: Path):
     """
-    Reads masterfile from path and sort by school, year range and the pupil entry number
+    Reads masterfile from path, adds in str representation of dates and sort by school, year range and the pupil entry number
 
     Args:
         data_path (Path): path to masterfile
@@ -183,6 +183,13 @@ def read_and_sort_masterfile(data_path: Path):
         logger.error(f"No processed data file found at {data_path}. Exiting.")
         raise processed_data_missing_error
     processed_data = join_masterfile_dfs(masterfile_data)
+
+    date_cols = [x for x in processed_data.columns if x.endswith("_date")]
+    date_string_representation = processed_data[date_cols].applymap(lambda x: x.strftime("%d/%m/%Y") if not pd.isnull(x) else "NA")
+    date_str_cols = [f"{x}_str" for x in date_cols]
+
+    processed_data[date_str_cols] = date_string_representation
+
     # sort data
     processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
     processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)

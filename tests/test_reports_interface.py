@@ -5,18 +5,23 @@ import pytest
 import tomli
 
 from rred_reports import get_config
+from rred_reports.masterfile import masterfile_columns
 from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
 
-example_processed_data = pd.DataFrame.from_dict(
-    {
-        "school_id": [1, 2, 3, 4],
-        "reg_rr_title": ["RR Teacher + Support Role", "RR Teacher + Class Leader", "RR Teacher + Support Role", "RR Teacher + Class Leader"],
-        "rrcp_school": [f"RRS{x}" for x in range(4)],
-        "pupil_no": [f"{x + 1}_2021-22" for x in range(4)],
-        "entry_dob": ["2017-01-01" for _ in range(4)],
-        "entry_date": ["2021-09-01" for _ in range(4)],
-    }
-)
+example_data_dict = {column: list(range(4)) for column in masterfile_columns()}
+
+example_processed_data = pd.DataFrame.from_dict(example_data_dict)
+example_processed_data["reg_rr_title"] = [
+    "RR Teacher + Support Role",
+    "RR Teacher + Class Leader",
+    "RR Teacher + Support Role",
+    "RR Teacher + Class Leader",
+]
+example_processed_data["rrcp_school"] = [f"RRS{x}" for x in range(4)]
+example_processed_data["pupil_no"] = [f"{x + 1}_2021-22" for x in range(4)]
+example_processed_data["entry_dob"] = ["2017-01-01" for _ in range(4)]
+example_processed_data["entry_date"] = ["2021-09-01" for _ in range(4)]
+example_processed_data["exit_date"] = ["2022-06-01" for _ in range(4)]
 
 
 def test_report_type_enum():
@@ -37,7 +42,7 @@ def test_validate_data_sources_passes(temp_data_directories: dict):
 
     processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    example_processed_data.to_excel(processed_data_path)
+    example_processed_data.to_excel(processed_data_path, index=False)
     example_processed_data.to_csv(template_file_standin_path)
     validated_data = validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
     assert isinstance(validated_data, dict)
@@ -61,7 +66,7 @@ def test_validate_data_sources_fails_template_file_missing(temp_data_directories
 
     processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    example_processed_data.to_excel(processed_data_path)
+    example_processed_data.to_excel(processed_data_path, index=False)
     with pytest.raises(FileNotFoundError):
         validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
 
@@ -91,7 +96,7 @@ def test_generate_school_reports(mocker, temp_data_directories: dict, data_path)
 
     processed_data_path = top_level_dir / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    example_processed_data.to_excel(processed_data_path)
+    example_processed_data.to_excel(processed_data_path, index=False)
     example_processed_data.to_csv(template_file_standin_path)
     test_config_file = data_path / "report_config.toml"
 

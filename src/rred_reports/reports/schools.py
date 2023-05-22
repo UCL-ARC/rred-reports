@@ -20,7 +20,7 @@ table_one_columns = [
 
 table_two_columns = ["rred_user_id", "pupil_no", "entry_sen_status", "exit_outcome"]
 
-table_three_columns = ["rred_user_id", "pupil_no", "entry_date", "exit_date", "exit_num_weeks", "exit_num_lessons", "exit_outcome"]
+table_three_columns = ["rred_user_id", "pupil_no", "entry_date_str", "exit_date_str", "exit_num_weeks", "exit_num_lessons", "exit_outcome"]
 
 table_four_columns = [
     "rred_user_id",

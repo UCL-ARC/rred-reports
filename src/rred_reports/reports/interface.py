@@ -6,7 +6,7 @@ import typer
 from loguru import logger
 
 from rred_reports import get_config
-from rred_reports.masterfile import read_and_sort_masterfile
+from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
 
@@ -50,7 +50,7 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
     template_file_path = top_level_dir / template_file
     output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
-    processed_data = read_and_sort_masterfile(data_path)
+    processed_data = read_and_process_masterfile(data_path)
 
     try:
         assert template_file_path.is_file()
