@@ -109,7 +109,7 @@ def convert(report_dir: Path, output: str = "result") -> Path:
     logger.info("Converting docx reports to pdf reports. ")
     report_paths = list(report_dir.glob("*.docx"))
     pdf_paths = []
-    for report_path in report_paths:
+    for report_path in sorted(report_paths):
         output_path = report_path.with_suffix(".pdf")
         pdf_paths.append(output_path)
 
