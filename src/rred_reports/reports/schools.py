@@ -206,7 +206,7 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
 
     # adding a column for table four
     lost_lesson_cols = [col for col in school_df if col.startswith("exit_lessons_missed")]
-    school_df["total_lost_lessons"] = school_df[lost_lesson_cols].sum(axis=1)
+    school_df["total_lost_lessons"] = school_df[lost_lesson_cols].sum(axis=1).astype(int)
 
     columns_and_filters = (
         (table_one_columns, filter_by_entry_and_exit),
