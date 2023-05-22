@@ -26,27 +26,27 @@ class Pupil(PandasDataFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
-    assessi_engtest2: Data[pd.Int32Dtype]
-    assessi_iretest1: Data[pd.Int32Dtype]
+    assessi_engtest2: Data[str]
+    assessi_iretest1: Data[str]
     assessi_iretype1: Data[str]
-    assessi_maltest1: Data[pd.Int32Dtype]
+    assessi_maltest1: Data[str]
     assessi_outcome: Data[str]
-    assessi_scotest1: Data[pd.Int32Dtype]
-    assessi_scotest2: Data[pd.Int32Dtype]
-    assessi_scotest3: Data[pd.Int32Dtype]
+    assessi_scotest1: Data[str]
+    assessi_scotest2: Data[str]
+    assessi_scotest3: Data[str]
     assessii_engcheck1: Data[str]
-    assessii_engtest4: Data[pd.Int32Dtype]
-    assessii_engtest5: Data[pd.Int32Dtype]
-    assessii_engtest6: Data[pd.Int32Dtype]
-    assessii_engtest7: Data[pd.Int32Dtype]
-    assessii_engtest8: Data[pd.Int32Dtype]
-    assessii_scotest4: Data[pd.Int32Dtype]
-    assessii_iretest2: Data[pd.Int32Dtype]
+    assessii_engtest4: Data[str]
+    assessii_engtest5: Data[str]
+    assessii_engtest6: Data[str]
+    assessii_engtest7: Data[str]
+    assessii_engtest8: Data[str]
+    assessii_scotest4: Data[str]
+    assessii_iretest2: Data[str]
     assessii_iretype2: Data[str]
-    assessiii_engtest10: Data[pd.Int32Dtype]
-    assessiii_engtest11: Data[pd.Int32Dtype]
-    assessiii_engtest9: Data[pd.Int32Dtype]
-    assessiii_iretest4: Data[pd.Int32Dtype]
+    assessiii_engtest10: Data[str]
+    assessiii_engtest11: Data[str]
+    assessiii_engtest9: Data[str]
+    assessiii_iretest4: Data[str]
     entry_dob: Data[Literal["datetime64[ns]"]]
     summer: Data[str]
     entry_date: Data[Literal["datetime64[ns]"]]
@@ -178,17 +178,12 @@ def read_and_sort_masterfile(data_path: Path):
         FileNotFoundError if the masterfile doesn't exist
     """
     try:
-        masterfile_data = pd.read_excel(data_path)
+        masterfile_data = parse_masterfile(data_path)
     except FileNotFoundError as processed_data_missing_error:
         logger.error(f"No processed data file found at {data_path}. Exiting.")
         raise processed_data_missing_error
-    processed_data = masterfile_data.copy()
-    # convert to dates
-    date_cols = [col for col in processed_data if col.endswith("date")]
-    date_cols.append("entry_dob")
-    dates = processed_data[date_cols].applymap(pd.to_datetime, format="%Y-%m-%d", errors="coerce")
+    processed_data = join_masterfile_dfs(masterfile_data)
     # sort data
-    processed_data[date_cols] = dates
     processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
     processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
     processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
