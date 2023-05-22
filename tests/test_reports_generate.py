@@ -44,7 +44,7 @@ def test_validate_pdf_failure_missing_file():
     with pytest.raises(ReportConversionException) as error:
         validate_pdf(Path("/path/to/report.pdf"))
 
-    assert error.value.message == "Report conversion failed - output PDF does not exist"
+    assert error.value.message.startswith("Report conversion failed - output PDF does not exist")
 
 
 def test_validate_pdf_failure_empty_file(mocker, template_report_pdf_path):
@@ -53,14 +53,14 @@ def test_validate_pdf_failure_empty_file(mocker, template_report_pdf_path):
     with pytest.raises(ReportConversionException) as error:
         validate_pdf(template_report_pdf_path)
 
-    assert error.value.message == "Report conversion failed - empty PDF produced"
+    assert error.value.message.startswith("Report conversion failed - empty PDF produced")
 
 
 def test_validate_pdf_failure_no_metadata(mocker, template_report_pdf_path):
     mocker.patch.object(PdfReader, "__init__", side_effect=PdfReadError("test"))
     with pytest.raises(ReportConversionException) as error:
         validate_pdf(template_report_pdf_path)
-    assert error.value.message == "Report conversion failed - error reading resulting PDF"
+    assert error.value.message.startswith("Report conversion failed - error reading resulting PDF")
 
 
 def test_concatenate_pdf_reports_success(template_report_pdf_path: Path, temp_out_dir: Path):

@@ -71,17 +71,17 @@ def validate_pdf(pdf_file_path: Path) -> bool:
         pdf_file_path (Path): Path to PDF report
     """
     if not pdf_file_path.exists():
-        message = "Report conversion failed - output PDF does not exist"
+        message = f"Report conversion failed - output PDF does not exist: {pdf_file_path}"
         raise ReportConversionException(message)
 
     with pdf_file_path.open("rb") as converted_report:
         try:
             PdfReader(converted_report)
         except EmptyFileError as error:
-            message = "Report conversion failed - empty PDF produced"
+            message = f"Report conversion failed - empty PDF produced: {pdf_file_path}"
             raise ReportConversionException(message) from error
         except PdfReadError as error:
-            message = "Report conversion failed - error reading resulting PDF"
+            message = f"Report conversion failed - error reading resulting PDF: {pdf_file_path}"
             raise ReportConversionException(message) from error
     return True
 
