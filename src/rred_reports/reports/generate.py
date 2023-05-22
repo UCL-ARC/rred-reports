@@ -63,7 +63,7 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
         )
 
 
-def validate_pdf(pdf_file_path: Path) -> None:
+def validate_pdf(pdf_file_path: Path) -> bool:
     """Check the validity of a converted PDF report
     Raises an appropriate error if file not valid.
 
