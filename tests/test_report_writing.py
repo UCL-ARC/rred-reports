@@ -27,7 +27,7 @@ def test_school_tables_filled(example_school_data: pd.DataFrame, templates_dir: 
     """
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2022, output_doc)
+    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2021, output_doc)
 
     assert populated_template.verify_tables_filled()
     assert output_doc.exists()
@@ -41,7 +41,7 @@ def test_school_name_replaced_in_paragraphs(example_school_data, templates_dir: 
     """
     output_doc = temp_out_dir / "school.docx"
 
-    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2022, output_doc)
+    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2021, output_doc)
 
     output_paragraphs = []
     for paragraph in populated_template.doc.paragraphs:
@@ -73,7 +73,7 @@ def test_first_filter_kept(example_school_data, pupil_id):
     Then this template should be filled with the following:
     Table 1, 2, 5: test-1_2021-22, test-3_2021-22, test-4_2021-22, test-5_2021-22, test-6_2021-22
     """
-    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2022)
+    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2021)
     # first filter test
     assert (~example_school_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader Only", "Teacher Leader + Support Role"])).any()
     assert (example_school_data["entry_date"] < "2022-8-1").all()
@@ -93,11 +93,11 @@ def test_first_filter_removed(example_school_data):
     When the template is populated with redcap data
     Then this template should not have pupil test-2_2021-22
     """
-    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2022)
+    test_filter_for_one_two_five = filter_by_entry_and_exit(example_school_data, 2021)
     # test-2_2021-22, Discontinued, not within date boundary, month3 testdate out of range, no month6. Should not be in any tables.
     pupil_2 = test_filter_for_one_two_five.loc[test_filter_for_one_two_five.pupil_no == "test-2_2021-22"]
-    assert ((~pupil_2["entry_date"] < "2022-8-1") | (~pupil_2["entry_date"] > "2021-7-31")).all()
-    assert ((~pupil_2["exit_date"] < "2022-8-1") | (~pupil_2["exit_date"] > "2021-7-31") | (pupil_2["exit_date"].isna())).all()
+    assert ((~pupil_2["entry_date"] < "2022-8-1") & (~pupil_2["entry_date"] > "2021-7-31")).all()
+    assert all(((~pupil_2["exit_date"] < "2022-8-1") & (~pupil_2["exit_date"] > "2021-7-31")) | (pupil_2["exit_date"].isna()))
 
 
 def test_table_3_4_filter(example_school_data):
@@ -107,7 +107,7 @@ def test_table_3_4_filter(example_school_data):
     Then this template should be filled with the following:
     Table 3&4: test-1_2021-22, test-4_2021-22
     """
-    test_filter_for_three_four = filter_for_three_four(example_school_data, 2022)
+    test_filter_for_three_four = filter_for_three_four(example_school_data, 2021)
     # testing filter for table 3,4 applied
     assert (~test_filter_for_three_four["pupil_no"].isin(["test-2_2021-22", "test-3_2021-22", "test-5_2021-22", "test-6_2021-22"])).any()
     assert (~test_filter_for_three_four["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
@@ -126,7 +126,7 @@ def test_table_6_filter(example_school_data):
     Then this template should be filled with the following:
     Table 6: test-1_2021-22, test-4_2021-22
     """
-    test_filter_six = filter_six(example_school_data, 2022)
+    test_filter_six = filter_six(example_school_data, 2021)
 
     six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["test-1_2021-22", "test-4_2021-22"])]
     assert six_filter.shape[0] == 2
