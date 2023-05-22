@@ -127,7 +127,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
-    teach_df = teach_df.drop_duplicates()  # pylint: disable=E1101
+    teach_df.drop_duplicates(subset="rred_user_id", inplace=True)  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
     drop_cols.append(teach_df.columns.values[1])
