@@ -132,7 +132,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     teach_df.drop_duplicates(subset="rred_user_id", inplace=True)  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
-    drop_cols.append(teach_df.columns.values[1])
+    drop_cols.append(teach_df.columns.values[1])  # pylint: disable=E1101
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
