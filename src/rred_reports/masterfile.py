@@ -5,6 +5,8 @@ from typing import Literal
 
 import pandas as pd
 from loguru import logger
+from openpyxl.styles import NamedStyle
+from openpyxl.utils import get_column_letter
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
@@ -197,3 +199,30 @@ def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
     processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
     processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
     return processed_data
+
+
+def write_to_excel(masterfile_data: pd.DataFrame, output_file: Path) -> None:
+    """
+    Write masterfile dataframe to excel, formatting dates in Excel so they can be edited in excel without type
+    conversion
+
+    Parameters:
+        masterfile_data (pd.DataFrame): dataframe of masterfile
+        output_file (Path): path to write the file to
+    """
+    date_format_string = "YYYY-MM-DD"
+    excel_date_format = NamedStyle(name="date_format", number_format=date_format_string)
+    column_names = [column for column in masterfile_data.columns if column.endswith("_date") or column.endswith("_testdate")]  # noqa: PIE810
+    column_names.append("entry_dob")
+
+    with pd.ExcelWriter(output_file, date_format=date_format_string, engine="openpyxl") as writer:
+        masterfile_data.to_excel(writer, index=False)
+        workbook = writer.book
+        worksheet = workbook.active
+        for pandas_column_name in column_names:
+            # convert to the Excel column letters e.g. 'A', 'B', ... 'AA', 'AB' ...
+            column_letter = get_column_letter(masterfile_data.columns.get_loc(pandas_column_name) + 1)
+            column = worksheet[column_letter]
+            # skip the title column formatting
+            for cell in column[1:]:
+                cell.style = excel_date_format

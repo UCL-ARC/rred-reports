@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 
 from rred_reports import get_config
+from rred_reports.masterfile import write_to_excel
 from rred_reports.redcap.main import ExtractInput, RedcapReader
 
 top_level_dir = Path(__file__).resolve().parents[3]
@@ -43,7 +44,9 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
     )
     long_data = parser.read_redcap_data(current_year, previous_year)
     output_file = output_dir / f"masterfile_{current_period}.xlsx"
-    long_data.to_excel(output_file, index=False)
+
+    write_to_excel(long_data, output_file)
+
     typer.echo(f"Output written to: {output_file}")
 
 
