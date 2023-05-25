@@ -122,7 +122,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
     filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])].copy()
 
-    def clmnlist(i, data=filtered_data):
+    def clmnlist(i: int, data: pd.DataFrame=filtered_data) -> list:
         return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
