@@ -42,7 +42,7 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
             schools_with_no_data.append(school_id)
             continue
 
-        if all(school_data["rrcp_school"] == "nan"):
+        if all(school_data["rrcp_school"].isna()):
             logger.trace("No name found for school {school}", school=school_id)
             schools_with_no_name.append(school_id)
             continue
