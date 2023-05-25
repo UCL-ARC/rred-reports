@@ -122,7 +122,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
     filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])].copy()
 
-    def clmnlist(i: int, data: pd.DataFrame=filtered_data) -> list:
+    def clmnlist(i: int, data: pd.DataFrame = filtered_data) -> list:
         return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
@@ -157,7 +157,7 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
 
 
-def masterfile_columns():
+def masterfile_columns() -> list[str]:
     """List of all masterfile columns, in the expected order"""
     pupil_no, user_id, *other_pupil_fields = Pupil.fields()
     _school_id, *other_school_fields = School.fields()
@@ -168,7 +168,7 @@ def masterfile_columns():
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
 
 
-def read_and_process_masterfile(data_path: Path):
+def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
     """
     Reads masterfile from path, adds in str representation of dates and sort by school, year range and the pupil entry number
 
