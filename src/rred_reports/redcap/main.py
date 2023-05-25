@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from loguru import logger
+from tqdm import tqdm
 
 from rred_reports.dispatch_list import get_unique_schools
 from rred_reports.masterfile import masterfile_columns
@@ -82,7 +83,7 @@ class RedcapReader:
         logger.info("Pre-processing wide data")
         processed_extract = labelled_data.copy(deep=True)
         # Unify on using the raw_data column names, labelled uses the questions given on the survey as column names
-        processed_extract.columns = labelled_data.columns
+        processed_extract.columns = raw_data.columns
         cls._fill_school_id_with_coalesce(raw_data, processed_extract)
         cls._fill_region_with_coalesce(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
@@ -223,7 +224,7 @@ class RedcapReader:
             *self._parsing_cols["wide_columns"][1:],
             *entry_year_cols,
         ]
-        for wide_column in remaining_wide_columns:
+        for wide_column in tqdm(remaining_wide_columns):
             export_data = self._long_and_merge(wide_extract, wide_column, export_data)
         return export_data
 

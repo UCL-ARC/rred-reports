@@ -1,6 +1,6 @@
 # All paths should be populated as a relative path from the repository root
 [2021]
-dispatch_list = "input/downloaded/2021/Dispatch list 2021-22.xlsx"
+dispatch_list = "input/dispatch_lists/Dispatch list 2021-22.xlsx"
 
     [2021.current_year]
     coded_data_file = "input/downloaded/2021/ReadingRecoveryEvalu_DATA_2021.csv"
@@ -11,7 +11,7 @@ dispatch_list = "input/downloaded/2021/Dispatch list 2021-22.xlsx"
     label_data_file = "input/downloaded/2021/ReadingRecoveryEvalu_DATA_LABELS_2020.csv"
 
 [2022]
-dispatch_list = "input/downloaded/2022/Dispatch list 2022-23.xlsx"
+dispatch_list = "input/dispatch_lists/Dispatch list 2022-23.xlsx"
 
     [2022.current_year]
     coded_data_file = "input/downloaded/2022/ReadingRecoveryEvalu_DATA_2022.csv"

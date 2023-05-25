@@ -2,15 +2,17 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-import pandas as pd
 import typer
 from loguru import logger
 
 from rred_reports import get_config
-from rred_reports.reports.generate import generate_report_school, convert_single_report, concatenate_pdf_reports
+from rred_reports.masterfile import read_and_process_masterfile
+from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
 
 app = typer.Typer()
+
+TOP_LEVEL_DIR = Path(__file__).resolve().parents[3]
 
 
 class ReportType(str, Enum):
@@ -24,12 +26,13 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
         year (int): Year to process
         template_file (Path): Template file
+        masterfile_path (Path): Masterfile file
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
 
@@ -41,17 +44,13 @@ def validate_data_sources(year: int, template_file: Path, top_level_dir: Optiona
         dict: Dictionary of validated data sources
     """
     if top_level_dir is None:
-        top_level_dir = Path(__file__).resolve().parents[6]
+        top_level_dir = TOP_LEVEL_DIR
 
-    data_path = top_level_dir / "output" / "processed" / str(year)
+    data_path = top_level_dir / masterfile_path
     template_file_path = top_level_dir / template_file
     output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
-    try:
-        processed_data = pd.read_csv(data_path / "processed_data.csv")
-    except FileNotFoundError as processed_data_missing_error:
-        logger.error(f'No processed data file found at {data_path / "processed_data.csv"}. Exiting.')
-        raise processed_data_missing_error
+    processed_data = read_and_process_masterfile(data_path)
 
     try:
         assert template_file_path.is_file()
@@ -84,11 +83,12 @@ def generate(
     config = get_config(config_file)
 
     template_file_path = config[level.value]["template"]
-    validated_data = validate_data_sources(year, template_file_path, top_level_dir=top_level_dir)
+    masterfile_path = config[level.value]["masterfile"]
+    validated_data = validate_data_sources(year, template_file_path, masterfile_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
     if level.value.lower() == "school":
-        generate_report_school(processed_data, template_file, output_dir)
+        generate_report_school(processed_data, template_file, output_dir, year)
     else:
         typer.echo("Other levels currently not implemented! Please select 'school'.")
         raise typer.Exit()
@@ -106,11 +106,14 @@ def convert(report_dir: Path, output: str = "result") -> Path:
     Returns:
         Path: Path to directory containing PDF reports
     """
+    logger.info("Converting docx reports to pdf reports. ")
+    report_paths = list(report_dir.glob("*.docx"))
     pdf_paths = []
-    for report_path in report_dir.glob("*.docx"):
+    for report_path in sorted(report_paths):
         output_path = report_path.with_suffix(".pdf")
-        convert_single_report(docx_report_path=report_dir, output_pdf_path=output_path)
-        pdf_paths.append(report_path)
+        pdf_paths.append(output_path)
+
+    convert_all_reports(report_paths, pdf_paths)
 
     concatenate_pdf_reports(pdf_paths, report_dir, output)
 
@@ -118,7 +121,7 @@ def convert(report_dir: Path, output: str = "result") -> Path:
 
 
 @app.command()
-def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", output: str = "result"):
+def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", output: str = "uat_combined"):
     """Generate reports at the level specified, convert to PDF and concatenate
 
     Args:
@@ -127,7 +130,6 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
     """
     typer.echo(f"Creating a report for level: {level.value}")
     report_dir = generate(level, year, config_file)
-
     convert(report_dir, output)
 
 
@@ -144,15 +146,16 @@ def send_school(
     Args:
         year (int): Report start year
         id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
-        attachment (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
+        attachment_name (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
+        config_file (Optional[Path], optional): Non-standard configuration file for processing
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
     """
     config = get_config(config_file)
     dispatch_list = Path(config["school"]["dispatch_list"]).resolve()
 
-    if top_level_dir is not None:
-        top_level_dir = Path(__file__).resolve().parents[6]
+    if top_level_dir is None:
+        top_level_dir = TOP_LEVEL_DIR
 
     if id_list is None:
         id_list = []
@@ -168,3 +171,7 @@ def send_school(
 def main():
     """Run the report generation pipeline"""
     return
+
+
+if __name__ == "__main__":
+    create(ReportType.SCHOOL, 2021, TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml")

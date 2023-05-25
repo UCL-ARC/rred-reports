@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
+from loguru import logger
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
@@ -25,27 +26,27 @@ class Pupil(PandasDataFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
-    assessi_engtest2: Data[pd.Int32Dtype]
-    assessi_iretest1: Data[pd.Int32Dtype]
+    assessi_engtest2: Data[str]
+    assessi_iretest1: Data[str]
     assessi_iretype1: Data[str]
-    assessi_maltest1: Data[pd.Int32Dtype]
+    assessi_maltest1: Data[str]
     assessi_outcome: Data[str]
-    assessi_scotest1: Data[pd.Int32Dtype]
-    assessi_scotest2: Data[pd.Int32Dtype]
-    assessi_scotest3: Data[pd.Int32Dtype]
+    assessi_scotest1: Data[str]
+    assessi_scotest2: Data[str]
+    assessi_scotest3: Data[str]
     assessii_engcheck1: Data[str]
-    assessii_engtest4: Data[pd.Int32Dtype]
-    assessii_engtest5: Data[pd.Int32Dtype]
-    assessii_engtest6: Data[pd.Int32Dtype]
-    assessii_engtest7: Data[pd.Int32Dtype]
-    assessii_engtest8: Data[pd.Int32Dtype]
-    assessii_scotest4: Data[pd.Int32Dtype]
-    assessii_iretest2: Data[pd.Int32Dtype]
+    assessii_engtest4: Data[str]
+    assessii_engtest5: Data[str]
+    assessii_engtest6: Data[str]
+    assessii_engtest7: Data[str]
+    assessii_engtest8: Data[str]
+    assessii_scotest4: Data[str]
+    assessii_iretest2: Data[str]
     assessii_iretype2: Data[str]
-    assessiii_engtest10: Data[pd.Int32Dtype]
-    assessiii_engtest11: Data[pd.Int32Dtype]
-    assessiii_engtest9: Data[pd.Int32Dtype]
-    assessiii_iretest4: Data[pd.Int32Dtype]
+    assessiii_engtest10: Data[str]
+    assessiii_engtest11: Data[str]
+    assessiii_engtest9: Data[str]
+    assessiii_iretest4: Data[str]
     entry_dob: Data[Literal["datetime64[ns]"]]
     summer: Data[str]
     entry_date: Data[Literal["datetime64[ns]"]]
@@ -118,18 +119,20 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
         dict[str, pd.DataFrame]: Dictionary of dataframes
     """
     full_data = pd.read_excel(file)
+    # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
+    filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])].copy()
 
-    def clmnlist(i, data=full_data):
+    def clmnlist(i: int, data: pd.DataFrame = filtered_data) -> list:
         return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
-    teach_df = teach_df.drop_duplicates()  # pylint: disable=E1101
+    teach_df.drop_duplicates(subset="rred_user_id", inplace=True)  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
-    drop_cols.append(teach_df.columns.values[1])
+    drop_cols.append(teach_df.columns.values[1])  # pylint: disable=E1101
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
@@ -154,7 +157,7 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
     return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
 
 
-def masterfile_columns():
+def masterfile_columns() -> list[str]:
     """List of all masterfile columns, in the expected order"""
     pupil_no, user_id, *other_pupil_fields = Pupil.fields()
     _school_id, *other_school_fields = School.fields()
@@ -163,3 +166,34 @@ def masterfile_columns():
     assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
 
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
+
+
+def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
+    """
+    Reads masterfile from path, adds in str representation of dates and sort by school, year range and the pupil entry number
+
+    Args:
+        data_path (Path): path to masterfile
+    Returns:
+        pd.DataFrame: masterfile
+    Raises:
+        FileNotFoundError if the masterfile doesn't exist
+    """
+    try:
+        masterfile_data = parse_masterfile(data_path)
+    except FileNotFoundError as processed_data_missing_error:
+        logger.error(f"No processed data file found at {data_path}. Exiting.")
+        raise processed_data_missing_error
+    processed_data = join_masterfile_dfs(masterfile_data)
+
+    date_cols = [x for x in processed_data.columns if x.endswith("_date")]
+    date_string_representation = processed_data[date_cols].applymap(lambda x: x.strftime("%d/%m/%Y") if not pd.isnull(x) else "NA")
+    date_str_cols = [f"{x}_str" for x in date_cols]
+
+    processed_data[date_str_cols] = date_string_representation
+
+    # sort data
+    processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
+    processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
+    processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
+    return processed_data

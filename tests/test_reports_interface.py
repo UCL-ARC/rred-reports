@@ -5,7 +5,23 @@ import pytest
 import tomli
 
 from rred_reports import get_config
+from rred_reports.masterfile import masterfile_columns
 from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
+
+example_data_dict = {column: list(range(4)) for column in masterfile_columns()}
+
+example_processed_data = pd.DataFrame.from_dict(example_data_dict)
+example_processed_data["reg_rr_title"] = [
+    "RR Teacher + Support Role",
+    "RR Teacher + Class Leader",
+    "RR Teacher + Support Role",
+    "RR Teacher + Class Leader",
+]
+example_processed_data["rrcp_school"] = [f"RRS{x}" for x in range(4)]
+example_processed_data["pupil_no"] = [f"{x + 1}_2021-22" for x in range(4)]
+example_processed_data["entry_dob"] = ["2017-01-01" for _ in range(4)]
+example_processed_data["entry_date"] = ["2021-09-01" for _ in range(4)]
+example_processed_data["exit_date"] = ["2022-06-01" for _ in range(4)]
 
 
 def test_report_type_enum():
@@ -24,13 +40,11 @@ def test_validate_data_sources_passes(temp_data_directories: dict):
     top_level_dir = temp_data_directories["top_level"]
     data_directory = temp_data_directories["year"]
 
-    example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
-    processed_df.to_csv(template_file_standin_path)
-    validated_data = validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+    example_processed_data.to_excel(processed_data_path, index=False)
+    example_processed_data.to_csv(template_file_standin_path)
+    validated_data = validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
     assert isinstance(validated_data, dict)
     assert len(validated_data) == 3
 
@@ -38,26 +52,23 @@ def test_validate_data_sources_passes(temp_data_directories: dict):
 def test_validate_data_sources_fails_processed_data_missing(temp_data_directories: dict):
     top_level_dir = temp_data_directories["top_level"]
 
-    example_processed_data = {"item 1": 1, "item 2": 2}
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(template_file_standin_path)
+    example_processed_data.to_csv(template_file_standin_path)
+    missing_processed_data = top_level_dir / "nope.xlsx"
 
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, missing_processed_data, top_level_dir=top_level_dir)
 
 
 def test_validate_data_sources_fails_template_file_missing(temp_data_directories: dict):
     top_level_dir = temp_data_directories["top_level"]
     data_directory = temp_data_directories["year"]
 
-    example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
+    example_processed_data.to_excel(processed_data_path, index=False)
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
 
 
 def test_get_config_success(temp_config_file: Path):
@@ -79,25 +90,22 @@ def test_get_config_failure():
         get_config(incorrect_config_path)
 
 
-def test_generate_school_reports(mocker, temp_data_directories: dict):
+def test_generate_school_reports(mocker, temp_data_directories: dict, data_path):
     mocker.patch("rred_reports.reports.interface.generate_report_school")
     top_level_dir = temp_data_directories["top_level"]
-    data_directory = temp_data_directories["year"]
 
-    example_processed_data = {"item 1": 1, "item 2": 2}
-    processed_data_path = data_directory / "processed_data.csv"
+    processed_data_path = top_level_dir / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
-    processed_df = pd.DataFrame.from_dict([example_processed_data])
-    processed_df.to_csv(processed_data_path)
-    processed_df.to_csv(template_file_standin_path)
-    test_config_file = Path("tests/data/report_config.toml")
+    example_processed_data.to_excel(processed_data_path, index=False)
+    example_processed_data.to_csv(template_file_standin_path)
+    test_config_file = data_path / "report_config.toml"
 
     result = generate(ReportType("school"), 2099, config_file=test_config_file, top_level_dir=top_level_dir)
     assert "output/reports/2099/schools" in "/".join(result.parts)
 
 
 def test_convert(mocker, temp_out_dir: Path):
-    convert_single_patch = mocker.patch("rred_reports.reports.interface.convert_single_report")
+    convert_single_patch = mocker.patch("rred_reports.reports.interface.convert_all_reports")
     concatenate_patch = mocker.patch("rred_reports.reports.interface.concatenate_pdf_reports")
 
     # Create a single docx file in a temporary test directory
@@ -124,10 +132,10 @@ def test_create(mocker):
     convert_patch.assert_called_once()
 
 
-def test_send_school(mocker, temp_data_directories):
+def test_send_school(mocker, temp_data_directories, data_path):
     school_mailer = mocker.patch("rred_reports.reports.interface.school_mailer")
     top_level_dir = temp_data_directories["top_level"]
-    test_config_file = Path("tests/data/report_config.toml")
+    test_config_file = data_path / "report_config.toml"
 
     id_list = ["AAAAA"]
     send_school(2021, id_list, attachment_name="test.pdf", config_file=test_config_file, top_level_dir=top_level_dir)
