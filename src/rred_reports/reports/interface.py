@@ -9,6 +9,7 @@ from rred_reports import get_config
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
+from rred_reports.validation import log_data_inconsistencies
 
 app = typer.Typer()
 
@@ -26,7 +27,7 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
@@ -51,6 +52,7 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
     output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     processed_data = read_and_process_masterfile(data_path)
+    log_data_inconsistencies(processed_data, top_level_dir / dispatch_path)
 
     try:
         assert template_file_path.is_file()
@@ -84,7 +86,8 @@ def generate(
 
     template_file_path = config[level.value]["template"]
     masterfile_path = config[level.value]["masterfile"]
-    validated_data = validate_data_sources(year, template_file_path, masterfile_path, top_level_dir=top_level_dir)
+    dispatch_path = config[level.value]["dispatch_list"]
+    validated_data = validate_data_sources(year, template_file_path, masterfile_path, dispatch_path=dispatch_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
     if level.value.lower() == "school":
