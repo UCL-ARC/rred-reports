@@ -85,7 +85,7 @@ def trial_period_dates(report_year: int) -> tuple[datetime, datetime]:
 
 
 def school_filter(whole_dataframe: pd.DataFrame, school_id: str) -> pd.DataFrame:
-    """Function to filter out the Teacher Leaders in training and by school
+    """Function to filter by school
 
     Args:
         whole_dataframe (pd.DataFrame)
@@ -94,8 +94,7 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id: str) -> pd.DataFrame
     Returns: pd.DataFrame filtered data
 
     """
-    teacher_filtered = whole_dataframe[~whole_dataframe["reg_rr_title"].isin(["Teacher Leader in Training"])]
-    return teacher_filtered[teacher_filtered.school_id == school_id].copy()
+    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
 
 
 def filter_by_entry_and_exit(school_dataframe: pd.DataFrame, report_year: int) -> pd.DataFrame:

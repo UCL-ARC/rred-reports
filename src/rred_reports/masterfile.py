@@ -123,10 +123,8 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
         dict[str, pd.DataFrame]: Dictionary of dataframes
     """
     full_data = pd.read_excel(file)
-    # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
-    filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader in Training"])].copy()
 
-    def clmnlist(i: int, data: pd.DataFrame = filtered_data) -> list:
+    def clmnlist(i: int, data: pd.DataFrame = full_data) -> list:
         return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
