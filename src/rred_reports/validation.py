@@ -12,12 +12,15 @@ def log_data_inconsistencies(masterfile_df: pd.DataFrame, dispatch_path: Path) -
     teacher_schools = masterfile_df[["rred_user_id", "school_id"]].copy().drop_duplicates()
     school_counts = teacher_schools.groupby("rred_user_id").count()
     multiple_schools = school_counts[school_counts["school_id"] > 1].copy()
-    multiple_schools.drop("school_id", axis=1, inplace=True)
-    multi_school_ids = pd.merge(teacher_schools, multiple_schools, how="inner", on="rred_user_id")
-    multi_school_ids["row"] = "school_id_" + (multi_school_ids.groupby("rred_user_id").cumcount() + 1).apply(str)
-    multi_school_pivoted = multi_school_ids.pivot(index=["rred_user_id"], columns="row", values="school_id").reset_index()
-    multi_school_dispatch_list = pd.merge(dispatch_df, multi_school_pivoted, how="inner", left_on="DL_UserID", right_on="rred_user_id")
-    output_school_changed = multi_school_dispatch_list[["rred_user_id", "DL_RRED School ID", "DL_School Label", "school_id_1", "school_id_2"]]
+    # Make empty dataframe so that downstream filtering works if there are not duplicated schools
+    output_school_changed = pd.DataFrame(columns=["rred_user_id", "DL_RRED School ID", "school_id_1", "school_id_2"])
+    if multiple_schools.size != 0:
+        multiple_schools.drop("school_id", axis=1, inplace=True)
+        multi_school_ids = pd.merge(teacher_schools, multiple_schools, how="inner", on="rred_user_id")
+        multi_school_ids["row"] = "school_id_" + (multi_school_ids.groupby("rred_user_id").cumcount() + 1).apply(str)
+        multi_school_pivoted = multi_school_ids.pivot(index=["rred_user_id"], columns="row", values="school_id").reset_index()
+        multi_school_dispatch_list = pd.merge(dispatch_df, multi_school_pivoted, how="inner", left_on="DL_UserID", right_on="rred_user_id")
+        output_school_changed = multi_school_dispatch_list[["rred_user_id", "DL_RRED School ID", "DL_School Label", "school_id_1", "school_id_2"]]
 
     if output_school_changed.size != 0:
         logger.warning(
