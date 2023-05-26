@@ -9,7 +9,7 @@ from rred_reports import get_config
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
-from rred_reports.validation import log_data_inconsistencies
+from rred_reports.validation import log_school_inconsistencies
 
 app = typer.Typer()
 
@@ -52,7 +52,7 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
     output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     processed_data = read_and_process_masterfile(data_path)
-    log_data_inconsistencies(processed_data, top_level_dir / dispatch_path)
+    log_school_inconsistencies(processed_data, top_level_dir / dispatch_path, year)
 
     try:
         assert template_file_path.is_file()

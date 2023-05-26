@@ -4,12 +4,25 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 
+from rred_reports.reports.schools import filter_by_entry_and_exit
 
-def log_data_inconsistencies(masterfile_df: pd.DataFrame, dispatch_path: Path) -> None:
+
+def log_school_inconsistencies(masterfile_df: pd.DataFrame, dispatch_path: Path, year: int) -> None:
+    """
+    Log inconsistencies for school reporting
+
+    Args:
+        masterfile_df (pd.DataFrame): masterfile data
+        dispatch_path (Path): path to dispatch list
+        year (int): starting year of the study period
+    """
     dispatch_df = pd.read_excel(dispatch_path)
     dispatch_df.columns = "DL_" + dispatch_df.columns
 
-    teacher_schools = masterfile_df[["rred_user_id", "school_id"]].copy().drop_duplicates()
+    # only keep rows in the trial period
+    masterfile_for_period = filter_by_entry_and_exit(masterfile_df, year)
+
+    teacher_schools = masterfile_for_period[["rred_user_id", "school_id"]].copy().drop_duplicates()
     school_counts = teacher_schools.groupby("rred_user_id").count()
     multiple_schools = school_counts[school_counts["school_id"] > 1].copy()
     # Make empty dataframe so that downstream filtering works if there are not duplicated schools
@@ -29,7 +42,7 @@ def log_data_inconsistencies(masterfile_df: pd.DataFrame, dispatch_path: Path) -
             mismatch=output_school_changed.to_string(index=False),
         )
 
-    inner_joined = pd.merge(dispatch_df, masterfile_df, how="inner", left_on="DL_UserID", right_on="rred_user_id")
+    inner_joined = pd.merge(dispatch_df, masterfile_for_period, how="inner", left_on="DL_UserID", right_on="rred_user_id")
     schools_differ = inner_joined[inner_joined["rrcp_school"].isna() & (~inner_joined["DL_UserID"].isin(output_school_changed["rred_user_id"]))]
     output_mismatch = schools_differ[["DL_UserID", "DL_RRED School ID", "DL_School Label", "rred_user_id", "school_id"]].copy().drop_duplicates()
     if output_mismatch.size != 0:
@@ -39,7 +52,7 @@ def log_data_inconsistencies(masterfile_df: pd.DataFrame, dispatch_path: Path) -
             mismatch=output_mismatch.to_string(index=False),
         )
 
-    outer_joined = pd.merge(dispatch_df, masterfile_df, how="outer", left_on="DL_RRED School ID", right_on="school_id")
+    outer_joined = pd.merge(dispatch_df, masterfile_for_period, how="outer", left_on="DL_RRED School ID", right_on="school_id")
     no_match = outer_joined[outer_joined["school_id"] != outer_joined["DL_RRED School ID"]]
     no_match = no_match[["DL_RRED School ID", "DL_School Label", "school_id"]].copy().drop_duplicates()
 
