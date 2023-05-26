@@ -124,7 +124,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     """
     full_data = pd.read_excel(file)
     # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
-    filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])].copy()
+    filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader in Training"])].copy()
 
     def clmnlist(i: int, data: pd.DataFrame = filtered_data) -> list:
         return list(data.iloc[:, i])
