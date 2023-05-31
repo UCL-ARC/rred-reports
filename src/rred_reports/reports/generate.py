@@ -32,7 +32,6 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
     school_ids: list[str] = processed_data.loc[:, "school_id"].sort_values(ascending=True).unique().tolist()
     logger.info("Generating reports for {total_schools} schools", total_schools=len(school_ids))
     schools_with_no_data = []
-    schools_with_no_name = []
 
     for school_id in tqdm(school_ids):
         school_data = school_filter(processed_data, school_id)
@@ -44,9 +43,6 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
 
         if all(school_data["rrcp_school"].isna()):
             logger.trace("No name found for school {school}", school=school_id)
-            users = school_data["rred_user_id"].unique().tolist()
-            area = school_data["rrcp_area"].unique().tolist()
-            schools_with_no_name.append({"school": school_id, "users": users, "area": area})
             continue
 
         output_doc = output_dir / f"report_{str(school_id)}.docx"
@@ -56,15 +52,6 @@ def generate_report_school(processed_data: pd.DataFrame, template_file: Path, ou
             "{school_count} schools did not have data remaining after filtering: {schools}",
             school_count=len(schools_with_no_data),
             schools=schools_with_no_data,
-        )
-    if schools_with_no_name:
-        output_schools = ""
-        for school in schools_with_no_name:
-            output_schools = f"{output_schools}\n{school}"
-        logger.warning(
-            "{school_count} schools had no name in the masterfile (presumably weren't in the dispatch list at extract): {output_schools}",
-            school_count=len(schools_with_no_name),
-            output_schools=output_schools,
         )
 
 
