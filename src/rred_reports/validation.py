@@ -7,11 +7,13 @@ from loguru import logger
 
 from rred_reports.reports.schools import filter_by_entry_and_exit
 
-logging_column_key = "---\nkey:\nDL_ = Dispatch List, MF_ = Master File\n---\n"
+KEY_FOR_COLUMNS = "---\nkey:\nDL_ = Dispatch List, MF_ = Master File\n---\n"
 
 
 @dataclass
 class ValidationIssue:
+    """Issue type to report for validation, can be logged or exported to file"""
+
     title: str
     description: str
     dataframe: pd.DataFrame
@@ -70,9 +72,7 @@ def _check_schools_differ(
     output_mismatch = schools_differ[["DL_UserID", "DL_RRED School ID", "DL_School Label", "rred_user_id", "school_id"]].copy().drop_duplicates()
     if output_mismatch.size != 0:
         output_mismatch.rename({"school_id": "MF_school_id"}, axis=1, inplace=True)
-        message = (
-            f"{output_mismatch.shape[0]} Users were found with different school IDs in dispatch list compared to masterfile:\n{logging_column_key}"
-        )
+        message = f"{output_mismatch.shape[0]} Users were found with different school IDs in dispatch list compared to masterfile:\n{KEY_FOR_COLUMNS}"
         logger.warning(
             "{message}\n{mismatch}",
             message=message,
@@ -91,7 +91,7 @@ def _mismatch_schools(dispatch_df: pd.DataFrame, masterfile_for_period: pd.DataF
 def _check_schools_changed(issues: list[ValidationIssue], school_changed: pd.DataFrame):
     if school_changed.size != 0:
         output_school_changed = school_changed.rename({"school_id_1": "MF_school_id_1", "school_id_2": "MF_school_id_2"}, axis=1)
-        message = f"{output_school_changed.shape[0]} Users were found with multiple school IDs in the masterfile:\n{logging_column_key}"
+        message = f"{output_school_changed.shape[0]} Users were found with multiple school IDs in the masterfile:\n{KEY_FOR_COLUMNS}"
         logger.warning("{message}\n{mismatch}", message=message, mismatch=output_school_changed.to_string(index=False))
         issues.append(ValidationIssue("multiple_ids", message, output_school_changed))
 
@@ -106,7 +106,7 @@ def _check_not_in_masterfile(
     ].copy()
     if not_in_masterfile.size != 0:
         not_in_masterfile.rename({"school_id": "MF_school_id"}, axis=1, inplace=True)
-        message = f"{not_in_masterfile.shape[0]} School IDs were not found in masterfile:\n{logging_column_key}"
+        message = f"{not_in_masterfile.shape[0]} School IDs were not found in masterfile:\n{KEY_FOR_COLUMNS}"
         logger.warning(
             "{message}\n{mismatch}",
             message=message,
