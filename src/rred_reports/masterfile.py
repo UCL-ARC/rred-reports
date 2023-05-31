@@ -215,6 +215,7 @@ def write_to_excel(masterfile_data: pd.DataFrame, output_file: Path) -> None:
     column_names = [column for column in masterfile_data.columns if column.endswith("_date") or column.endswith("_testdate")]  # noqa: PIE810
     column_names.append("entry_dob")
 
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(output_file, date_format=date_format_string, engine="openpyxl") as writer:
         masterfile_data.to_excel(writer, index=False)
         workbook = writer.book

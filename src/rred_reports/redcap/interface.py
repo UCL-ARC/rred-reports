@@ -5,7 +5,7 @@ import typer
 from rred_reports import get_config
 from rred_reports.masterfile import write_to_excel
 from rred_reports.redcap.main import ExtractInput, RedcapReader
-from rred_reports.validation import log_school_inconsistencies
+from rred_reports.validation import log_school_id_inconsistencies, write_issues_if_exist
 
 top_level_dir = Path(__file__).resolve().parents[3]
 
@@ -14,7 +14,7 @@ app = typer.Typer()
 
 
 @app.command()
-def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_config.toml", output_dir: Path = "output/processed/") -> None:
+def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_config.toml", output_dir: Path = "output/") -> None:
     """
     Extract files from redcap from wide to long and apply basic processing
     Process wide to long of the files listed under the year-based config toml
@@ -22,7 +22,7 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
     Args:
         year (int): Year to process
         config_file (Path): Path to config file
-        output_dir (Path): Path to output directory where the long CSV data will be saved
+        output_dir (Path): Path to parent output directory
     """
     typer.echo(f"Extracting data for {year} and the previous year's surveys")
     config = get_config(config_file)[str(year)]
@@ -44,9 +44,11 @@ def extract(year: int, config_file: Path = "src/rred_reports/redcap/redcap_confi
         f"{year -1}-{str(year)[-2:]}",
     )
     long_data = parser.read_redcap_data(current_year, previous_year)
-    output_file = output_dir / f"masterfile_{current_period}.xlsx"
-    log_school_inconsistencies(long_data, dispatch_path, year)
+    issues = log_school_id_inconsistencies(long_data, dispatch_path, year)
+    output_file = output_dir / "issues" / f"{current_period}school_id_issues.xlsx"
+    write_issues_if_exist(issues, output_file)
 
+    output_file = output_dir / "processed" / f"masterfile_{current_period}.xlsx"
     write_to_excel(long_data, output_file)
 
     typer.echo(f"Output written to: {output_file}")
