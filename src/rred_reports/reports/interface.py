@@ -27,7 +27,7 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
