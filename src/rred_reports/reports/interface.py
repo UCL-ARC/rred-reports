@@ -4,6 +4,7 @@ from typing import Optional
 
 import typer
 from loguru import logger
+from tqdm import tqdm
 
 from rred_reports import get_config
 from rred_reports.dispatch_list import get_mailing_info
@@ -170,12 +171,14 @@ def send_school(
             id_list.append(report_path.stem.split("_")[-1])
 
     email_details = []
-    for school_id in id_list:
+    logger.info("Getting dispatch list details for each school report pdf found")
+    for school_id in tqdm(id_list):
         email_info = get_mailing_info(school_id, dispatch_list)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
     emailed_ids = set()
-    for email_detail in email_details:
+    logger.info("Emailing each school")
+    for email_detail in tqdm(email_details):
         try:
             school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
             emailed_ids.add(email_detail["school_id"])

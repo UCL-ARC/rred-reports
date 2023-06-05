@@ -67,7 +67,12 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
     dispatch_df = dispatch_df.loc[dispatch_df["RRED School ID"].str.match(rred_school_id)]
     dispatch_df = dispatch_df.loc[:, ["RRED School ID", "School Label", "Email", "TL Email"]]
 
-    # Case 1: Find no teacher email instance - replace with TL if that exists
+    # School doesn't exist in dispatch list
+    if len(dispatch_df) == 0:
+        message = f"School not found in dispatch list: {rred_school_id}. Try deleting all output reports and generating them again"
+        raise DispatchListException(message)
+
+    # Find no teacher email instance - replace with TL if that exists
 
     dispatch_df.loc[:, "Mailing List"] = np.nan
     dispatch_df.loc[(~dispatch_df["Email"].isna()), "Mailing List"] = dispatch_df["Email"]
