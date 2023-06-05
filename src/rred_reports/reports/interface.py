@@ -174,8 +174,16 @@ def send_school(
         email_info = get_mailing_info(school_id, dispatch_list)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
+    emailed_ids = set()
     for email_detail in email_details:
-        school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
+        try:
+            school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
+            emailed_ids.add(email_detail["school_id"])
+        except Exception as e:
+            all_schools = set(id_list)
+            schools_to_send = sorted(all_schools.difference(emailed_ids))
+            logger.error("Error on ending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
+            raise e
 
 
 @app.callback()
