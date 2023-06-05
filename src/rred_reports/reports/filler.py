@@ -147,7 +147,8 @@ class TemplateFiller:
             table.add_row()
             for j in range(data.shape[-1]):
                 current_cell = table.cell(i + header_rows, j)
-                current_cell.text = str(data.values[i, j])
+                # Ensure NA representation is shorter: for thin columns, to avoid splitting over multiple lines
+                current_cell.text = str(data.values[i, j]).replace("<NA>", "NA")
                 # manually set the style of the new text, and don't break table over multiple lines
                 current_paragraph = current_cell.paragraphs[0]
                 current_paragraph.style = self.table_text_style
