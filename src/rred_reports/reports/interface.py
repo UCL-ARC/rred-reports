@@ -157,7 +157,7 @@ def send_school(
             data can be found. Defaults to None.
     """
     config = get_config(config_file)
-    dispatch_list = Path(config["school"]["dispatch_list"]).resolve()
+    dispatch_list = top_level_dir / config["school"]["dispatch_list"]
 
     if top_level_dir is None:
         top_level_dir = TOP_LEVEL_DIR
