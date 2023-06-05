@@ -6,6 +6,7 @@ import typer
 from loguru import logger
 
 from rred_reports import get_config
+from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
@@ -168,8 +169,13 @@ def send_school(
         for report_path in sorted(report_directory.glob("report_*.pdf")):
             id_list.append(report_path.stem.split("_")[-1])
 
+    email_details = []
     for school_id in id_list:
-        school_mailer(school_id, dispatch_list, year, report_name=attachment_name)
+        email_info = get_mailing_info(school_id, dispatch_list)
+        email_details.append({"school_id": school_id, "mail_info": email_info})
+
+    for email_detail in email_details:
+        school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
 
 
 @app.callback()

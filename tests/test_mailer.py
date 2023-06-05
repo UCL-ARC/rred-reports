@@ -1,6 +1,7 @@
 import pytest
 from exchangelib import Message
 
+from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.reports.auth import RREDAuthenticator
 from rred_reports.reports.emails import EmailContent, ReportEmailer, ReportEmailerException, school_mailer
 
@@ -140,8 +141,9 @@ def test_school_mailer_success(mocker, data_path, dispatch_list):
     report_name = "test_report_name.pdf"
 
     reports_dir = data_path / "output" / "reports" / "2021" / "schools"
+    email_info = get_mailing_info(school_id, dispatch_list)
 
-    school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
+    school_mailer(school_id, year, email_info, report_name, reports_dir)
 
     runner.assert_called_once()
 
@@ -153,7 +155,9 @@ def test_school_mailer_failure(data_path, dispatch_list):
 
     reports_dir = data_path / "nothing"
 
+    email_info = get_mailing_info(school_id, dispatch_list)
+
     with pytest.raises(ReportEmailerException) as error:
-        school_mailer(school_id, dispatch_list, year, report_name, reports_dir)
+        school_mailer(school_id, year, email_info, report_name, reports_dir)
 
     assert "not found" in error.value.message

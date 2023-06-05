@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -152,6 +153,14 @@ def test_send_school(mocker, temp_data_directories, data_path):
     school_mailer = mocker.patch("rred_reports.reports.interface.school_mailer")
     top_level_dir = temp_data_directories["top_level"]
     test_config_file = data_path / "report_config.toml"
+
+    # copy dispatch list to tmp directory
+    dispatch_filename = "dispatch_list_single_test_school.xlsx"
+    dispatch_folders = "tests/data"
+    input_dispatch_list = data_path / dispatch_filename
+    tmp_dispatch_dir = top_level_dir / dispatch_folders / dispatch_filename
+    tmp_dispatch_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(input_dispatch_list, tmp_dispatch_dir)
 
     id_list = ["AAAAA"]
     send_school(2021, id_list, attachment_name="test.pdf", config_file=test_config_file, top_level_dir=top_level_dir)

@@ -5,7 +5,6 @@ from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
-from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.reports.auth import RREDAuthenticator
 
 
@@ -223,24 +222,18 @@ class ReportEmailer:
         return self.__class__.send_email(email, save=save_email)
 
 
-def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str, reports_dir: Path = None):
+def school_mailer(school_id: str, year: int, mail_info: dict, report_name: str, reports_dir: Path = None):
     """Wrapper mailing function
 
     Args:
         school_id (str): School ID
-        dispatch_list (Path): Path to dispatch list
-
-    Args:
-        school_id (str): School ID
-        dispatch_list (Path): Path to dispatch list
         year (int): Starting year of report coverage
+        mail_info (dict): Details of emails
         report_name (str, optional): Name of attached file. Defaults to "RRED_report.pdf".
 
     Raises:
         ReportEmailerException: Exception raised if report directory does not exist.
     """
-
-    mail_info = get_mailing_info(school_id, dispatch_list)
     emailer = ReportEmailer()
 
     if reports_dir is None:
