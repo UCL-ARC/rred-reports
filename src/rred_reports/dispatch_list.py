@@ -51,7 +51,7 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
     """Obtain the mailing info for a single school ID
 
     Args:
-        school_id (str): RRED School ID
+        rred_school_id (str): RRED School ID
         dispatch_list (Path): Path to dispatch list excel file
 
     Raises:
