@@ -5,6 +5,8 @@ from typing import Literal
 
 import pandas as pd
 from loguru import logger
+from openpyxl.styles import NamedStyle
+from openpyxl.utils import get_column_letter
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
@@ -26,27 +28,28 @@ class Pupil(PandasDataFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
-    assessi_engtest2: Data[str]
-    assessi_iretest1: Data[str]
-    assessi_iretype1: Data[str]
-    assessi_maltest1: Data[str]
-    assessi_outcome: Data[str]
-    assessi_scotest1: Data[str]
-    assessi_scotest2: Data[str]
-    assessi_scotest3: Data[str]
-    assessii_engcheck1: Data[str]
-    assessii_engtest4: Data[str]
-    assessii_engtest5: Data[str]
-    assessii_engtest6: Data[str]
-    assessii_engtest7: Data[str]
-    assessii_engtest8: Data[str]
-    assessii_scotest4: Data[str]
-    assessii_iretest2: Data[str]
-    assessii_iretype2: Data[str]
-    assessiii_engtest10: Data[str]
-    assessiii_engtest11: Data[str]
-    assessiii_engtest9: Data[str]
-    assessiii_iretest4: Data[str]
+    # no type coercion for "assess" columns, as can be both numeric and text, will require error handling if we use these
+    assessi_engtest2: Data[None]
+    assessi_iretest1: Data[None]
+    assessi_iretype1: Data[None]
+    assessi_maltest1: Data[None]
+    assessi_outcome: Data[None]
+    assessi_scotest1: Data[None]
+    assessi_scotest2: Data[None]
+    assessi_scotest3: Data[None]
+    assessii_engcheck1: Data[None]
+    assessii_engtest4: Data[None]
+    assessii_engtest5: Data[None]
+    assessii_engtest6: Data[None]
+    assessii_engtest7: Data[None]
+    assessii_engtest8: Data[None]
+    assessii_scotest4: Data[None]
+    assessii_iretest2: Data[None]
+    assessii_iretype2: Data[None]
+    assessiii_engtest10: Data[None]
+    assessiii_engtest11: Data[None]
+    assessiii_engtest9: Data[None]
+    assessiii_iretest4: Data[None]
     entry_dob: Data[Literal["datetime64[ns]"]]
     summer: Data[str]
     entry_date: Data[Literal["datetime64[ns]"]]
@@ -104,9 +107,10 @@ class School(PandasDataFrame):
     """School information can link with Teacher df with school_id"""
 
     school_id: Data[str]
-    rrcp_country: Data[str]
-    rrcp_area: Data[str]
-    rrcp_school: Data[str]
+    # no type coercion so .isna() can be used to drop rows that don't have any school data
+    rrcp_country: Data[None]
+    rrcp_area: Data[None]
+    rrcp_school: Data[None]
 
 
 def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
@@ -119,17 +123,15 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
         dict[str, pd.DataFrame]: Dictionary of dataframes
     """
     full_data = pd.read_excel(file)
-    # drop out teachers at this point, so that if a teacher has changed title between years, we take the most recent one
-    filtered_data = full_data[~full_data["reg_rr_title"].isin(["Teacher Leader", "Teacher Leader in Training"])].copy()
 
-    def clmnlist(i: int, data: pd.DataFrame = filtered_data) -> list:
+    def clmnlist(i: int, data: pd.DataFrame = full_data) -> list:
         return list(data.iloc[:, i])
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
-    teach_df.drop_duplicates(subset="rred_user_id", inplace=True)  # pylint: disable=E1101
+    teach_df.drop_duplicates(subset=["rred_user_id", "school_id"], inplace=True)  # pylint: disable=E1101
 
     drop_cols = list(all_schools_df.columns.values)
     drop_cols.append(teach_df.columns.values[1])  # pylint: disable=E1101
@@ -197,3 +199,31 @@ def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
     processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
     processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
     return processed_data
+
+
+def write_to_excel(masterfile_data: pd.DataFrame, output_file: Path) -> None:
+    """
+    Write masterfile dataframe to excel, formatting dates in Excel so they can be edited in excel without type
+    conversion
+
+    Parameters:
+        masterfile_data (pd.DataFrame): dataframe of masterfile
+        output_file (Path): path to write the file to
+    """
+    date_format_string = "YYYY-MM-DD"
+    excel_date_format = NamedStyle(name="date_format", number_format=date_format_string)
+    column_names = [column for column in masterfile_data.columns if column.endswith("_date") or column.endswith("_testdate")]  # noqa: PIE810
+    column_names.append("entry_dob")
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    with pd.ExcelWriter(output_file, date_format=date_format_string, engine="openpyxl") as writer:
+        masterfile_data.to_excel(writer, index=False)
+        workbook = writer.book
+        worksheet = workbook.active
+        for pandas_column_name in column_names:
+            # convert to the Excel column letters e.g. 'A', 'B', ... 'AA', 'AB' ...
+            column_letter = get_column_letter(masterfile_data.columns.get_loc(pandas_column_name) + 1)
+            column = worksheet[column_letter]
+            # skip the title column formatting
+            for cell in column[1:]:
+                cell.style = excel_date_format

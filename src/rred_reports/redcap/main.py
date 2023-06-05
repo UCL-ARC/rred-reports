@@ -212,6 +212,7 @@ class RedcapReader:
         entry_year_cols = [f"entry_year_{country}" for country in ["eng", "ire", "mal", "sco"]]
 
         export_data = self._create_long_data(entry_year_cols, wide_extract)
+        self._convert_dates_to_datetime(export_data)
         processed_data = self._process_calculated_columns(entry_year_cols, export_data, survey_period)
         processed_data.rename(columns={"rrcp_rr_id": "rred_user_id"}, inplace=True)
 
@@ -235,6 +236,12 @@ class RedcapReader:
         if long_df is not None:
             return pd.concat([long_df, transformed[column_prefix]], axis=1)
         return transformed
+
+    @staticmethod
+    def _convert_dates_to_datetime(extract: pd.DataFrame):
+        date_cols = [col for col in extract if col.endswith("_date")]
+        dates = extract[date_cols].applymap(pd.to_datetime, format="%Y-%m-%d", errors="coerce")
+        extract[date_cols] = dates
 
     def _process_calculated_columns(self, entry_year_cols: list[str], export_data: pd.DataFrame, survey_period: str) -> pd.DataFrame:
         """

@@ -17,11 +17,17 @@ example_processed_data["reg_rr_title"] = [
     "RR Teacher + Support Role",
     "RR Teacher + Class Leader",
 ]
-example_processed_data["rrcp_school"] = [f"RRS{x}" for x in range(4)]
+example_processed_data["rred_user_id"] = [f"id_{x}" for x in range(4)]
+example_processed_data["school_id"] = [f"RRS{x}" for x in range(4)]
+example_processed_data["rrcp_school"] = [f"school_{x}" for x in range(4)]
 example_processed_data["pupil_no"] = [f"{x + 1}_2021-22" for x in range(4)]
 example_processed_data["entry_dob"] = ["2017-01-01" for _ in range(4)]
 example_processed_data["entry_date"] = ["2021-09-01" for _ in range(4)]
 example_processed_data["exit_date"] = ["2022-06-01" for _ in range(4)]
+
+example_dispatch_list = pd.DataFrame.from_dict(
+    {"UserID": [f"id_{x}" for x in range(4)], "RRED School ID": [f"RRS{x}" for x in range(4)], "School Label": [f"school_{x}" for x in range(4)]}
+)
 
 
 def test_report_type_enum():
@@ -41,10 +47,12 @@ def test_validate_data_sources_passes(temp_data_directories: dict):
     data_directory = temp_data_directories["year"]
 
     processed_data_path = data_directory / "processed_data.xlsx"
+    dispatch_list_path = top_level_dir / "dispatch_list.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     example_processed_data.to_excel(processed_data_path, index=False)
     example_processed_data.to_csv(template_file_standin_path)
-    validated_data = validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
+    example_dispatch_list.to_excel(dispatch_list_path, index=False)
+    validated_data = validate_data_sources(2099, template_file_standin_path, processed_data_path, dispatch_list_path, top_level_dir=top_level_dir)
     assert isinstance(validated_data, dict)
     assert len(validated_data) == 3
 
@@ -55,9 +63,11 @@ def test_validate_data_sources_fails_processed_data_missing(temp_data_directorie
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     example_processed_data.to_csv(template_file_standin_path)
     missing_processed_data = top_level_dir / "nope.xlsx"
+    dispatch_list_path = top_level_dir / "dispatch_list.xlsx"
+    example_dispatch_list.to_excel(dispatch_list_path, index=False)
 
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, missing_processed_data, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, missing_processed_data, dispatch_list_path, top_level_dir=top_level_dir)
 
 
 def test_validate_data_sources_fails_template_file_missing(temp_data_directories: dict):
@@ -67,8 +77,10 @@ def test_validate_data_sources_fails_template_file_missing(temp_data_directories
     processed_data_path = data_directory / "processed_data.xlsx"
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     example_processed_data.to_excel(processed_data_path, index=False)
+    dispatch_list_path = top_level_dir / "dispatch_list.xlsx"
+    example_dispatch_list.to_excel(dispatch_list_path, index=False)
     with pytest.raises(FileNotFoundError):
-        validate_data_sources(2099, template_file_standin_path, processed_data_path, top_level_dir=top_level_dir)
+        validate_data_sources(2099, template_file_standin_path, processed_data_path, dispatch_list_path, top_level_dir=top_level_dir)
 
 
 def test_get_config_success(temp_config_file: Path):
@@ -95,9 +107,13 @@ def test_generate_school_reports(mocker, temp_data_directories: dict, data_path)
     top_level_dir = temp_data_directories["top_level"]
 
     processed_data_path = top_level_dir / "processed_data.xlsx"
+    # Slight hack to allow same config file to be used for other email end-to-end tests, write to expected path
+    dispatch_list_path = top_level_dir / "tests/data/dispatch_list_single_test_school.xlsx"
+    dispatch_list_path.parent.mkdir(parents=True)
     template_file_standin_path = top_level_dir / "template_file_standin.csv"
     example_processed_data.to_excel(processed_data_path, index=False)
     example_processed_data.to_csv(template_file_standin_path)
+    example_dispatch_list.to_excel(dispatch_list_path, index=False)
     test_config_file = data_path / "report_config.toml"
 
     result = generate(ReportType("school"), 2099, config_file=test_config_file, top_level_dir=top_level_dir)

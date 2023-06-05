@@ -9,6 +9,7 @@ from rred_reports import get_config
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
 from rred_reports.reports.emails import school_mailer
+from rred_reports.validation import log_school_id_inconsistencies, write_issues_if_exist
 
 app = typer.Typer()
 
@@ -26,7 +27,7 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
@@ -48,9 +49,12 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
 
     data_path = top_level_dir / masterfile_path
     template_file_path = top_level_dir / template_file
-    output_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
+    report_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     processed_data = read_and_process_masterfile(data_path)
+    issues_file = top_level_dir / "output" / "issues" / f"{year}_school_id_issues.xlsx"
+    issues = log_school_id_inconsistencies(processed_data, top_level_dir / dispatch_path, year)
+    write_issues_if_exist(issues, issues_file)
 
     try:
         assert template_file_path.is_file()
@@ -58,10 +62,10 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
         logger.error(f"No template file found at {template_file_path}. Exiting.")
         raise FileNotFoundError from error
 
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True)
+    if not report_dir.exists():
+        report_dir.mkdir(parents=True)
 
-    return {"data": processed_data, "template_file": template_file_path, "output_dir": output_dir}
+    return {"data": processed_data, "template_file": template_file_path, "output_dir": report_dir}
 
 
 @app.command()
@@ -84,7 +88,8 @@ def generate(
 
     template_file_path = config[level.value]["template"]
     masterfile_path = config[level.value]["masterfile"]
-    validated_data = validate_data_sources(year, template_file_path, masterfile_path, top_level_dir=top_level_dir)
+    dispatch_path = config[level.value]["dispatch_list"]
+    validated_data = validate_data_sources(year, template_file_path, masterfile_path, dispatch_path=dispatch_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
     if level.value.lower() == "school":
