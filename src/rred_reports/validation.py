@@ -156,7 +156,7 @@ def write_issues_if_exist(issues: list[ValidationIssue], issues_path: Path) -> N
     if not issues:
         return
     issues_path.parent.mkdir(parents=True, exist_ok=True)
-    logger.info("Writing issues to {path}", path=issues_path)
+    logger.warning("Writing issues to {path}", path=issues_path)
     with pd.ExcelWriter(issues_path, engine="openpyxl") as writer:
         for issue in issues:
             description_lines = issue.description.split("\n")
