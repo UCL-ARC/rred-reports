@@ -165,7 +165,7 @@ def send_school(
     if id_list is None:
         id_list = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
-        for report_path in report_directory.glob("report_*.pdf"):
+        for report_path in sorted(report_directory.glob("report_*.pdf")):
             id_list.append(report_path.stem.split("_")[-1])
 
     for school_id in id_list:
