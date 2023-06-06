@@ -1,5 +1,6 @@
 """Reading and use of the RRED dispatch list"""
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -47,12 +48,13 @@ def _raise_if_school_duplicated(schools) -> None:
         raise DispatchListException(message)
 
 
-def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
+def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: Optional[str] = None) -> dict:
     """Obtain the mailing info for a single school ID
 
     Args:
         rred_school_id (str): RRED School ID
         dispatch_list (Path): Path to dispatch list excel file
+        override_mailto (str, optional): Email address to override for each school, for use in manual testing and UAT
 
     Raises:
         ReportDispatchException: If no contact email is found
@@ -104,6 +106,8 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
     school_id = mailing_info["RRED School ID"].unique()[0]
     school_label = mailing_info["School Label"].tolist()[0]
     mailing_list = mailing_info["Mailing List"].tolist()
+    if override_mailto:
+        mailing_list = [override_mailto]
 
     mailing_info = {"rred_school_id": school_id, "school_label": school_label, "mailing_list": mailing_list}
 

@@ -147,6 +147,7 @@ def send_school(
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,
+    override_mailto: Optional[str] = None,
 ):
     """Send reports to school contacts via RRED school ID
 
@@ -157,6 +158,7 @@ def send_school(
         config_file (Optional[Path], optional): Non-standard configuration file for processing
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
+        override_mailto (str, optional): Email address to override for each school, for use in manual testing and UAT
     """
     config = get_config(config_file)
     dispatch_list = top_level_dir / config["school"]["dispatch_list"]
@@ -173,7 +175,7 @@ def send_school(
     email_details = []
     logger.info("Getting dispatch list details for each school report pdf found")
     for school_id in tqdm(id_list):
-        email_info = get_mailing_info(school_id, dispatch_list)
+        email_info = get_mailing_info(school_id, dispatch_list, override_mailto)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
     emailed_ids = set()
