@@ -5,6 +5,7 @@ from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
+from rred_reports.redcap.interface import top_level_dir
 from rred_reports.reports.auth import RREDAuthenticator
 
 
@@ -230,6 +231,7 @@ def school_mailer(school_id: str, year: int, mail_info: dict, report_name: str, 
         year (int): Starting year of report coverage
         mail_info (dict): Details of emails
         report_name (str, optional): Name of attached file. Defaults to "RRED_report.pdf".
+        reports_dir (Path, optional): Path where the reports should be found
 
     Raises:
         ReportEmailerException: Exception raised if report directory does not exist.
@@ -237,7 +239,7 @@ def school_mailer(school_id: str, year: int, mail_info: dict, report_name: str, 
     emailer = ReportEmailer()
 
     if reports_dir is None:
-        reports_dir = Path(__file__).resolve().parents[6] / "output" / "reports" / str(year) / "schools"
+        reports_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     try:
         assert reports_dir.exists()
