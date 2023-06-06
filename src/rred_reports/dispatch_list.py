@@ -102,7 +102,7 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path) -> dict:
         raise DispatchListException(message) from error
 
     school_id = mailing_info["RRED School ID"].unique()[0]
-    school_label = mailing_info["School Label"].tolist()
+    school_label = mailing_info["School Label"].tolist()[0]
     mailing_list = mailing_info["Mailing List"].tolist()
 
     mailing_info = {"rred_school_id": school_id, "school_label": school_label, "mailing_list": mailing_list}
