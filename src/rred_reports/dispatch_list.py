@@ -49,7 +49,7 @@ def _raise_if_school_duplicated(schools) -> None:
 
 
 def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: Optional[str] = None) -> dict:
-    """Obtain the mailing info for a single school ID
+    """Obtain the mailing info for a single school ID, emailing the teacher and teacher leader for each school
 
     Args:
         rred_school_id (str): RRED School ID
@@ -77,23 +77,24 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: 
     # Find no teacher email instance - replace with TL if that exists
 
     dispatch_df.loc[:, "Mailing List"] = np.nan
+    teacher_leader_dispatch = dispatch_df.copy()
+    teacher_leader_dispatch.loc[~dispatch_df["TL Email"].isna(), "Mailing List"] = teacher_leader_dispatch["TL Email"]
     dispatch_df.loc[(~dispatch_df["Email"].isna()), "Mailing List"] = dispatch_df["Email"]
-    dispatch_df.loc[(dispatch_df["Email"].isna()) & (~dispatch_df["TL Email"].isna()), "Mailing List"] = dispatch_df["TL Email"]
+    teacher_and_leader_dispatch = pd.concat([dispatch_df, teacher_leader_dispatch], axis=0, ignore_index=True)
+    teacher_and_leader_dispatch = teacher_and_leader_dispatch[~teacher_and_leader_dispatch["Mailing List"].isna()]
 
-    # Drop any null email instances and report them out
-    missing_email = dispatch_df.loc[dispatch_df["Mailing List"].isna()]
+    # Drop report schools with no dispatch emails
     try:
-        assert len(missing_email) == 0
+        assert len(teacher_and_leader_dispatch) > 0
     except AssertionError as error:
-        missing_ids = missing_email["RRED School ID"].tolist()
-        message = f"Missing contact ID for schools with RRED IDs: {missing_ids}. Exiting."
+        message = f"Missing contact ID for school with RRED ID: '{rred_school_id}'. Exiting."
         raise DispatchListException(message) from error
 
     # Case 2: Find instances of multiple teacher emails
     # Remove any space-delimited lists and replace with comma separated
-    cleaned_mailing_list = dispatch_df.loc[:, "Mailing List"].str.replace(" ", ",").str.replace(",,", ",")
-    dispatch_df.loc[:, "Mailing List"] = cleaned_mailing_list
-    mailing_info = dispatch_df.loc[:, ["RRED School ID", "School Label", "Mailing List"]]
+    cleaned_mailing_list = teacher_and_leader_dispatch.loc[:, "Mailing List"].str.replace(" ", ",").str.replace(",,", ",")
+    teacher_and_leader_dispatch.loc[:, "Mailing List"] = cleaned_mailing_list
+    mailing_info = teacher_and_leader_dispatch.loc[:, ["RRED School ID", "School Label", "Mailing List"]]
 
     # Teacher emails may be entered on separate rows, in which case this DF will have multiple rows
 
