@@ -155,6 +155,7 @@ class ReportEmailer:
 
         Args:
             message (Message): Constructed message to send
+            save (bool): Should the email be saved to the sent mailbox
         Returns:
             process_status (bool): Did the message successfully send?
         """
