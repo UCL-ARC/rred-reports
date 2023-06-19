@@ -124,7 +124,7 @@ class ReportEmailer:
         """Building the content of the email
 
         Args:
-            content (EmailContent): EmailContent object
+            mail_content (EmailContent): EmailContent object
 
         Returns:
             Message: Email (optionally with attachment) as exchangelib Message
