@@ -35,9 +35,8 @@ def formatted_mail_content(school_name: str, start_year: int, end_year) -> dict:
     Please find attached the Reading Recovery Annual Report for your school for {start_year}-{end_year_short}.
     The report outlines the progress that pupils have made in Reading Recovery in your school during the year {start_year}-{end_year_short}.<br><br>
 
-    This report is likely to reflect the disruption to schools caused by the COVID-19 pandemic
-    as many teachers were unable to continue daily lessons due to disruption and providing cover for teacher absence in schools.
-    Only programmes that offered regular teaching have been recorded as complete.
+    Programmes that offered regular teaching have been recorded as complete, either Discontinued or Referred.
+    Programmes that will continue after the summer break are recorded as 'Ongoing'.
     Any programme that <b>will not continue after the summer break</b> but is without exit assessment data has been recorded as 'Incomplete'.
     Any record started last year will still be available in your survey queue for {start_year}-{end_year_short} so that you can complete the pupil's record.<br><br>
 
