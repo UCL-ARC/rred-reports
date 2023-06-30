@@ -7,6 +7,7 @@ import tomli
 
 from rred_reports import get_config
 from rred_reports.masterfile import masterfile_columns
+from rred_reports.redcap import interface
 from rred_reports.reports.emails import ReportEmailer
 from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
 
@@ -168,11 +169,24 @@ def test_send_school(mocker, temp_data_directories, data_path):
     school_mailer.assert_called_once()
 
 
-def test_mailto_override(mocker, temp_data_directories, data_path):
+@pytest.fixture()
+def tmp_top_level_dir(temp_data_directories) -> Path:
+    """
+    Manually set temporary top level directory, and return it. Rollback after the test has run.
+    """
+    original_value = interface.top_level_dir
+    interface.top_level_dir = temp_data_directories["top_level"]
+    yield temp_data_directories["top_level"]
+    interface.top_level_dir = original_value
+
+
+def test_mailto_override(mocker, tmp_top_level_dir, data_path):
     email_run_mock = mocker.patch.object(ReportEmailer, "run")
-    top_level_dir = temp_data_directories["top_level"]
+    top_level_dir = tmp_top_level_dir
     test_config_file = data_path / "report_config.toml"
     id_list = ["AAAAA"]
+    output_dir = top_level_dir / "output" / "reports" / "2021" / "schools"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # copy dispatch list to tmp directory
     dispatch_filename = "dispatch_list_single_test_school.xlsx"
