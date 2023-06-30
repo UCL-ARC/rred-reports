@@ -188,11 +188,11 @@ def send_school(
         try:
             school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
             emailed_ids.add(email_detail["school_id"])
-        except Exception as e:
+        except Exception as error:
             all_schools = set(id_list)
             schools_to_send = sorted(all_schools.difference(emailed_ids))
             logger.error("Error on ending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
-            raise e
+            raise error
 
 
 @app.callback()
