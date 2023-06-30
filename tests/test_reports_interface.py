@@ -7,7 +7,7 @@ import tomli
 
 from rred_reports import get_config
 from rred_reports.masterfile import masterfile_columns
-from rred_reports.redcap import interface
+from rred_reports.reports import emails
 from rred_reports.reports.emails import ReportEmailer
 from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
 
@@ -174,10 +174,10 @@ def tmp_top_level_dir(temp_data_directories) -> Path:
     """
     Manually set temporary top level directory, and return it. Rollback after the test has run.
     """
-    original_value = interface.top_level_dir
-    interface.top_level_dir = temp_data_directories["top_level"]
+    original_value = emails.top_level_dir
+    emails.top_level_dir = temp_data_directories["top_level"]
     yield temp_data_directories["top_level"]
-    interface.top_level_dir = original_value
+    emails.top_level_dir = original_value
 
 
 def test_mailto_override(mocker, tmp_top_level_dir, data_path):
