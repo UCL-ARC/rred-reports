@@ -198,4 +198,8 @@ def main():
 
 
 if __name__ == "__main__":
-    create(ReportType.SCHOOL, 2021, TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml")
+    create(ReportType.SCHOOL, 2022, TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml")
+    ## test sending reports to specific UCL user
+    # send_school(2021, config_file=TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml", top_level_dir=TOP_LEVEL_DIR, override_mailto="username@ucl.ac.uk")
+    ## test sending reports to RRED email for UAT
+    # send_school(2021, config_file=TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml", top_level_dir=TOP_LEVEL_DIR, override_mailto="ilc.comms@ucl.ac.uk")
