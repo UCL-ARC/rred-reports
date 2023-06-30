@@ -29,13 +29,14 @@ class ReportType(str, Enum):
     NATIONAL = "national"
 
 
-def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
     """Perform some basic data source validation
 
     Args:
         year (int): Year to process
         template_file (Path): Template file
         masterfile_path (Path): Masterfile file
+        dispatch_path (Path): Dispatch file
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
 
@@ -79,6 +80,7 @@ def generate(
     Args:
         level (ReportType): school, centre, national
         year (int): Year to process
+        config_file (Path): path to config file
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
             data can be found. Defaults to None.
 
@@ -134,6 +136,8 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
     Args:
         level (ReportType): school, centre, national
         year (int): Year to process
+        config_file (Path): path to config file
+        output (str): Output file name for all report PDFs combined, without extension
     """
     typer.echo(f"Creating a report for level: {level.value}")
     report_dir = generate(level, year, config_file)
