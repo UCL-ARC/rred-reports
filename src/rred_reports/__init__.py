@@ -7,7 +7,7 @@ Allows automated sending of reports via email
 
 __version__ = "0.1.0"
 
-__all__ = ("__version__",)
+__all__ = ("__version__", "get_config")
 
 from pathlib import Path
 
