@@ -5,7 +5,7 @@ from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
-from rred_reports.dispatch_list import get_mailing_info
+from rred_reports.redcap.interface import top_level_dir
 from rred_reports.reports.auth import RREDAuthenticator
 
 
@@ -35,9 +35,8 @@ def formatted_mail_content(school_name: str, start_year: int, end_year) -> dict:
     Please find attached the Reading Recovery Annual Report for your school for {start_year}-{end_year_short}.
     The report outlines the progress that pupils have made in Reading Recovery in your school during the year {start_year}-{end_year_short}.<br><br>
 
-    This report is likely to reflect the disruption to schools caused by the COVID-19 pandemic
-    as many teachers were unable to continue daily lessons due to disruption and providing cover for teacher absence in schools.
-    Only programmes that offered regular teaching have been recorded as complete.
+    Programmes that offered regular teaching have been recorded as complete, either Discontinued or Referred.
+    Programmes that will continue after the summer break are recorded as 'Ongoing'.
     Any programme that <b>will not continue after the summer break</b> but is without exit assessment data has been recorded as 'Incomplete'.
     Any record started last year will still be available in your survey queue for {start_year}-{end_year_short} so that you can complete the pupil's record.<br><br>
 
@@ -124,7 +123,7 @@ class ReportEmailer:
         """Building the content of the email
 
         Args:
-            content (EmailContent): EmailContent object
+            mail_content (EmailContent): EmailContent object
 
         Returns:
             Message: Email (optionally with attachment) as exchangelib Message
@@ -148,7 +147,7 @@ class ReportEmailer:
         return message
 
     @staticmethod
-    def send_email(message: Message, save: bool = False) -> bool:
+    def send_email(message: Message, save: bool = True) -> bool:
         """Sends the defined email.
 
         Also can save a copy in the sent mailbox via
@@ -156,6 +155,7 @@ class ReportEmailer:
 
         Args:
             message (Message): Constructed message to send
+            save (bool): Should the email be saved to the sent mailbox
         Returns:
             process_status (bool): Did the message successfully send?
         """
@@ -223,28 +223,23 @@ class ReportEmailer:
         return self.__class__.send_email(email, save=save_email)
 
 
-def school_mailer(school_id: str, dispatch_list: Path, year: int, report_name: str, reports_dir: Path = None):
+def school_mailer(school_id: str, year: int, mail_info: dict, report_name: str, reports_dir: Path = None):
     """Wrapper mailing function
 
     Args:
         school_id (str): School ID
-        dispatch_list (Path): Path to dispatch list
-
-    Args:
-        school_id (str): School ID
-        dispatch_list (Path): Path to dispatch list
         year (int): Starting year of report coverage
+        mail_info (dict): Details of emails
         report_name (str, optional): Name of attached file. Defaults to "RRED_report.pdf".
+        reports_dir (Path, optional): Path where the reports should be found
 
     Raises:
         ReportEmailerException: Exception raised if report directory does not exist.
     """
-
-    mail_info = get_mailing_info(school_id, dispatch_list)
     emailer = ReportEmailer()
 
     if reports_dir is None:
-        reports_dir = Path(__file__).resolve().parents[6] / "output" / "reports" / str(year) / "schools"
+        reports_dir = top_level_dir / "output" / "reports" / str(year) / "schools"
 
     try:
         assert reports_dir.exists()

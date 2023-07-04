@@ -35,6 +35,7 @@ dependencies = [
   "pandas-dataclasses == 0.12.0",
   "pypdf == 3.8.1",
   "python-docx == 0.8.11",
+  "numpy == 1.24.2",
   "tomli == 2.0.1",
   "tomli-w == 1.0.0",
   "typer == 0.7.0",

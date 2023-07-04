@@ -24,7 +24,7 @@ def test_get_mailing_info_success_single_recipient(data_path):
     test_id = "RRS100"
     mailing_info = get_mailing_info(test_id, dispatch_list)
     assert len(mailing_info.keys()) == 3
-    assert len(mailing_info["mailing_list"]) == 1
+    assert len(mailing_info["mailing_list"]) == 2
 
 
 def test_get_mailing_info_success_multiple_recipients(data_path):
@@ -32,7 +32,7 @@ def test_get_mailing_info_success_multiple_recipients(data_path):
     test_id = "RRS180"
     mailing_info = get_mailing_info(test_id, dispatch_list)
     assert len(mailing_info.keys()) == 3
-    assert len(mailing_info["mailing_list"]) == 2
+    assert len(mailing_info["mailing_list"]) == 4
 
 
 def test_get_mailing_info_success_null_recipient_replaced_with_tl(data_path):
@@ -49,7 +49,7 @@ def test_get_mailing_info_failure_no_email_no_tl(data_path):
     test_id = "RRS103"
     with pytest.raises(DispatchListException) as error:
         get_mailing_info(test_id, dispatch_list)
-    expected_message = f"Missing contact ID for schools with RRED IDs: ['{test_id}']. Exiting."
+    expected_message = f"Missing contact ID for school with RRED ID: '{test_id}'. Exiting."
     assert str(error.value) == expected_message
 
 

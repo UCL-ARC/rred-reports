@@ -67,11 +67,13 @@ class RedcapReader:
         """
         Process wide data before conversion to long.
 
+        - Use labelled data for all columns except for `school_id`, which remains as the code for later processing using the dispatch list
         - Some data is spread across multiple columns, so coalesce this data
         - Type conversion for dates
         - Convert wide columns to consistent format ({column}_v{student_number}
         - Add in row number column for unique indexes
         - Filter responses with no students
+        - Filter out test rows - `record_id` starting with 'Sandbox' or 'TEST'
 
         Args:
             raw_data (pd.DataFrame): survey responses, with data given as codes
@@ -118,7 +120,7 @@ class RedcapReader:
     def _filter_non_entry_and_test_rows(extract: pd.DataFrame) -> pd.DataFrame:
         no_children = extract[extract["no_rr_children"].notnull() & extract["no_rr_children"] != 0]
         has_id = no_children[no_children["rrcp_rr_id"].notnull()]
-        return has_id[~has_id["record_id"].str.startswith("Sandbox")]
+        return has_id[~has_id["record_id"].str.startswith("Sandbox") & ~has_id["record_id"].str.startswith("TEST")]
 
     @staticmethod
     def _rename_wide_cols_with_student_number_suffix(extract: pd.DataFrame) -> pd.DataFrame:
