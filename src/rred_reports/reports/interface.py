@@ -191,7 +191,7 @@ def send_school(
         except Exception as error:
             all_schools = set(id_list)
             schools_to_send = sorted(all_schools.difference(emailed_ids))
-            logger.error("Error on ending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
+            logger.error("Error on sending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
             raise error
 
 
