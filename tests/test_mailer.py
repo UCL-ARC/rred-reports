@@ -49,7 +49,7 @@ def test_build_email_without_report(mock_ews_account):
 def test_send_email_no_save(mocker, mock_message):
     send_mock = mocker.patch("exchangelib.Message.send")
 
-    ReportEmailer.send_email(mock_message)
+    ReportEmailer.send_email(mock_message, save=False)
     send_mock.assert_called_once()
 
 

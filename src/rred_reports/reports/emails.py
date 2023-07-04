@@ -147,7 +147,7 @@ class ReportEmailer:
         return message
 
     @staticmethod
-    def send_email(message: Message, save: bool = False) -> bool:
+    def send_email(message: Message, save: bool = True) -> bool:
         """Sends the defined email.
 
         Also can save a copy in the sent mailbox via
