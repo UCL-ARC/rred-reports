@@ -172,6 +172,7 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
 
     def get_outcome_from_summary(outcome_df: pd.DataFrame, outcome_type: str) -> int:
         """
+        Get count of exit outcome.
 
         Args:
             outcome_df (pd.DataFrame): dataframe with lower-cased "exit_outcome" column
