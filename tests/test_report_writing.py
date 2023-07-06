@@ -10,6 +10,7 @@ from rred_reports.reports.schools import (
     filter_six,
     populate_school_data,
     school_filter,
+    summary_table,
 )
 
 
@@ -17,6 +18,29 @@ from rred_reports.reports.schools import (
 def example_school_data(data_path: Path):
     testing_df = read_and_process_masterfile(data_path / "example_masterfile.xlsx")
     return school_filter(testing_df, "RRS2030220")
+
+
+def test_summary_table_output(example_school_data: pd.DataFrame):
+    """
+    Given a masterfile with data for school RRS2030220, where one pupil is filtered by date range, leaving 5 pupils with a different exit outcome
+    When a summary table is generated
+    Then there should be a single teacher, 5 pupils, and one of each exit outcome
+    """
+    output = summary_table(example_school_data, 2021)
+
+    assert output.equals(
+        pd.DataFrame(
+            {
+                "number_of_rr_teachers": [1],
+                "number_of_pupils_served": [5],
+                "po_discontinued": [1],
+                "po_referred_to_school": [1],
+                "po_incomplete": [1],
+                "po_left_school": [1],
+                "po_ongoing": [1],
+            }
+        )
+    )
 
 
 def test_school_tables_filled(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path):

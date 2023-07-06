@@ -170,9 +170,9 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
-    def get_outcome_from_summary(school_df: pd.DataFrame, outcome_type: str) -> int:
+    def get_outcome_from_summary(df: pd.DataFrame, outcome_type: str) -> int:
         try:
-            return school_df["exit_outcome"].value_counts()[outcome_type]
+            return df["exit_outcome"].value_counts()[outcome_type]
         except KeyError:
             return 0
 
@@ -186,7 +186,7 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
             "po_discontinued": get_outcome_from_summary(filtered_summary_table, "Discontinued"),
             "po_referred_to_school": get_outcome_from_summary(filtered_summary_table, "Referred to school"),
             "po_incomplete": get_outcome_from_summary(filtered_summary_table, "Incomplete"),
-            "po_left_school": get_outcome_from_summary(filtered_summary_table, "Left school"),
+            "po_left_school": get_outcome_from_summary(filtered_summary_table, "Left School"),
             "po_ongoing": get_outcome_from_summary(filtered_summary_table, "Ongoing"),
         }
     )
