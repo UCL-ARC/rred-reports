@@ -170,9 +170,9 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
-    def get_outcome_from_summary(df: pd.DataFrame, outcome_type: str) -> int:
+    def get_outcome_from_summary(outcome_df: pd.DataFrame, outcome_type: str) -> int:
         try:
-            return df["exit_outcome"].value_counts()[outcome_type]
+            return outcome_df["exit_outcome"].value_counts()[outcome_type]
         except KeyError:
             return 0
 
