@@ -171,8 +171,16 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
     def get_outcome_from_summary(outcome_df: pd.DataFrame, outcome_type: str) -> int:
+        """
+
+        Args:
+            outcome_df (pd.DataFrame): dataframe with lower-cased "exit_outcome" column
+            outcome_type (str): case-insensitive exit outcome value
+        Returns:
+            count of each exit outcome, if it doesn't exist then 0
+        """
         try:
-            return outcome_df["exit_outcome"].value_counts()[outcome_type]
+            return outcome_df["exit_outcome"].value_counts()[outcome_type.lower()]
         except KeyError:
             return 0
 
