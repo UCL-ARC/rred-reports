@@ -170,24 +170,35 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
     """
     columns_used = ["rred_user_id", "pupil_no", "exit_outcome"]
 
-    def get_outcome_from_summary(school_df: pd.DataFrame, outcome_type: str) -> int:
+    def get_outcome_from_summary(outcome_df: pd.DataFrame, outcome_type: str) -> int:
+        """
+        Get count of exit outcome.
+
+        Args:
+            outcome_df (pd.DataFrame): dataframe with lower-cased "exit_outcome" column
+            outcome_type (str): case-insensitive exit outcome value
+        Returns:
+            count of each exit outcome, if it doesn't exist then 0
+        """
         try:
-            return school_df["exit_outcome"].value_counts()[outcome_type]
+            return outcome_df["exit_outcome"].value_counts()[outcome_type.lower()]
         except KeyError:
             return 0
 
     filtered = filter_by_entry_and_exit(school_df, report_year)
-    filtered_summary_table = filtered[columns_used]
+    filtered_summary_table = filtered[columns_used].copy()
+    # let's try and reduce the pain with exit outcome labels
+    filtered_summary_table["exit_outcome"] = filtered_summary_table["exit_outcome"].str.lower().str.strip()
 
     return pd.DataFrame(
         {
             "number_of_rr_teachers": [filtered_summary_table["rred_user_id"].nunique()],
             "number_of_pupils_served": [filtered_summary_table["pupil_no"].nunique()],
-            "po_discontinued": get_outcome_from_summary(filtered_summary_table, "Discontinued"),
-            "po_referred_to_school": get_outcome_from_summary(filtered_summary_table, "Referred to school"),
-            "po_incomplete": get_outcome_from_summary(filtered_summary_table, "Incomplete"),
-            "po_left_school": get_outcome_from_summary(filtered_summary_table, "Left school"),
-            "po_ongoing": get_outcome_from_summary(filtered_summary_table, "Ongoing"),
+            "po_discontinued": get_outcome_from_summary(filtered_summary_table, "discontinued"),
+            "po_referred_to_school": get_outcome_from_summary(filtered_summary_table, "referred to school"),
+            "po_incomplete": get_outcome_from_summary(filtered_summary_table, "incomplete"),
+            "po_left_school": get_outcome_from_summary(filtered_summary_table, "left school"),
+            "po_ongoing": get_outcome_from_summary(filtered_summary_table, "ongoing"),
         }
     )
 
