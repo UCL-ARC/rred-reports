@@ -11,24 +11,10 @@
 Extracts RRED data from REDCap, transforms and populates templates. Allows
 automated sending of reports via email
 
-## Setting up a development version on UCL Data Safe Haven
+## Extracting data from the UCL Data Safe Haven (DSH)
 
-- A sane workflow once we have stable versions would be to publish to PyPi and
-  install the application via the DSH artifactory. For now, we can use the DSH
-  file transfer of the zipped repository to move code over.
-- Follow the
-  [How do I install packages on Anaconda using Artifactory](https://www.ucl.ac.uk/isd/services/file-storage-sharing/data-safe-haven/data-safe-haven-user-guide-faqs)
-  section of the DSH FAQ, setting up the `.condarc` (Set up Anaconda with conda)
-  and `pip.ini` (Set up Anaconda with PyPi) file in the N: drive
-- Run an anaconda prompt from the S drive and navigate to the project directory
-- Create a new conda environment called rred and activate it and install the
-  package in editable mode
-  ```shell
-  conda create python=3.9 -n rred
-  conda activate rred
-  pip install -e .
-  ```
-- The `rred` CLI will now exist within this conda environment
+- To set up the RRED package for the first time in DSH follow the instruction in
+  [src/rred_reports/redcap/SETUP.md](src/rred_reports/redcap/SETUP.md)
 - For running the steps in the DSH, follow the instructions in
   [src/rred_reports/redcap/README.md](src/rred_reports/redcap/README.md)
 
@@ -54,7 +40,8 @@ In brief, new app registrations should be made by:
 - Searching for 'App Registrations'
 - Creating a new registration and noting down the tenant ID and
   client/application ID
-- Creating a client secret with a sensible name and noting down the secret
+- Creating a client secret with a sensible name and noting down the secret value
+  (e.g. `client secret`)
 - Setting API permissions as described in the exchangelib docs. If you are not
   able to assign the `full_access_as_app` permission as shown in the exchangelib
   docs, add the `EWS.AccessAsUser.All` permission (found under)
