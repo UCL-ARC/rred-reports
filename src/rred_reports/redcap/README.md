@@ -6,7 +6,7 @@
   copied it to `S:\ReadingRecoveryEvalDB\ARC\rred-reports` and installed it in a
   conda environment following the setup instructions in the [setup.md](SETUP.md)
 - In the DSH Desktop, start a new anaconda prompt on the `S:` drive (look in
-  Start } Anaconda3 64-bit) and navigate to the installed repo
+  Start > Anaconda3 64-bit) and navigate to the installed repo
 - Activate the conda environment
   ```shell
   conda activate rred
