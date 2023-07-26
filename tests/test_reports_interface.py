@@ -5,11 +5,11 @@ import pandas as pd
 import pytest
 import tomli
 
-from rred_reports import get_config
+from rred_reports import ReportType, get_config
 from rred_reports.masterfile import masterfile_columns
 from rred_reports.reports import emails
 from rred_reports.reports.emails import ReportEmailer
-from rred_reports.reports.interface import ReportType, convert, create, generate, send_school, validate_data_sources
+from rred_reports.reports.interface import convert, create, generate, send_school, validate_data_sources
 
 example_data_dict = {column: list(range(4)) for column in masterfile_columns()}
 

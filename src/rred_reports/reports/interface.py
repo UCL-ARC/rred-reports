@@ -1,4 +1,3 @@
-from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -6,7 +5,7 @@ import typer
 from loguru import logger
 from tqdm import tqdm
 
-from rred_reports import get_config
+from rred_reports import ReportType, get_config, get_report_year_files
 from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
@@ -16,17 +15,6 @@ from rred_reports.validation import log_school_id_inconsistencies, write_issues_
 app = typer.Typer()
 
 TOP_LEVEL_DIR = Path(__file__).resolve().parents[3]
-
-
-class ReportType(str, Enum):
-    """ReportType class
-
-    Provides report types as enums
-    """
-
-    SCHOOL = "school"
-    CENTRE = "centre"
-    NATIONAL = "national"
 
 
 def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
@@ -90,9 +78,7 @@ def generate(
     typer.echo(f"Generating report for level: {level.value}")
     config = get_config(config_file)
 
-    template_file_path = config[level.value]["template"]
-    masterfile_path = config[level.value]["masterfile"]
-    dispatch_path = config[level.value]["dispatch_list"]
+    dispatch_path, masterfile_path, template_file_path = get_report_year_files(config, level, year)
     validated_data = validate_data_sources(year, template_file_path, masterfile_path, dispatch_path=dispatch_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
@@ -165,7 +151,9 @@ def send_school(
         override_mailto (str, optional): Email address to override for each school, for use in manual testing and UAT
     """
     config = get_config(config_file)
-    dispatch_list = top_level_dir / config["school"]["dispatch_list"]
+    dispatch_path, *_ = get_report_year_files(config, ReportType.SCHOOL, year)
+
+    dispatch_list = top_level_dir / dispatch_path
 
     if top_level_dir is None:
         top_level_dir = TOP_LEVEL_DIR

@@ -1,8 +1,15 @@
 [school]
-template = "template_file_standin.csv"
-masterfile = "processed_data.xlsx"
 n_tables = 7
-dispatch_list = "tests/data/dispatch_list_single_test_school.xlsx"
+
+    [school.2099]
+    template = "template_file_standin.csv"
+    masterfile = "processed_data.xlsx"
+    dispatch_list = "tests/data/dispatch_list_single_test_school.xlsx"
+
+    [school.2021]
+    template = "template_file_standin.csv"
+    masterfile = "processed_data.xlsx"
+    dispatch_list = "tests/data/dispatch_list_single_test_school.xlsx"
 
 ### The below aren't yet implemented and just contain placeholder values!
 [centre]
