@@ -61,7 +61,4 @@ def get_report_year_files(report_config: dict, report_type: ReportType, year: in
     except KeyError as error:
         msg = f"Year not found in config: {year}. Please add this year to the report config file."
         raise KeyError(msg) from error
-    template_file_path = year_config["template"]
-    masterfile_path = year_config["masterfile"]
-    dispatch_path = year_config["dispatch_list"]
-    return dispatch_path, masterfile_path, template_file_path
+    return year_config["dispatch_list"], year_config["masterfile"], year_config["template"]
