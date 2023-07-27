@@ -133,7 +133,7 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    id_list: Optional[list[str]] = None,
+    manual_id: Optional[list[str]] = typer.Option(None),  # noqa: B008
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,
@@ -143,7 +143,7 @@ def send_school(
 
     Args:
         year (int): Report start year
-        id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
+        manual_id (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to empty list.
         attachment_name (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
         config_file (Optional[Path], optional): Non-standard configuration file for processing
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
@@ -157,15 +157,24 @@ def send_school(
         top_level_dir = TOP_LEVEL_DIR
 
     dispatch_list = top_level_dir / dispatch_path
-    if not id_list:
-        id_list = []
+    logger.error(manual_id)
+    schools_to_send = sorted(manual_id)
+    school_command = f"--manual-id {' --manual-id '.join(schools_to_send)}"
+    logger.error(
+        "Error on sending emails, IDs left to send to {schools_to_send}\nYou can run just these schools by adding this to the CLI:\n{school_command}",
+        schools_to_send=schools_to_send,
+        school_command=school_command,
+    )
+    return
+    if not manual_id:
+        manual_id = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
         for report_path in sorted(report_directory.glob("report_*.pdf")):
-            id_list.append(report_path.stem.split("_")[-1])
+            manual_id.append(report_path.stem.split("_")[-1])
 
     email_details = []
     logger.info("Getting dispatch list details for each school report pdf found")
-    for school_id in tqdm(id_list):
+    for school_id in tqdm(manual_id):
         email_info = get_mailing_info(school_id, dispatch_list, override_mailto)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
@@ -176,9 +185,17 @@ def send_school(
             school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
             emailed_ids.add(email_detail["school_id"])
         except Exception as error:
-            all_schools = set(id_list)
+            all_schools = set(manual_id)
             schools_to_send = sorted(all_schools.difference(emailed_ids))
-            logger.error("Error on sending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
+            school_command = f"--manual-id {' --manual-id '.join(schools_to_send)}"
+            logger.error(
+                "Error on sending emails, IDs left to send to:\n"
+                "{schools_to_send}\n\n"
+                "You can run just these schools by adding this to the CLI:\n"
+                "{school_command}",
+                schools_to_send=schools_to_send,
+                school_command=school_command,
+            )
             raise error
 
 
