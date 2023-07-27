@@ -158,14 +158,7 @@ def send_school(
 
     dispatch_list = top_level_dir / dispatch_path
     logger.error(manual_id)
-    schools_to_send = sorted(manual_id)
-    school_command = f"--manual-id {' --manual-id '.join(schools_to_send)}"
-    logger.error(
-        "Error on sending emails, IDs left to send to {schools_to_send}\nYou can run just these schools by adding this to the CLI:\n{school_command}",
-        schools_to_send=schools_to_send,
-        school_command=school_command,
-    )
-    return
+
     if not manual_id:
         manual_id = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
