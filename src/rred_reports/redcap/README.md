@@ -38,6 +38,9 @@
   - Copy these files to your `input/downloaded/{year}` directory that you
     created above
 - Copy the dispatch list from the research team
+  - We require the `UserID`, `School Label`, `RRED School ID`, `Email` and
+    `TL Email` columns in the dispatch list. Update the column names if required
+    to match this.
   - Copy the dispatch list Excel file into `input/dispatch_lists`, renaming it
     to match the [redcap_config.toml](redcap_config.toml) `dispatch_list`
     filename
@@ -47,6 +50,9 @@
   ```
 - This should take a couple of minutes, then copy output masterfile to the
   outgoing folder for RRED
+  - If you get a `DispatchlistException` then email the RRED study group to ask
+    for the correct school information for us to update the dispatch list. This
+    means our work is blocked
 - Transfer the output data, and if there are any issues the issues file to
   `R:\ReadingRecoveryEvalDB\ARC` and download these to your machine using the
   [DSH file transfer portal](https://filetransfer.idhs.ucl.ac.uk/webclient/Login.xhtml)
