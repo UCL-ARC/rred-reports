@@ -157,8 +157,7 @@ def send_school(
         top_level_dir = TOP_LEVEL_DIR
 
     dispatch_list = top_level_dir / dispatch_path
-
-    if id_list is None:
+    if not id_list:
         id_list = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
         for report_path in sorted(report_directory.glob("report_*.pdf")):
