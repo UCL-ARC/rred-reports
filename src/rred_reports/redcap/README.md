@@ -2,6 +2,8 @@
 
 ## Extracting redcap data on the data safe haven (DSH)
 
+- If the current year isn't in [redcap_config.toml](redcap_config.toml), add it
+  and make a PR to get this into the `main` branch.
 - Assuming that you have transferred the latest version of the repo to the DSH,
   copied it to `S:\ReadingRecoveryEvalDB\ARC\rred-reports` and installed it in a
   conda environment following the setup instructions in the [setup.md](SETUP.md)
@@ -13,8 +15,7 @@
   ```
 - Create a subdirectory in `input/downloaded` for the study year, e.g. `2021`
 - Copy the latest dispatch list into this subdirectory and name it so that
-  matches the [redcap_config.toml](redcap_config.toml) (Adding in all details
-  for a new year if required), or you may also create a custom config file
+  matches the [redcap_config.toml](redcap_config.toml)
 - Open up redcap from the DSH desktop start bar and log in using your DSH
   credentials
 - For each study period (e.g. current year is 2021, so _2021-22_ and _2020-21_

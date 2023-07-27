@@ -16,6 +16,8 @@ virtualenv/conda env there is some first-time setup required:
 - Copy the masterfile export from the Data Safe Haven
   `MFT Outbound/ReadingRecoveryEvalDB/` to the repo's `input/processed/{year}`
   so that it matches the settings in [report_config.toml](report_config.toml).
+  - Update this file and make a PR if the current year doesn't exist in the
+    config.
 - Copy the dispatch list to `input/dispatch_lists` so that it matches the
   settings in [report_config.toml](report_config.toml).
 - Close Microsoft Word if its open (as Word is opened during PDF writing).
@@ -32,13 +34,44 @@ virtualenv/conda env there is some first-time setup required:
 - If prompted, grant access to the `schools` directory in Microsoft (this will
   only happen the first time when you create reports for this year)
 - At the end of the run, the output User Acceptance Testing (UAT) pdf of all
-  reports joined together will be created and its filepath logged. Review this
-  for any errors and send it to the study team for sign off.
+  reports joined together will be created and its filepath logged.
+- Review the UAT file for any errors and send it to the study team for sign off.
 
 ## User Acceptance Testing of emails
 
-- TODO:
+We can override all email addresses with a single email for testing. In order to
+make sure that the report emailing works, you can do this first to your own
+email for the year following this pattern:
+
+```shell
+rred reports send-school {year} --override-mailto="{your username}@ucl.ac.uk"
+```
+
+If you encounter any errors, you can run the reports/interface.py file in debug
+mode in your IDE, altering the `if __name__ == "__main__:` to call the
+`send_school` function, overriding the email addresses. There's an example of
+this already in the current code block.
+
+Once you have reviewed the emails to check that the subject, email body and
+attachments look correct, you can send the reports to the RRED study team
+
+```shell
+rred reports send-school {year} --override-mailto="ilc.comms@ucl.ac.uk"
+```
 
 ## Emailing of reports to teachers
 
-- TODO:
+Once the RRED study team has reviewed the reports, we can run the full email to
+teachers and teacher leaders.
+
+```shell
+rred reports send-school {year}
+```
+
+If there are any errors while reports are sending, then the logging will tell
+you which email IDs failed to send, which you can either copy the list to run
+via the reports/interface.py `if __name__ == "__main__:` block, or you can use
+the CLI arguments given by the logging.
+
+Let the RRED team know about the emails being sent out and transfer the
+masterfile and dispatch list to the RRED R drive.
