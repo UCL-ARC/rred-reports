@@ -153,10 +153,10 @@ def send_school(
     config = get_config(config_file)
     dispatch_path, *_ = get_report_year_files(config, ReportType.SCHOOL, year)
 
-    dispatch_list = top_level_dir / dispatch_path
-
     if top_level_dir is None:
         top_level_dir = TOP_LEVEL_DIR
+
+    dispatch_list = top_level_dir / dispatch_path
 
     if id_list is None:
         id_list = []
