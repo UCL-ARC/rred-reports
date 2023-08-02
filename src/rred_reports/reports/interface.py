@@ -157,7 +157,6 @@ def send_school(
         top_level_dir = TOP_LEVEL_DIR
 
     dispatch_list = top_level_dir / dispatch_path
-    logger.error(manual_id)
 
     if not manual_id:
         manual_id = []
