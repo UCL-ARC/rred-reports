@@ -13,6 +13,11 @@ virtualenv/conda env there is some first-time setup required:
 
 ## Generate PDF reports
 
+- We should have received this year's template for school report documents
+  (based on the previous years because we've edited it to make it consistent)
+  from the RRED team. The report template should be added to
+  `input/templates/{year}/{year-range}_template.docx` and the
+  [report_config.toml](report_config.toml) updated to the current year.
 - Copy the masterfile export from the Data Safe Haven
   `MFT Outbound/ReadingRecoveryEvalDB/` to the repo's `input/processed/{year}`
   so that it matches the settings in [report_config.toml](report_config.toml).
@@ -29,7 +34,7 @@ virtualenv/conda env there is some first-time setup required:
     value if not obvious. report with the `pupil_no` and `rred_user_id`,
     correcting to a temporarily likely value to be able to check for more errors
   - If you get errors which aren't clear, you can run the reports/interface.py
-    file in debug mode in your IDE, altering the `if __name__ == "__main__:` to
+    file in debug mode in your IDE, altering the `if __name__ == "__main__":` to
     call the `create` function.
 - If prompted, grant access to the `schools` directory in Microsoft (this will
   only happen the first time when you create reports for this year)
@@ -38,6 +43,11 @@ virtualenv/conda env there is some first-time setup required:
 - Review the UAT file for any errors and send it to the study team for sign off.
 
 ## User Acceptance Testing of emails
+
+The email body text may be changed and emailed to us, if so update it in
+`src/rred_reports/reports/emails.py` in the `formatted_mail_content` function,
+replacing any hardcoded years with the templating and ensuring all html
+formatting is still being followed.
 
 We can override all email addresses with a single email for testing. In order to
 make sure that the report emailing works, you can do this first to your own
@@ -48,7 +58,7 @@ rred reports send-school {year} --override-mailto="{your username}@ucl.ac.uk"
 ```
 
 If you encounter any errors, you can run the reports/interface.py file in debug
-mode in your IDE, altering the `if __name__ == "__main__:` to call the
+mode in your IDE, altering the `if __name__ == "__main__":` to call the
 `send_school` function, overriding the email addresses. There's an example of
 this already in the current code block.
 
@@ -70,7 +80,7 @@ rred reports send-school {year}
 
 If there are any errors while reports are sending, then the logging will tell
 you which email IDs failed to send, which you can either copy the list to run
-via the reports/interface.py `if __name__ == "__main__:` block, or you can use
+via the reports/interface.py `if __name__ == "__main__":` block, or you can use
 the CLI arguments given by the logging.
 
 Let the RRED team know about the emails being sent out and transfer the
