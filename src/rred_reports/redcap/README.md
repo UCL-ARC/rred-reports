@@ -58,6 +58,14 @@
   [DSH file transfer portal](https://filetransfer.idhs.ucl.ac.uk/webclient/Login.xhtml)
 - Email the research group with any issues and the masterfile, explaining the
   issues and asking for them to look into and fix them.
+  - Any issues with the dispatch list need to be addressed and then this should
+    be used to re-run the redcap extraction on the DSH (as school names come
+    from the dispatch list).
+  - If there are still issues that are important after the dispatch list has
+    been corrected then the masterfile will need to be edited, and we should use
+    that version downstream. Any schools that don't exist in the dispatch list
+    will not make it into the report processing stage as they won't have a
+    school name.
 - Copy the extract to your local machine's version of the `rred-reports` in
   `input/processed/{year}/`, naming the file to match
   [src/rred_reports/reports/report_config.toml](../reports/report_config.toml)
