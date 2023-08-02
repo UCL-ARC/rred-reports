@@ -1,8 +1,15 @@
 [school]
-template = "input/templates/2022/2022-23_template.docx"
-masterfile = "input/processed/2022/masterfile_2022-23.xlsx"
-dispatch_list = "input/dispatch_lists/Dispatch list 2022-23.xlsx"
 n_tables = 7
+
+    [school.2022]
+    template = "input/templates/2022/2022-23_template.docx"
+    masterfile = "input/processed/2022/masterfile_2022-23.xlsx"
+    dispatch_list = "input/dispatch_lists/Dispatch list 2022-23.xlsx"
+
+    [school.2021]
+    template = "input/templates/2021/2021-22_template.docx"
+    masterfile = "input/processed/2021/masterfile_2021-22.xlsx"
+    dispatch_list = "input/dispatch_lists/Dispatch list 2021-22.xlsx"
 
 ### The below aren't yet implemented and just contain placeholder values!
 # Do not use the school template for 'centre' or 'national' report production

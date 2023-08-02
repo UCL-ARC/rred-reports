@@ -35,4 +35,4 @@ def mock_mailing_info(mocker):
 @pytest.fixture()
 def dispatch_list(data_path, repo_root):
     test_config_file = data_path / "report_config.toml"
-    return repo_root / get_config(test_config_file)["school"]["dispatch_list"]
+    return repo_root / get_config(test_config_file)["school"]["2099"]["dispatch_list"]

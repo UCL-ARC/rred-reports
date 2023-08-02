@@ -1,4 +1,3 @@
-from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -6,7 +5,7 @@ import typer
 from loguru import logger
 from tqdm import tqdm
 
-from rred_reports import get_config
+from rred_reports import ReportType, get_config, get_report_year_files
 from rred_reports.dispatch_list import get_mailing_info
 from rred_reports.masterfile import read_and_process_masterfile
 from rred_reports.reports.generate import generate_report_school, convert_all_reports, concatenate_pdf_reports
@@ -16,17 +15,6 @@ from rred_reports.validation import log_school_id_inconsistencies, write_issues_
 app = typer.Typer()
 
 TOP_LEVEL_DIR = Path(__file__).resolve().parents[3]
-
-
-class ReportType(str, Enum):
-    """ReportType class
-
-    Provides report types as enums
-    """
-
-    SCHOOL = "school"
-    CENTRE = "centre"
-    NATIONAL = "national"
 
 
 def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
@@ -90,9 +78,7 @@ def generate(
     typer.echo(f"Generating report for level: {level.value}")
     config = get_config(config_file)
 
-    template_file_path = config[level.value]["template"]
-    masterfile_path = config[level.value]["masterfile"]
-    dispatch_path = config[level.value]["dispatch_list"]
+    dispatch_path, masterfile_path, template_file_path = get_report_year_files(config, level, year)
     validated_data = validate_data_sources(year, template_file_path, masterfile_path, dispatch_path=dispatch_path, top_level_dir=top_level_dir)
     processed_data, template_file, output_dir = validated_data.values()
 
@@ -147,7 +133,7 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    id_list: Optional[list[str]] = None,
+    manual_id: Optional[list[str]] = typer.Option(None),  # noqa: B008
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,
@@ -157,7 +143,7 @@ def send_school(
 
     Args:
         year (int): Report start year
-        id_list (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to None.
+        manual_id (Optional[list[str]], optional): List of school IDs from which to send reports. Defaults to empty list.
         attachment_name (str, optional): Alternative attachment name. Defaults to "RRED_report.pdf".
         config_file (Optional[Path], optional): Non-standard configuration file for processing
         top_level_dir (Optional[Path], optional): Non-standard top level directory in which input
@@ -165,20 +151,22 @@ def send_school(
         override_mailto (str, optional): Email address to override for each school, for use in manual testing and UAT
     """
     config = get_config(config_file)
-    dispatch_list = top_level_dir / config["school"]["dispatch_list"]
+    dispatch_path, *_ = get_report_year_files(config, ReportType.SCHOOL, year)
 
     if top_level_dir is None:
         top_level_dir = TOP_LEVEL_DIR
 
-    if id_list is None:
-        id_list = []
+    dispatch_list = top_level_dir / dispatch_path
+
+    if not manual_id:
+        manual_id = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
         for report_path in sorted(report_directory.glob("report_*.pdf")):
-            id_list.append(report_path.stem.split("_")[-1])
+            manual_id.append(report_path.stem.split("_")[-1])
 
     email_details = []
     logger.info("Getting dispatch list details for each school report pdf found")
-    for school_id in tqdm(id_list):
+    for school_id in tqdm(manual_id):
         email_info = get_mailing_info(school_id, dispatch_list, override_mailto)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
@@ -189,9 +177,17 @@ def send_school(
             school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
             emailed_ids.add(email_detail["school_id"])
         except Exception as error:
-            all_schools = set(id_list)
+            all_schools = set(manual_id)
             schools_to_send = sorted(all_schools.difference(emailed_ids))
-            logger.error("Error on sending emails, IDs left to send to {schools_to_send}", schools_to_send=schools_to_send)
+            school_command = f"--manual-id {' --manual-id '.join(schools_to_send)}"
+            logger.error(
+                "Error on sending emails, IDs left to send to:\n"
+                "{schools_to_send}\n\n"
+                "You can run just these schools by adding this to the CLI:\n"
+                "{school_command}",
+                schools_to_send=schools_to_send,
+                school_command=school_command,
+            )
             raise error
 
 
