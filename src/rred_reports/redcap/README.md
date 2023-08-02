@@ -58,6 +58,9 @@
   [DSH file transfer portal](https://filetransfer.idhs.ucl.ac.uk/webclient/Login.xhtml)
 - Email the research group with any issues and the masterfile, explaining the
   issues and asking for them to look into and fix them.
+  - Any schools which aren't in the dispatch list but have `in_current_survey`
+    as `FALSE` do not need to be corrected because they won't be reported on
+    this year.
   - Any issues with the dispatch list need to be addressed and then this should
     be used to re-run the redcap extraction on the DSH (as school names come
     from the dispatch list).
