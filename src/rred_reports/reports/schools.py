@@ -193,7 +193,7 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "number_of_rr_teachers": [filtered_summary_table["rred_user_id"].nunique()],
-            "number_of_pupils_served": [filtered_summary_table["pupil_no"].nunique()],
+            "number_of_pupils_served": [(filtered_summary_table["pupil_no"] + "-" + filtered_summary_table["rred_user_id"]).nunique()],
             "po_discontinued": get_outcome_from_summary(filtered_summary_table, "discontinued"),
             "po_referred_to_school": get_outcome_from_summary(filtered_summary_table, "referred to school"),
             "po_incomplete": get_outcome_from_summary(filtered_summary_table, "incomplete"),
