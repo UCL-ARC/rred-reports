@@ -12,7 +12,7 @@ def test_masterfile_read(data_path):
 
     joined_data = join_masterfile_dfs(nested_data)
 
-    assert nested_data["pupils"].shape == (35, 64)
-    assert nested_data["teachers"].shape == (10, 3)
+    assert nested_data["pupils"].shape == (40, 64)
+    assert nested_data["teachers"].shape == (11, 3)
     assert nested_data["schools"].shape == (10, 4)
-    assert joined_data.shape == (35, 69)  # should be the same number of students as in the pupils df
+    assert joined_data.shape == (40, 69)  # should be the same number of students as in the pupils df
