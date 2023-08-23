@@ -87,7 +87,7 @@ class RedcapReader:
         # Unify on using the raw_data column names, labelled uses the questions given on the survey as column names
         processed_extract.columns = raw_data.columns
         cls._fill_school_id_with_coalesce(raw_data, processed_extract, "school_id")
-        cls._fill_school_id_with_coalesce(processed_extract, processed_extract, "rrcp_school")
+        cls._fill_school_id_with_coalesce(processed_extract, processed_extract, "redcap_school_name")
         cls._fill_region_with_coalesce(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
         # Making a copy, so we have a de-fragmented frame for adding row number, was getting a performance warning
@@ -138,7 +138,7 @@ class RedcapReader:
     _parsing_cols = {
         "non_wide_columns": ["reg_rr_title", "rrcp_country", "rrcp_area", "school_id"],
         "wide_columns": [
-            "rrcp_school_name",
+            "redcap_school_name",
             "assessi_engtest2",
             "assessi_iretest1",
             "assessi_iretype1",
