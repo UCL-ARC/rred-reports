@@ -138,6 +138,7 @@ class RedcapReader:
     _parsing_cols = {
         "non_wide_columns": ["reg_rr_title", "rrcp_country", "rrcp_area", "school_id"],
         "wide_columns": [
+            "rrcp_school_name",
             "assessi_engtest2",
             "assessi_iretest1",
             "assessi_iretype1",
