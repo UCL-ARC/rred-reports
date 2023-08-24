@@ -167,7 +167,7 @@ def masterfile_columns() -> list[str]:
 
     assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
 
-    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields]
+    return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields, "redcap_school_name"]
 
 
 def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
