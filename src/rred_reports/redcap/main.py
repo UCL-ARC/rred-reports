@@ -60,7 +60,7 @@ class RedcapReader:
         processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
         long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
         long_with_names = self._add_school_name_column(long)
-        masterfile_and_debug_columns = [*masterfile_columns(), "redcap_school_name"]
+        masterfile_and_debug_columns = [*masterfile_columns()]
         return long_with_names[masterfile_and_debug_columns].copy()
 
     @classmethod
@@ -87,8 +87,8 @@ class RedcapReader:
         processed_extract = labelled_data.copy(deep=True)
         # Unify on using the raw_data column names, labelled uses the questions given on the survey as column names
         processed_extract.columns = raw_data.columns
-        cls._fill_school_id_with_coalesce(raw_data, processed_extract, "school_id")
-        cls._fill_school_id_with_coalesce(processed_extract, processed_extract, "redcap_school_name")
+        cls._fill_school_column_with_coalesce(raw_data, processed_extract, "school_id")
+        cls._fill_school_column_with_coalesce(processed_extract, processed_extract, "redcap_school_name")
         cls._fill_region_with_coalesce(processed_extract)
         cls._convert_timestamps_to_dates(processed_extract)
         # Making a copy, so we have a de-fragmented frame for adding row number, was getting a performance warning
@@ -100,8 +100,8 @@ class RedcapReader:
 
     @staticmethod
     def _fill_school_column_with_coalesce(school_data: pd.DataFrame, processed_extract: pd.DataFrame, column_name: str):
-        school_id_cols = [col for col in raw_data if col.startswith("entry_school_")]
-        processed_extract[column_name] = raw_data[school_id_cols].bfill(axis=1).iloc[:, 0]
+        school_id_cols = [col for col in school_data if col.startswith("entry_school_")]
+        processed_extract[column_name] = school_data[school_id_cols].bfill(axis=1).iloc[:, 0]
 
     @staticmethod
     def _fill_region_with_coalesce(extract: pd.DataFrame):

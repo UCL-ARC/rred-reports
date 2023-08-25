@@ -52,11 +52,8 @@ def test_read_redcap_extract_rows_and_cols(redcap_extract):
     6 rows should exist, and the output columns should match what is in our masterfile definition
     """
 
-    expected_columns = set(masterfile_columns())
-    actual_columns = set(redcap_extract.columns)
-
     assert redcap_extract.shape[0] == 6
-    assert actual_columns == expected_columns
+    assert list(redcap_extract.columns.values) == masterfile_columns()
 
 
 def test_redcap_calculated_columns(redcap_extract):
@@ -72,6 +69,3 @@ def test_redcap_calculated_columns(redcap_extract):
     not_summer_dob_and_not_ongoing = redcap_extract.loc[redcap_extract.pupil_no == "2_2021-2022"]
     assert (not_summer_dob_and_not_ongoing["summer"] == "No").all()
     assert (not_summer_dob_and_not_ongoing["exit_outcome"] == "Discontinued").all()
-
-
-# list(redcap_extract.columns.values) == masterfile_columns()
