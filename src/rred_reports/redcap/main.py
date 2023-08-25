@@ -99,7 +99,7 @@ class RedcapReader:
         return cls._rename_wide_cols_with_student_number_suffix(filtered)
 
     @staticmethod
-    def _fill_school_id_with_coalesce(raw_data, processed_extract, column_name):
+    def _fill_school_column_with_coalesce(school_data: pd.DataFrame, processed_extract: pd.DataFrame, column_name: str):
         school_id_cols = [col for col in raw_data if col.startswith("entry_school_")]
         processed_extract[column_name] = raw_data[school_id_cols].bfill(axis=1).iloc[:, 0]
 
