@@ -60,8 +60,7 @@ class RedcapReader:
         processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
         long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
         long_with_names = self._add_school_name_column(long)
-        masterfile_and_debug_columns = [*masterfile_columns()]
-        return long_with_names[masterfile_and_debug_columns].copy()
+        return long_with_names[masterfile_columns()].copy()
 
     @classmethod
     def preprocess_wide_data(cls, raw_data: pd.DataFrame, labelled_data: pd.DataFrame) -> pd.DataFrame:
