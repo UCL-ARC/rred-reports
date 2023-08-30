@@ -146,6 +146,7 @@ src/*/_version.py
 
 input/downloaded
 input/processed
+input/school_aliases
 !input/*/.gitkeep
 output/**
 !output/*/.gitkeep
