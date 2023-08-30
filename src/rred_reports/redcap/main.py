@@ -1,9 +1,11 @@
 """Downloading and processing of redcap data"""
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
+import tomli
 from loguru import logger
 from tqdm import tqdm
 
@@ -23,7 +25,7 @@ class ExtractInput:
 class RedcapReader:
     """Reads two years of redcap data, processing the files (wide to long, and others) and filtering to non-empty rows"""
 
-    def __init__(self, school_list: Path):
+    def __init__(self, school_list: Path, school_aliases: Optional[Path] = None):
         """
         Setup for reading from redcap
 
@@ -31,6 +33,14 @@ class RedcapReader:
             school_list: path to Excel dispatch list file
         """
         self._school_list = get_unique_schools(school_list)
+        self._school_aliases = None
+        if school_aliases:
+            try:
+                with school_aliases.open(mode="rb") as handle:
+                    self._school_aliases = tomli.load(handle)
+            except FileNotFoundError as error:
+                msg = f"No school alias file found at {school_aliases}. Exiting."
+                raise FileNotFoundError(msg) from error
 
     def read_redcap_data(self, current_year: ExtractInput, previous_year: ExtractInput) -> pd.DataFrame:
         """
