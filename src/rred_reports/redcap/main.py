@@ -26,12 +26,6 @@ class RedcapReader:
     """Reads two years of redcap data, processing the files (wide to long, and others) and filtering to non-empty rows"""
 
     def __init__(self, school_list: Path, school_aliases: Optional[Path] = None):
-        """
-        Setup for reading from redcap
-
-        Args:
-            school_list: path to Excel dispatch list file
-        """
         self._school_list = get_unique_schools(school_list)
         self._school_aliases = None
         if school_aliases:
@@ -68,6 +62,8 @@ class RedcapReader:
         raw_data = pd.read_csv(redcap_fields.coded_data_path, low_memory=False)
         labelled_data = pd.read_csv(redcap_fields.labelled_data_path, low_memory=False)
         processed_wide = self.preprocess_wide_data(raw_data, labelled_data)
+        if self._school_aliases:
+            processed_wide["school_id"] = processed_wide["school_id"].replace(self._school_aliases)
         long = self.wide_to_long(processed_wide, redcap_fields.survey_period)
         long_with_names = self._add_school_name_column(long)
         return long_with_names[masterfile_columns()].copy()
@@ -282,6 +278,8 @@ class RedcapReader:
         return processed_data
 
     def _add_school_name_column(self, long_df: pd.DataFrame) -> pd.DataFrame:
+        if self._school_aliases:
+            long_df["school_id"] = long_df["school_id"].replace(self._school_aliases)
         named_schools = long_df.merge(self._school_list, left_on="school_id", right_on="RRED School ID", how="left")
         named_schools.rename({"School Name": "rrcp_school"}, axis=1, inplace=True)
         return named_schools
