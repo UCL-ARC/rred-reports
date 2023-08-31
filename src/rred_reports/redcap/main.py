@@ -27,7 +27,7 @@ class RedcapReader:
 
     def __init__(self, school_list: Path, school_aliases: Optional[Path] = None):
         self._school_list = get_unique_schools(school_list)
-        self._school_aliases = None
+        self._school_aliases = Path("input/school_aliases/template.toml")
         if school_aliases:
             try:
                 with school_aliases.open(mode="rb") as handle:
