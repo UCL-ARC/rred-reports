@@ -277,7 +277,7 @@ class RedcapReader:
 
     def _add_school_name_column(self, long_df: pd.DataFrame) -> pd.DataFrame:
         if self._school_aliases:
-            long_df["school_id"] = long_df["school_id"].replace(self._school_aliases, inplace=True)
+            long_df["school_id"].replace(self._school_aliases, inplace=True)
         named_schools = long_df.merge(self._school_list, left_on="school_id", right_on="RRED School ID", how="left")
         named_schools.rename({"School Name": "rrcp_school"}, axis=1, inplace=True)
         return named_schools

@@ -52,7 +52,7 @@ def test_read_redcap_extract_rows_and_cols(redcap_extract):
     6 rows should exist, and the output columns should match what is in our masterfile definition
     """
 
-    assert redcap_extract.shape[0] == 6
+    assert redcap_extract.shape[0] == 8
     assert list(redcap_extract.columns.values) == masterfile_columns()
 
 
