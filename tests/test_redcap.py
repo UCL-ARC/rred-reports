@@ -47,12 +47,12 @@ def test_preprocess_wide_data(data_path):
 
 def test_read_redcap_extract_rows_and_cols(redcap_extract):
     """
-    Given an extract from redcap with 3 valid rows
+    Given an extract from redcap with 4 valid rows
     When the extract is processed, using the same extract as the current year and previous year
-    6 rows should exist, and the output columns should match what is in our masterfile definition
+    8 rows should exist, and the output columns should match what is in our masterfile definition
     """
 
-    assert redcap_extract.shape[0] == 6
+    assert redcap_extract.shape[0] == 8
     assert list(redcap_extract.columns.values) == masterfile_columns()
 
 
