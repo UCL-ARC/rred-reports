@@ -19,7 +19,7 @@ def set_top_level_dir() -> None:
     interface.top_level_dir = original_value
 
 
-def test_cli_writes_file(temp_out_dir, set_top_level_dir):
+def test_cli_writes_file(temp_out_dir: Path, set_top_level_dir: None):
     """
     Given a config file pointing to valid test data
     When the extract CLI command is run, with an output to a temporary directory
@@ -48,7 +48,7 @@ def test_cli_writes_file(temp_out_dir, set_top_level_dir):
     assert expected_file.exists()
 
 
-def test_school_id_aliases(temp_out_dir, set_top_level_dir):
+def test_school_id_aliases(temp_out_dir: Path, set_top_level_dir: None):
     """
     Given a config file pointing to valid test data, and an alias file for school ids for RRS200 -> RRS100
     When the extract command is run, with an output to a temporary directory
@@ -88,5 +88,6 @@ def test_school_id_aliases(temp_out_dir, set_top_level_dir):
     assert output[output.school_id == "RRS200"].shape[0] == 0
     renamed_school = output[output.school_id == "RRS100"]
     ## new RRS100 should exist in output and those rows should have the correct school from the dispatch list
+    assert "RRS100" in renamed_school["school_id"].values
     assert renamed_school.shape[0] > 0
     assert all(renamed_school["rrcp_school"] == "School 100")
