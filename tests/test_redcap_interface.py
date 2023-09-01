@@ -79,7 +79,7 @@ def test_school_id_aliases(temp_out_dir, set_top_level_dir):
         tomli_w.dump({"RRS200": "RRS100"}, handle)
 
     # Act
-    extract(2021, config_file=config_path, output_dir=temp_out_dir)
+    extract(2021, config_file=config_path, output_dir=temp_out_dir, school_aliases=alias_path)
 
     # Assert
     expected_file = temp_out_dir / "processed" / "masterfile_2021-22.xlsx"
