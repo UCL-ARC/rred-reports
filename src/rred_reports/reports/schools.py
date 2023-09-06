@@ -94,7 +94,7 @@ def school_filter(whole_dataframe: pd.DataFrame, school_id: str) -> pd.DataFrame
     Returns: pd.DataFrame filtered data
 
     """
-    return (whole_dataframe[whole_dataframe.school_id == school_id].copy()).sort_values(by=["rred_user_id", "entry_year"])
+    return whole_dataframe[whole_dataframe.school_id == school_id].copy()
 
 
 def filter_by_entry_and_exit(school_dataframe: pd.DataFrame, report_year: int) -> pd.DataFrame:
