@@ -187,7 +187,7 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
             return 0
 
     filtered = filter_by_entry_and_exit(school_df, report_year)
-    filtered_summary_table = filtered[columns_used].copy()
+    filtered_summary_table = filtered[columns_used].drop_duplicates().copy()
     # let's try and reduce the pain with exit outcome labels
     filtered_summary_table["exit_outcome"] = filtered_summary_table["exit_outcome"].str.lower().str.strip()
 
