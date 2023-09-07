@@ -158,7 +158,7 @@ def send_school(
 
     dispatch_list = top_level_dir / dispatch_path
 
-    if not manual_id:
+    if not manual_id or (not manual_id.exists):
         manual_id = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
         for report_path in sorted(report_directory.glob("report_*.pdf")):
