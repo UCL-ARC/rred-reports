@@ -240,9 +240,9 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df, report_year)
         table_to_write = filtered[columns]
-        if index == 0 and (table_to_write.shape[0] != table_to_write.drop_duplicates().shape[0]):
+        if index == 0 and any(table_to_write.duplicated()):
             logger.warning(
-                "Table 1 has duplicate values that will be removed, suggests an issue with the masterfile school or teacher data:\n{school_data}",
+                "Duplicate students found, this suggests an issue with the masterfile school or teacher data. Table 1 data:\n{school_data}",
                 school_data=table_to_write.to_markdown(),
             )
         template_filler.populate_table(index + 1, table_to_write.drop_duplicates())
