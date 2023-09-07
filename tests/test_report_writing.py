@@ -57,6 +57,22 @@ def test_school_tables_filled(example_school_data: pd.DataFrame, templates_dir: 
     assert output_doc.exists()
 
 
+def test_duplicate_student_warning(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path, loguru_caplog):
+    """
+    Given a masterfile dataframe with one duplicated row
+    When the school template is populated
+    Then the resulting table will have one less row than the input data, and there will be a loguru message for the duplication
+    """
+    output_doc = temp_out_dir / "school.docx"
+
+    duplicate_school_data = example_school_data.copy()
+    duplicate_school_data.iloc[3] = duplicate_school_data.iloc[5]
+
+    populated_template = populate_school_data(duplicate_school_data, templates_dir / "2021/2021-22_template.docx", 2021, output_doc)
+    assert (duplicate_school_data.shape[0] - 1) == len(populated_template.tables[1].rows)
+    assert "Duplicate students found" in loguru_caplog.text
+
+
 def test_school_name_replaced_in_paragraphs(example_school_data, templates_dir: Path, temp_out_dir: Path):
     """
     Given a school template with the first non-blank paragraph having a "School A" placeholder
