@@ -9,6 +9,8 @@ from tqdm import tqdm
 
 from rred_reports.reports.schools import populate_school_data, school_filter
 
+_EXPECTED_PAGE_COUNT = 10
+
 
 class ReportConversionException(Exception):
     """Custom exception generator for the TemplateFiller class"""
@@ -68,7 +70,15 @@ def validate_pdf(pdf_file_path: Path) -> bool:
 
     with pdf_file_path.open("rb") as converted_report:
         try:
-            PdfReader(converted_report)
+            reader = PdfReader(converted_report)
+            pages_in_pdf = len(reader.pages)
+            if pages_in_pdf != _EXPECTED_PAGE_COUNT:
+                logger.warning(
+                    "File {pdf_file_path} had {pages_in_pdf} pages, {expected_pages} pages were expected. Check for tables spanning multiple pages",
+                    pdf_file_path=pdf_file_path,
+                    pages_in_pdf=pages_in_pdf,
+                    expected_pages=_EXPECTED_PAGE_COUNT,
+                )
         except EmptyFileError as error:
             message = f"Report conversion failed - empty PDF produced: {pdf_file_path}"
             raise ReportConversionException(message) from error
