@@ -33,6 +33,15 @@ virtualenv/conda env there is some first-time setup required:
     is most likely a typo in the date, ask the research team for the correct
     value if not obvious. report with the `pupil_no` and `rred_user_id`,
     correcting to a temporarily likely value to be able to check for more errors
+  - If you get an error during conversion of word docs to pdfs that contains
+    `'result': 'error', 'error': 'Error: Message not understood.'`, then chances
+    are the file in the message is opened in word. Close the file and then rerun
+    `rred reports convert output/reports/{year}/schools`
+  - If you get a warning about a report having an unexpected number of pages,
+    open the Word document and check that a table hasn't been split over
+    multiple lines. If this happens ask the RRED team if we want to decrease the
+    font size for it to fit, or separate into two pages with the header on each
+    page.
   - If you get errors which aren't clear, you can run the reports/interface.py
     file in debug mode in your IDE, altering the `if __name__ == "__main__":` to
     call the `create` function.

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from _pytest.logging import LogCaptureFixture
 from pypdf import PdfMerger, PdfReader
 from pypdf.errors import EmptyFileError, PdfReadError
 
@@ -38,6 +39,16 @@ def test_convert_single_report_success(mocker, template_report_path: Path, temp_
     convert_all_reports([template_report_path], [output_file_path])
     pdf_conversion_mock.assert_called_once()
     pdf_validity_check_mock.assert_called_once()
+
+
+def test_validate_pdf_with_unexpected_number_of_pages(template_report_pdf_path: Path, loguru_caplog: LogCaptureFixture):
+    """
+    Given a pdf to validate that has 2 pages
+    When the pdf is validated
+    Then loguru will log that 10 pages were expected
+    """
+    validate_pdf(template_report_pdf_path)
+    assert "10 pages were expected" in loguru_caplog.text
 
 
 def test_validate_pdf_failure_missing_file():
