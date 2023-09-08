@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+from loguru import logger
 
 from rred_reports.reports.filler import TemplateFiller
 
@@ -192,7 +193,7 @@ def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
             return 0
 
     filtered = filter_by_entry_and_exit(school_df, report_year)
-    filtered_summary_table = filtered[columns_used].copy()
+    filtered_summary_table = filtered[columns_used].drop_duplicates().copy()
     # let's try and reduce the pain with exit outcome labels
     filtered_summary_table["exit_outcome"] = filtered_summary_table["exit_outcome"].str.lower().str.strip()
 
@@ -245,7 +246,12 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df, report_year)
         table_to_write = filtered[columns]
-        template_filler.populate_table(index + 1, table_to_write)
+        if index == 0 and any(table_to_write.duplicated()):
+            logger.warning(
+                "Duplicate students found, this suggests an issue with the masterfile school or teacher data. Table 1 data:\n{school_data}",
+                school_data=table_to_write.to_markdown(),
+            )
+        template_filler.populate_table(index + 1, table_to_write.drop_duplicates())
 
     return template_filler
 

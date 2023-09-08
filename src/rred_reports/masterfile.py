@@ -129,6 +129,10 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
 
     all_schools_df = School.new(clmnlist(6), clmnlist(3), clmnlist(4), clmnlist(5))  # pylint: disable=E1121
     all_schools_df = all_schools_df.drop_duplicates()  # pylint: disable=E1101
+    is_duplicated = all_schools_df.duplicated(["rrcp_school"])
+    if any(is_duplicated):
+        duplicated_schools = all_schools_df[all_schools_df["rrcp_school"].isin(all_schools_df.loc[is_duplicated, "rrcp_school"])]
+        logger.warning("The following School IDs had duplicate information:\n{duplicated_df}", duplicated_df=duplicated_schools.to_markdown())
 
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
     teach_df.drop_duplicates(subset=["rred_user_id", "school_id"], inplace=True)  # pylint: disable=E1101

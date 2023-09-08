@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 from loguru import logger
@@ -133,7 +133,7 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    manual_id: Optional[list[str]] = typer.Option(None),  # noqa: B008
+    manual_id: Annotated[Optional[list[str]], typer.Option([])] = (),
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,
@@ -157,16 +157,15 @@ def send_school(
         top_level_dir = TOP_LEVEL_DIR
 
     dispatch_list = top_level_dir / dispatch_path
-
+    school_ids = list(manual_id)
     if not manual_id:
-        manual_id = []
         report_directory = top_level_dir / "output" / "reports" / str(year) / "schools"
         for report_path in sorted(report_directory.glob("report_*.pdf")):
-            manual_id.append(report_path.stem.split("_")[-1])
+            school_ids.append(report_path.stem.split("_")[-1])
 
     email_details = []
     logger.info("Getting dispatch list details for each school report pdf found")
-    for school_id in tqdm(manual_id):
+    for school_id in tqdm(school_ids):
         email_info = get_mailing_info(school_id, dispatch_list, override_mailto)
         email_details.append({"school_id": school_id, "mail_info": email_info})
 
@@ -177,7 +176,7 @@ def send_school(
             school_mailer(email_detail["school_id"], year, email_detail["mail_info"], report_name=attachment_name)
             emailed_ids.add(email_detail["school_id"])
         except Exception as error:
-            all_schools = set(manual_id)
+            all_schools = set(school_ids)
             schools_to_send = sorted(all_schools.difference(emailed_ids))
             school_command = f"--manual-id {' --manual-id '.join(schools_to_send)}"
             logger.error(
@@ -198,8 +197,13 @@ def main():
 
 
 if __name__ == "__main__":
-    create(ReportType.SCHOOL, 2022, TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml")
+    # create(ReportType.SCHOOL, 2022, TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml")
     ## test sending reports to specific UCL user
-    # send_school(2021, config_file=TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml", top_level_dir=TOP_LEVEL_DIR, override_mailto="username@ucl.ac.uk")
+    send_school(
+        2022,
+        config_file=TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml",
+        top_level_dir=TOP_LEVEL_DIR,
+        override_mailto="sejjpia@ucl.ac.uk",
+    )
     ## test sending reports to RRED email for UAT
     # send_school(2021, config_file=TOP_LEVEL_DIR / "src/rred_reports/reports/report_config.toml", top_level_dir=TOP_LEVEL_DIR, override_mailto="ilc.comms@ucl.ac.uk")
