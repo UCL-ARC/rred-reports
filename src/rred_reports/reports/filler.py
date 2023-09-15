@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 from docx import Document
-from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.table import Table, _Row
 from loguru import logger
 
@@ -155,9 +154,6 @@ class TemplateFiller:
                 current_paragraph = current_cell.paragraphs[0]
                 current_paragraph.style = self.table_text_style
                 current_paragraph.paragraph_format.keep_with_next = True
-
-                # Center-align the table cell
-                current_paragraph.alignment = WD_ALIGN_VERTICAL.CENTER
 
         # override the style to deal with new rows sometimes not adding borders
         table.style = self.table_grid_style
