@@ -37,6 +37,9 @@
   - Remember to do this for the current study period and the previous one!
   - Copy these files to your `input/downloaded/{year}` directory that you
     created above
+  - N.B. Both files should be exported from RedCap at the end of the
+    survey period, because the previous year will also be updated (we shouldn't
+    reuse last year's exports!)
 - Copy the dispatch list from the research team
   - We require the `UserID`, `School Label`, `RRED School ID`, `Email` and
     `TL Email` columns in the dispatch list. Update the column names if required
