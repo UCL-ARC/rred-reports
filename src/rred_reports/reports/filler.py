@@ -148,7 +148,11 @@ class TemplateFiller:
             for j in range(data.shape[-1]):
                 current_cell = table.cell(i + header_rows, j)
                 # Ensure NA representation is shorter: for thin columns, to avoid splitting over multiple lines
-                current_cell.text = str(data.values[i, j]).replace("<NA>", "NA")
+                cell_text = str(data.values[i, j]).replace("<NA>", "NA").strip()
+                # Replace nan with Missing Data for report writing
+                if len(cell_text) == "nan":
+                    cell_text = "Missing Data"
+                current_cell.text = cell_text
                 # manually set the style of the new text, and don't break table over multiple lines
                 current_paragraph = current_cell.paragraphs[0]
                 current_paragraph.style = self.table_text_style
