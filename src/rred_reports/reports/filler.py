@@ -141,7 +141,7 @@ class TemplateFiller:
         table = self.tables[table_index]
         header_rows = self.header_rows[table_index]
         self.remove_all_rows(table, header_rows)
-        self._verify_new_rows(table, data, header_rows)
+        self._verify_new_rows_and_keep_together(table, data, header_rows)
 
         for i in range(data.shape[0]):
             table.add_row()
@@ -161,10 +161,11 @@ class TemplateFiller:
         # override the style to deal with new rows sometimes not adding borders
         table.style = self.table_grid_style
 
-    def _verify_new_rows(self, table: Table, data: pd.DataFrame, header_rows=1):
+    def _verify_new_rows_and_keep_together(self, table: Table, data: pd.DataFrame, header_rows=1):
         """Verify dimension of new rows to be added to existing table
         Pandas dataframe width should be the columnar dimension of the table
         i.e. the number of columns should match in both
+        Also updates formatting to keep header rows with the rest of the table
 
         Args:
             table (Table): Table object representing a table within a .docx file
@@ -175,7 +176,12 @@ class TemplateFiller:
             TemplateFillerException: DataFrame dimensions do not match table
         """
         table_header = self.__class__.view_header(table, header_rows)
-        contents = [cell.text.strip() for cell in table_header]
+        contents = []
+        for cell in table_header:
+            contents.append(cell.text.strip())
+            for paragraph in cell.paragraphs:
+                paragraph.paragraph_format.keep_with_next = True
+
         message = (
             f"Pandas dataframe with {data.shape[-1]} columns. Table has {len(table.columns)} columns - "
             f"dimension mismatch. Table columns are {contents}."
