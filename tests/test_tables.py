@@ -47,7 +47,7 @@ def test_verify_new_rows_failure_raises_exception(template_filler):
     }
     test_df = pd.DataFrame.from_dict(test_bad_data)
     with pytest.raises(TemplateFillerException):
-        template_filler._verify_new_rows(first_table, test_df)
+        template_filler._verify_new_rows_and_keep_together(first_table, test_df)
 
 
 def test_custom_template_filler_exception_message():
@@ -71,7 +71,7 @@ def test_verify_new_rows_good_data(template_filler):
         "Outcome": ["1", "2", "3"],
     }
     test_df = pd.DataFrame.from_dict(test_good_data)
-    template_filler._verify_new_rows(first_table, test_df)
+    template_filler._verify_new_rows_and_keep_together(first_table, test_df)
 
 
 def test_verify_tables_filled(template_filler_populated_tables):
