@@ -72,6 +72,10 @@
     that version downstream. Any schools that don't exist in the dispatch list
     will not make it into the report processing stage as they won't have a
     school name.
+  - You may need to create a school alias file using the
+    [template](../../../input/school_aliases/template.toml). You can then rerun
+    using the `--school-aliases` flag. For example:
+    `rred redcap extract 2022 --school-aliases input\school_aliases\2022-23_school_aliases.toml`
 - Copy the extract to your local machine's version of the `rred-reports` in
   `input/processed/{year}/`, naming the file to match
   [src/rred_reports/reports/report_config.toml](../reports/report_config.toml)
