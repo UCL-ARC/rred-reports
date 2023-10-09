@@ -40,8 +40,8 @@ virtualenv/conda env there is some first-time setup required:
   - If you get a warning about a report having an unexpected number of pages,
     open the Word document and check that a table hasn't been split over
     multiple lines. If this happens ask the RRED team if we want to decrease the
-    font size for it to fit, or separate into two pages with the header on each
-    page.
+    font size for it to fit, or select the table and in the layout tab, split it
+    so that it breaks over multiple pages, starting under table heading.
   - If you get errors which aren't clear, you can run the reports/interface.py
     file in debug mode in your IDE, altering the `if __name__ == "__main__":` to
     call the `create` function.
