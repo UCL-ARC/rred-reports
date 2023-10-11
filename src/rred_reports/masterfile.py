@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
-COL_NUMBER_AFTER_SLIMMING = 64
+COL_NUMBER_AFTER_SLIMMING = 65
 
 
 class PandasDataFrame(AsFrame):
@@ -28,6 +28,7 @@ class Pupil(PandasDataFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
+    school_id: Data[str]
     # no type coercion for "assess" columns, as can be both numeric and text, will require error handling if we use these
     assessi_engtest2: Data[None]
     assessi_iretest1: Data[None]
@@ -139,8 +140,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
     teach_df.drop_duplicates(subset=["rred_user_id", "school_id"], inplace=True)  # pylint: disable=E1101
 
-    drop_cols = list(all_schools_df.columns.values)
-    drop_cols.append(teach_df.columns.values[1])  # pylint: disable=E1101
+    drop_cols = ["rrcp_country", "rrcp_area", "rrcp_school", "reg_rr_title"]
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
@@ -162,7 +162,7 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
         pd.DataFrame: joined masterfile
     """
     teacher_schools = pd.merge(masterfile_dfs["teachers"], masterfile_dfs["schools"], on="school_id")
-    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
+    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on=["rred_user_id", "school_id"])
 
 
 def masterfile_columns() -> list[str]:
