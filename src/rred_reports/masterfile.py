@@ -167,11 +167,12 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
 
 def masterfile_columns() -> list[str]:
     """List of all masterfile columns, in the expected order"""
-    pupil_no, user_id, *other_pupil_fields = Pupil.fields()
-    _school_id, *other_school_fields = School.fields()
-    user_id, *other_teacher_fields, school_id = Teacher.fields()
+    pupil_no, user_id, _pupil_school_id, *other_pupil_fields = Pupil.fields()
+    school_id, *other_school_fields = School.fields()
+    user_id, *other_teacher_fields, _teacher_school_id = Teacher.fields()
 
-    assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
+    assert school_id == _teacher_school_id, "Sanity check for school ID columns being the same failed, these were not the same"
+    assert school_id == _pupil_school_id, "Sanity check for school ID columns being the same failed, these were not the same"
 
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields, "redcap_school_name"]
 
