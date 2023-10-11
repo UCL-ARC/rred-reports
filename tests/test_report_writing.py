@@ -57,6 +57,19 @@ def test_school_tables_filled(example_school_data: pd.DataFrame, templates_dir: 
     assert output_doc.exists()
 
 
+def test_missing_values_filled(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path):
+    """
+    Given a masterfile with data where the first pupil has missing numeric data in the poverty column
+    When the template for the school is populated using that data
+    Then the 8th column for povery should have "Missing Data" instead of "nan"
+    """
+    output_doc = temp_out_dir / "school.docx"
+
+    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2021, output_doc)
+
+    assert populated_template.tables[1].cell(1, 7).text == "Missing Data"
+
+
 def test_duplicate_student_warning(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path, loguru_caplog):
     """
     Given a masterfile dataframe with one duplicated row

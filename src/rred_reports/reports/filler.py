@@ -150,7 +150,7 @@ class TemplateFiller:
                 # Ensure NA representation is shorter: for thin columns, to avoid splitting over multiple lines
                 cell_text = str(data.values[i, j]).replace("<NA>", "NA").strip()
                 # Replace nan with Missing Data for report writing
-                if len(cell_text) == "nan":
+                if cell_text == "nan":
                     cell_text = "Missing Data"
                 current_cell.text = cell_text
                 # manually set the style of the new text, and don't break table over multiple lines
