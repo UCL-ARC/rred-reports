@@ -162,13 +162,13 @@ def test_table_3_4_filter(example_school_data):
     """
     test_filter_for_three_four = filter_for_three_four(example_school_data, 2021)
     # testing filter for table 3,4 applied
-    assert (~test_filter_for_three_four["pupil_no"].isin(["test-2_2021-22", "test-3_2021-22", "test-5_2021-22", "test-6_2021-22"])).any()
+    assert (~test_filter_for_three_four["pupil_no"].isin(["2_2021-22-test", "3_2021-22-test", "5_2021-22-test", "11_2021-22-test"])).any()
     assert (~test_filter_for_three_four["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    pupil_1 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test-1_2021-22"]
+    pupil_1 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "1_2021-22-test"]
     assert (~pupil_1["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    pupil_4 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test-4_2021-22"]
+    pupil_4 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "4_2021-22-test"]
     assert (pupil_4["exit_outcome"].isin(["Discontinued", "Referred to school"])).any()
 
 
@@ -181,5 +181,5 @@ def test_table_6_filter(example_school_data):
     """
     test_filter_six = filter_six(example_school_data, 2021)
 
-    six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["test-1_2021-22", "test-4_2021-22"])]
+    six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["1_2021-22-test", "4_2021-22-test"])]
     assert six_filter.shape[0] == 2
