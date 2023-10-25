@@ -201,11 +201,29 @@ def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
 
     processed_data[date_str_cols] = date_string_representation
 
-    # sort data
-    processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
-    processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
-    processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
-    return processed_data
+    return sort_masterfile(processed_data)
+
+
+def sort_masterfile(masterfile: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sort Masterfile for reporting usage.
+
+    Extra fun because we want to sort by the numeric pupil number
+
+    Args:
+        masterfile (pd.DataFrame): masterfile
+    Returns:
+        pd.DataFrame: sorted masterfile
+    """
+    if masterfile.size == 0:
+        return masterfile
+
+    sorted_masterfile = masterfile.copy()
+    sorted_masterfile[["entry_number", "period"]] = sorted_masterfile["pupil_no"].str.split("_", expand=True)
+    sorted_masterfile["entry_number"] = sorted_masterfile["entry_number"].astype(int)
+    sorted_masterfile.sort_values(by=["rred_user_id", "period", "entry_number"], inplace=True)
+    sorted_masterfile.drop(["entry_number", "period"], axis=1, inplace=True)
+    return sorted_masterfile
 
 
 def write_to_excel(masterfile_data: pd.DataFrame, output_file: Path) -> None:
