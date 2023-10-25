@@ -127,9 +127,9 @@ Below is some context for the issues spreadsheet:
 - School_mismatch: These are users which aren’t in the `multiple_ids` and have a
   different school being used in the Masterfile and the dispatch list. For each
   user check which school is correct, updating the Masterfile to match the most
-  recent year school allocation to the RRED user if required. As you said, can
-  be fine if a pupil has been allocated to a different school, but we’d like an
-  explicit check for each.
+  recent year school allocation to the RRED user if required. It can be fine if
+  a pupil has been allocated to a different school, but we’d like an explicit
+  check for each.
 - Not_in_masterfile: These are schools found in the dispatch list, but not in
   the Masterfile. Check that we don’t have any complete data for this year’s
   period – if so then please remove from the dispatch list. Otherwise let us
