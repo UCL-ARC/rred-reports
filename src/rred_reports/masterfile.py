@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
-COL_NUMBER_AFTER_SLIMMING = 64
+COL_NUMBER_AFTER_SLIMMING = 65
 
 
 class PandasDataFrame(AsFrame):
@@ -28,6 +28,7 @@ class Pupil(PandasDataFrame):
 
     pupil_no: Data[str]
     rred_user_id: Data[str]
+    school_id: Data[str]
     # no type coercion for "assess" columns, as can be both numeric and text, will require error handling if we use these
     assessi_engtest2: Data[None]
     assessi_iretest1: Data[None]
@@ -139,8 +140,7 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
     teach_df = Teacher.new(clmnlist(1), clmnlist(2), clmnlist(6))  # pylint: disable=E1121
     teach_df.drop_duplicates(subset=["rred_user_id", "school_id"], inplace=True)  # pylint: disable=E1101
 
-    drop_cols = list(all_schools_df.columns.values)
-    drop_cols.append(teach_df.columns.values[1])  # pylint: disable=E1101
+    drop_cols = ["rrcp_country", "rrcp_area", "rrcp_school", "reg_rr_title"]
 
     df_slimmed = full_data.drop(columns=drop_cols)
 
@@ -162,16 +162,17 @@ def join_masterfile_dfs(masterfile_dfs: dict[str, pd.DataFrame]) -> pd.DataFrame
         pd.DataFrame: joined masterfile
     """
     teacher_schools = pd.merge(masterfile_dfs["teachers"], masterfile_dfs["schools"], on="school_id")
-    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on="rred_user_id")
+    return pd.merge(teacher_schools, masterfile_dfs["pupils"], on=["rred_user_id", "school_id"])
 
 
 def masterfile_columns() -> list[str]:
     """List of all masterfile columns, in the expected order"""
-    pupil_no, user_id, *other_pupil_fields = Pupil.fields()
-    _school_id, *other_school_fields = School.fields()
-    user_id, *other_teacher_fields, school_id = Teacher.fields()
+    pupil_no, user_id, _pupil_school_id, *other_pupil_fields = Pupil.fields()
+    school_id, *other_school_fields = School.fields()
+    user_id, *other_teacher_fields, _teacher_school_id = Teacher.fields()
 
-    assert _school_id == school_id, "Sanity check for school ID columns being the same failed, these were not the same"
+    assert school_id == _teacher_school_id, "Sanity check for school ID columns being the same failed, these were not the same"
+    assert school_id == _pupil_school_id, "Sanity check for school ID columns being the same failed, these were not the same"
 
     return [pupil_no, user_id, *other_teacher_fields, *other_school_fields, school_id, *other_pupil_fields, "redcap_school_name"]
 
@@ -200,11 +201,29 @@ def read_and_process_masterfile(data_path: Path) -> pd.DataFrame:
 
     processed_data[date_str_cols] = date_string_representation
 
-    # sort data
-    processed_data[["entry_number", "period"]] = processed_data["pupil_no"].str.split("_", expand=True)
-    processed_data.sort_values(by=["school_id", "period", "entry_number"], inplace=True)
-    processed_data.drop(["entry_number", "period"], axis=1, inplace=True)
-    return processed_data
+    return sort_masterfile(processed_data)
+
+
+def sort_masterfile(masterfile: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sort Masterfile for reporting usage.
+
+    Extra fun because we want to sort by the numeric pupil number
+
+    Args:
+        masterfile (pd.DataFrame): masterfile
+    Returns:
+        pd.DataFrame: sorted masterfile
+    """
+    if masterfile.size == 0:
+        return masterfile
+
+    sorted_masterfile = masterfile.copy()
+    sorted_masterfile[["entry_number", "period"]] = sorted_masterfile["pupil_no"].str.split("_", expand=True)
+    sorted_masterfile["entry_number"] = sorted_masterfile["entry_number"].astype(int)
+    sorted_masterfile.sort_values(by=["rred_user_id", "period", "entry_number"], inplace=True)
+    sorted_masterfile.drop(["entry_number", "period"], axis=1, inplace=True)
+    return sorted_masterfile
 
 
 def write_to_excel(masterfile_data: pd.DataFrame, output_file: Path) -> None:
