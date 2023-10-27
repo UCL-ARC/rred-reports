@@ -92,7 +92,7 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: 
 
     # Case 2: Find instances of multiple teacher emails
     # Remove any space-delimited lists and replace with comma separated
-    cleaned_mailing_list = teacher_and_leader_dispatch.loc[:, "Mailing List"].str.replace(" ", ",").str.replace(",,", ",")
+    cleaned_mailing_list = teacher_and_leader_dispatch.loc[:, "Mailing List"].str.rstrip(" ").str.replace(" ", ",").str.replace(",,", ",")
     teacher_and_leader_dispatch.loc[:, "Mailing List"] = cleaned_mailing_list
     mailing_info = teacher_and_leader_dispatch.loc[:, ["RRED School ID", "School Label", "Mailing List"]]
 
@@ -106,7 +106,13 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: 
 
     school_id = mailing_info["RRED School ID"].unique()[0]
     school_label = mailing_info["School Label"].tolist()[0]
+    mailing_list = mailing_info["Mailing List"].str.rstrip(",").tolist()
     mailing_list = mailing_info["Mailing List"].tolist()
+
+    if any("," in email for email in mailing_list):
+        message = f"Comma found in at least one of the emails {mailing_list}"
+        raise DispatchListException(message)
+
     if override_mailto:
         mailing_list = [override_mailto]
 
