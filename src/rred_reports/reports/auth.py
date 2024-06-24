@@ -1,36 +1,76 @@
 """Mail server authentication"""
+import atexit
+import logging
 from dataclasses import dataclass
+from pathlib import Path
 
+import msal
 from dynaconf.base import Settings
 from exchangelib import (
     DELEGATE,
     Account,
     Configuration,
-    OAuth2LegacyCredentials,
+    OAuth2AuthorizationCodeCredentials,
 )
 
 from rred_reports.reports import get_settings
 
+LOG_FORMAT = "%(levelname)-10s %(asctime)s %(name)-30s %(funcName)-35s %(lineno)-5d: %(message)s"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class RREDAuthenticator:
-    """Class to handle MS exchange server authentication"""
+    """Class to handle MS Exchange server authentication"""
 
     settings: Settings = get_settings()
 
-    def get_credentials(self) -> OAuth2LegacyCredentials:
+    def _check_or_set_up_cache(self):
+        """Set up MSAL token cache and load existing token"""
+        cache = msal.SerializableTokenCache()
+        cache_path = Path("my_cache.bin")
+        if cache_path.exists():
+            with cache_path.open() as cache_file:
+                cache.deserialize(cache_file.read())
+        atexit.register(lambda: cache_path.open("w").write(cache.serialize()) if cache.has_state_changed else None)
+        return cache
+
+    def _get_app_access_token(self) -> dict:
+        """Acquire an access token for the Azure app"""
+        authority = f"https://login.microsoftonline.com/{self.settings.tenant_id}"
+        global_token_cache = self._check_or_set_up_cache()
+        app = msal.ClientApplication(
+            self.settings.client_id,
+            client_credential=self.settings.client_secret,
+            authority=authority,
+            token_cache=global_token_cache,
+        )
+
+        accounts = app.get_accounts(username=self.settings.username)
+
+        if accounts:
+            logger.info("Account(s) exists in cache, probably with token too. Let's try.")
+            result = app.acquire_token_silent([self.settings.scope], account=accounts[0])
+        else:
+            logger.info("No suitable token exists in cache. Let's initiate interactive login.")
+            result = app.acquire_token_by_username_password(self.settings.username, self.settings.password, [self.settings.scope])
+
+        if "access_token" not in result:
+            message = "Access token could not be acquired"
+            raise RuntimeError(message, result["error_description"])
+
+        return result
+
+    def get_credentials(self) -> OAuth2AuthorizationCodeCredentials:
         """Builds a user credential object for exchangelib
 
         Returns:
-            OAuth2LegacyCredentials: Credentials to authenticate a user
+            OAuth2AuthorizationCodeCredentials: Credentials to authenticate a user
         """
-        return OAuth2LegacyCredentials(
-            client_id=self.settings.client_id,
-            client_secret=self.settings.client_secret,
-            tenant_id=self.settings.tenant_id,
-            username=f"{self.settings.username}@ucl.ac.uk",
-            password=self.settings.password,
-        )
+        token_result = self._get_app_access_token()
+        access_token = token_result["access_token"]
+        return OAuth2AuthorizationCodeCredentials(access_token=access_token)
 
     def get_config(self) -> Configuration:
         """Retrieve an exchangelib Configuration object
@@ -39,7 +79,7 @@ class RREDAuthenticator:
         used to send emails
 
         Returns:
-            Configuration: _description_
+            Configuration: Configuration object for Exchange server
         """
         return Configuration(server=self.settings.server, credentials=self.get_credentials())
 
@@ -51,4 +91,5 @@ class RREDAuthenticator:
         Returns:
             Account: exchangelib Account object for an authenticated user
         """
-        return Account(primary_smtp_address=f"{self.settings.send_emails_as}", config=self.get_config(), access_type=DELEGATE)
+        conf = self.get_config()
+        return Account(primary_smtp_address=self.settings.send_emails_as, config=conf, access_type=DELEGATE)
