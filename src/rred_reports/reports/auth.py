@@ -3,7 +3,9 @@ import atexit
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from urllib import parse
 
+import click
 import msal
 from dynaconf.base import Settings
 from exchangelib import (
@@ -42,7 +44,6 @@ class RREDAuthenticator:
         global_token_cache = self._check_or_set_up_cache()
         app = msal.ClientApplication(
             self.settings.client_id,
-            client_credential=self.settings.client_secret,
             authority=authority,
             token_cache=global_token_cache,
         )
@@ -54,13 +55,26 @@ class RREDAuthenticator:
             result = app.acquire_token_silent([self.settings.scope], account=accounts[0])
         else:
             logger.info("No suitable token exists in cache. Let's initiate interactive login.")
-            result = app.acquire_token_by_username_password(self.settings.username, self.settings.password, [self.settings.scope])
+            auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username)
+            final_url = click.prompt(
+                f"Please follow auth flow by going to this link, then enter in the final redirect URL {auth_code_flow['auth_uri']}"
+            )
+            auth_response = self._convert_url_to_auth_dict(final_url)
+            result = app.acquire_token_by_auth_code_flow(auth_code_flow, auth_response)
 
         if "access_token" not in result:
             message = "Access token could not be acquired"
             raise RuntimeError(message, result["error_description"])
 
         return result
+
+    @staticmethod
+    def _convert_url_to_auth_dict(auth_url: str) -> dict:
+        query_string = parse.urlsplit(auth_url).query
+        query_data = parse.parse_qs(query_string)
+        # state needs to be a string to match the auth_code_flow
+        query_data["state"] = query_data["state"][0]
+        return query_data
 
     def get_credentials(self) -> OAuth2AuthorizationCodeCredentials:
         """Builds a user credential object for exchangelib
