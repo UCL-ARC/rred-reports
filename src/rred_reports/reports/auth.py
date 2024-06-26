@@ -14,6 +14,7 @@ from exchangelib import (
     Configuration,
     OAuth2AuthorizationCodeCredentials,
 )
+from oauthlib.oauth2 import OAuth2Token
 
 from rred_reports.reports import get_settings
 
@@ -83,7 +84,7 @@ class RREDAuthenticator:
             OAuth2AuthorizationCodeCredentials: Credentials to authenticate a user
         """
         token_result = self._get_app_access_token()
-        access_token = token_result["access_token"]
+        access_token = OAuth2Token(token_result)
         return OAuth2AuthorizationCodeCredentials(access_token=access_token)
 
     def get_config(self) -> Configuration:
