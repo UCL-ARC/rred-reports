@@ -1,1 +1,3 @@
+# Shared settings, i.e. not secrets
 server = "outlook.office365.com"
+scope = 'https://outlook.office.com/.default'
