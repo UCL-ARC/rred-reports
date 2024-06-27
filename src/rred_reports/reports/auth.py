@@ -48,7 +48,7 @@ class RREDAuthenticator:
         else:
             logger.info("No suitable token exists in cache. Let's initiate interactive login.")
             auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username)
-            final_url = click.prompt(
+            final_url = click.confirm(
                 f"Please follow auth flow by going to this link, then enter in the final redirect URL {auth_code_flow['auth_uri']}\n"
             )
             final_url = (Path(__file__).parents[3] / "access_link.txt").read_text()
