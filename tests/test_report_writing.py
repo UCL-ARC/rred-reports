@@ -57,6 +57,19 @@ def test_school_tables_filled(example_school_data: pd.DataFrame, templates_dir: 
     assert output_doc.exists()
 
 
+def test_missing_values_filled(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path):
+    """
+    Given a masterfile with data where the first pupil has missing numeric data in the poverty column
+    When the template for the school is populated using that data
+    Then the 8th column for povery should have "Missing Data" instead of "nan"
+    """
+    output_doc = temp_out_dir / "school.docx"
+
+    populated_template = populate_school_data(example_school_data, templates_dir / "2021/2021-22_template.docx", 2021, output_doc)
+
+    assert populated_template.tables[1].cell(1, 7).text == "Missing Data"
+
+
 def test_duplicate_student_warning(example_school_data: pd.DataFrame, templates_dir: Path, temp_out_dir: Path, loguru_caplog):
     """
     Given a masterfile dataframe with one duplicated row
@@ -149,13 +162,13 @@ def test_table_3_4_filter(example_school_data):
     """
     test_filter_for_three_four = filter_for_three_four(example_school_data, 2021)
     # testing filter for table 3,4 applied
-    assert (~test_filter_for_three_four["pupil_no"].isin(["test-2_2021-22", "test-3_2021-22", "test-5_2021-22", "test-6_2021-22"])).any()
+    assert (~test_filter_for_three_four["pupil_no"].isin(["2_2021-22-test", "3_2021-22-test", "5_2021-22-test", "11_2021-22-test"])).any()
     assert (~test_filter_for_three_four["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    pupil_1 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test-1_2021-22"]
+    pupil_1 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "1_2021-22-test"]
     assert (~pupil_1["exit_outcome"].isin(["Incomplete", "Ongoing"])).any()
 
-    pupil_4 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "test-4_2021-22"]
+    pupil_4 = test_filter_for_three_four.loc[test_filter_for_three_four.pupil_no == "4_2021-22-test"]
     assert (pupil_4["exit_outcome"].isin(["Discontinued", "Referred to school"])).any()
 
 
@@ -168,5 +181,5 @@ def test_table_6_filter(example_school_data):
     """
     test_filter_six = filter_six(example_school_data, 2021)
 
-    six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["test-1_2021-22", "test-4_2021-22"])]
+    six_filter = test_filter_six.loc[test_filter_six.pupil_no.isin(["1_2021-22-test", "4_2021-22-test"])]
     assert six_filter.shape[0] == 2

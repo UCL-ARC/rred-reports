@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 
+from rred_reports.masterfile import sort_masterfile
 from rred_reports.reports.filler import TemplateFiller
 
 table_one_columns = [
@@ -109,12 +110,10 @@ def filter_by_entry_and_exit(school_dataframe: pd.DataFrame, report_year: int) -
     """
     report_start, report_end = trial_period_dates(report_year)
 
-    return (
-        school_dataframe.loc[
-            ((school_dataframe["entry_date"] > report_start) & (school_dataframe["entry_date"] < report_end))
-            | ((school_dataframe["exit_date"] > report_start) & (school_dataframe["exit_date"] < report_end))
-        ]
-    ).sort_values(by=["rred_user_id", "entry_year"])
+    return school_dataframe.loc[
+        ((school_dataframe["entry_date"] > report_start) & (school_dataframe["entry_date"] < report_end))
+        | ((school_dataframe["exit_date"] > report_start) & (school_dataframe["exit_date"] < report_end))
+    ]
 
 
 def filter_for_three_four(school_dataframe: pd.DataFrame, report_year: int) -> pd.DataFrame:
@@ -131,9 +130,7 @@ def filter_for_three_four(school_dataframe: pd.DataFrame, report_year: int) -> p
 
     outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
 
-    return (outcome_filtered[(outcome_filtered["exit_date"] > report_start) & (outcome_filtered["exit_date"] < report_end)]).sort_values(
-        by=["rred_user_id", "entry_year"]
-    )
+    return outcome_filtered[(outcome_filtered["exit_date"] > report_start) & (outcome_filtered["exit_date"] < report_end)]
 
 
 def filter_six(school_dataframe: pd.DataFrame, report_year: int) -> pd.DataFrame:
@@ -150,12 +147,10 @@ def filter_six(school_dataframe: pd.DataFrame, report_year: int) -> pd.DataFrame
 
     outcome_filtered = school_dataframe[(school_dataframe["exit_outcome"].isin(["Discontinued", "Referred to school"]))]
 
-    return (
-        outcome_filtered[
-            ((outcome_filtered["month3_testdate"] > report_start) & (outcome_filtered["month3_testdate"] < report_end))
-            | ((outcome_filtered["month6_testdate"] > report_start) & (outcome_filtered["month6_testdate"] < report_end))
-        ]
-    ).sort_values(by=["rred_user_id", "entry_year"])
+    return outcome_filtered[
+        ((outcome_filtered["month3_testdate"] > report_start) & (outcome_filtered["month3_testdate"] < report_end))
+        | ((outcome_filtered["month6_testdate"] > report_start) & (outcome_filtered["month6_testdate"] < report_end))
+    ]
 
 
 def summary_table(school_df: pd.DataFrame, report_year: int) -> pd.DataFrame:
@@ -245,7 +240,8 @@ def populate_school_tables(school_df: pd.DataFrame, template_path: Path, report_
     for index, column_and_filter in enumerate(columns_and_filters):
         columns, filter_function = column_and_filter
         filtered = filter_function(school_df, report_year)
-        table_to_write = filtered[columns]
+        sorted_data = sort_masterfile(filtered)
+        table_to_write = sorted_data[columns]
         if index == 0 and any(table_to_write.duplicated()):
             logger.warning(
                 "Duplicate students found, this suggests an issue with the masterfile school or teacher data. Table 1 data:\n{school_data}",
