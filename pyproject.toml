@@ -27,7 +27,7 @@ dynamic = ["version"]
 dependencies = [
   "exchangelib == 4.9.0",
   "docx2pdf == 0.1.8",
-  "dynaconf == 3.1.12",
+  "dynaconf == 3.2.5",
   "loguru == 0.6.0",
   "openpyxl == 3.1.1",
   "pandas == 1.5.3",
