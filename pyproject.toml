@@ -25,10 +25,9 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "python_version>='3.9'",
   "exchangelib == 4.9.0",
   "docx2pdf == 0.1.8",
-  "dynaconf == 3.1.12",
+  "dynaconf == 3.2.5",
   "loguru == 0.6.0",
   "openpyxl == 3.1.1",
   "pandas == 1.5.3",
@@ -40,6 +39,7 @@ dependencies = [
   "tomli == 2.0.1",
   "tomli-w == 1.0.0",
   "typer == 0.7.0",
+  "msal == 1.29.0"
 ]
 
 [project.optional-dependencies]

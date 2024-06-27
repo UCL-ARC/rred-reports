@@ -155,3 +155,7 @@ input/dispatch_lists/*.xls*
 
 **/.DS_Store
 **/~$*.docx
+
+access_link.txt
+
+my_cache.bin
