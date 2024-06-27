@@ -25,7 +25,6 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "python_version>='3.9'",
   "exchangelib == 4.9.0",
   "docx2pdf == 0.1.8",
   "dynaconf == 3.1.12",
