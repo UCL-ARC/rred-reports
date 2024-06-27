@@ -43,7 +43,7 @@ class RREDAuthenticator:
             result = app.acquire_token_silent([self.settings.scope], account=accounts[0])
         else:
             logger.info("No suitable token exists in cache. Let's initiate interactive login.")
-            auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username)
+            auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username, max_age=60 * 60 * 24)
             click.confirm(
                 f"Please follow auth flow by going to this link, then enter in the final redirect URL in access_link.txt {auth_code_flow['auth_uri']}\n"
             )
