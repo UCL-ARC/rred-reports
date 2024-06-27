@@ -1,5 +1,4 @@
 """Mail server authentication"""
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from urllib import parse
@@ -13,13 +12,10 @@ from exchangelib import (
     Configuration,
     OAuth2AuthorizationCodeCredentials,
 )
+from loguru import logger
 from oauthlib.oauth2 import OAuth2Token
 
 from rred_reports.reports import get_settings
-
-LOG_FORMAT = "%(levelname)-10s %(asctime)s %(name)-30s %(funcName)-35s %(lineno)-5d: %(message)s"
-logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-logger = logging.getLogger(__name__)
 
 CACHE_PATH = Path("my_cache.bin")
 
@@ -48,8 +44,8 @@ class RREDAuthenticator:
         else:
             logger.info("No suitable token exists in cache. Let's initiate interactive login.")
             auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username)
-            final_url = click.confirm(
-                f"Please follow auth flow by going to this link, then enter in the final redirect URL {auth_code_flow['auth_uri']}\n"
+            click.confirm(
+                f"Please follow auth flow by going to this link, then enter in the final redirect URL in access_link.txt {auth_code_flow['auth_uri']}\n"
             )
             final_url = (Path(__file__).parents[3] / "access_link.txt").read_text()
             auth_response = self._convert_url_to_auth_dict(final_url)
