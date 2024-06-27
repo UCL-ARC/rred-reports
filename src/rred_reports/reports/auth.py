@@ -29,20 +29,10 @@ class RREDAuthenticator:
 
     settings: Settings = get_settings()
 
-    def _check_or_set_up_cache(self):
-        """Set up MSAL token cache and load existing token"""
-        cache = msal.SerializableTokenCache()
-        cache_path = Path("my_cache.bin")
-        if cache_path.exists():
-            with cache_path.open() as cache_file:
-                cache.deserialize(cache_file.read())
-        atexit.register(lambda: cache_path.open("w").write(cache.serialize()) if cache.has_state_changed else None)
-        return cache
-
     def _get_app_access_token(self) -> dict:
         """Acquire an access token for the Azure app"""
         authority = f"https://login.microsoftonline.com/{self.settings.tenant_id}"
-        global_token_cache = self._check_or_set_up_cache()
+        global_token_cache = _check_or_set_up_cache()
         app = msal.ClientApplication(
             self.settings.client_id,
             authority=authority,
@@ -58,8 +48,9 @@ class RREDAuthenticator:
             logger.info("No suitable token exists in cache. Let's initiate interactive login.")
             auth_code_flow = app.initiate_auth_code_flow(scopes=[self.settings.scope], login_hint=self.settings.username)
             final_url = click.prompt(
-                f"Please follow auth flow by going to this link, then enter in the final redirect URL {auth_code_flow['auth_uri']}"
+                f"Please follow auth flow by going to this link, then enter in the final redirect URL {auth_code_flow['auth_uri']}\n"
             )
+            final_url = (Path(__file__).parents[3] / "access_link.txt").read_text()
             auth_response = self._convert_url_to_auth_dict(final_url)
             result = app.acquire_token_by_auth_code_flow(auth_code_flow, auth_response)
 
@@ -108,3 +99,23 @@ class RREDAuthenticator:
         """
         conf = self.get_config()
         return Account(primary_smtp_address=self.settings.send_emails_as, config=conf, access_type=DELEGATE)
+
+
+def _check_or_set_up_cache():
+    """Set up MSAL token cache and load existing token"""
+    cache = msal.SerializableTokenCache()
+    cache_path = Path("my_cache.bin")
+
+    if cache_path.exists():
+        with cache_path.open("rb") as cache_file:
+            cache.deserialize(cache_file.read())
+
+    def save_cache():
+        if cache.has_state_changed:
+            with cache_path.open("wb") as cache_file:
+                cache_file.write(cache.serialize())
+
+    save_cache()
+    atexit.register(save_cache)
+
+    return cache

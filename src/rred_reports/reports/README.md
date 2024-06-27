@@ -51,7 +51,7 @@ virtualenv/conda env there is some first-time setup required:
   reports joined together will be created and its filepath logged.
 - Review the UAT file for any errors and send it to the study team for sign off.
 
-## User Acceptance Testing of emails
+## User Acceptance Testing of emails with MFA
 
 The email body text may be changed and emailed to us, if so update it in
 `src/rred_reports/reports/emails.py` in the `formatted_mail_content` function,
@@ -77,6 +77,24 @@ attachments look correct, you can send the reports to the RRED study team
 ```shell
 rred reports send-school {year} --override-mailto="ilc.comms@ucl.ac.uk"
 ```
+
+You will receive a message saying,
+`"Please follow the authentication flow by visiting this link and entering the final redirect URL: {some URL}"`.
+Click on this link to open a Microsoft login page in your web browser. Once
+logged in, you will see a 2-digit number. Use the Microsoft Authenticator app on
+your mobile device to authenticate the app by entering this number. After
+authentication, the Microsoft sign-in page should redirect to a blank screen.
+
+Copy the URL from the browser's address bar and save it to `access_link.txt`.
+
+Next, return to the command line and enter any text:
+
+`Please follow auth flow by going to this link, then enter in the final redirect URL: {some URL}`
+: `type something here (it doesn't matter what)`
+
+After completing these steps, a new file named `my_cache.bin` will have been
+created. This file contains your access tokens necessary for sending out emails.
+The process should now begin sending emails; please check your inbox.
 
 ## Emailing of reports to teachers
 

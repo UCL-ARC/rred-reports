@@ -64,6 +64,9 @@ from the app registration, or documented internally.
 For the study, we will want so `send_email_as` to be set to
 `"ilc.comms@ucl.ac.uk"`
 
-Fill in the username and password combination that will be used to authenticate
-the application. `.secrets.toml` has been added to the `.gitignore`, but this
-file should **never** be committed to version control.
+The `scope` would be `'https://outlook.office.com/.default'` and `server` =
+`'outlook.office365.com'`
+
+Fill in the `username` that will be used to authenticate the application.
+`.secrets.toml` has been added to the `.gitignore`, but this file should
+**never** be committed to version control.
