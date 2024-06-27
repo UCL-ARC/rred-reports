@@ -1,5 +1,4 @@
 """Mail server authentication"""
-import atexit
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,6 +20,8 @@ from rred_reports.reports import get_settings
 LOG_FORMAT = "%(levelname)-10s %(asctime)s %(name)-30s %(funcName)-35s %(lineno)-5d: %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 logger = logging.getLogger(__name__)
+
+CACHE_PATH = Path("my_cache.bin")
 
 
 @dataclass
@@ -57,6 +58,9 @@ class RREDAuthenticator:
         if "access_token" not in result:
             message = "Access token could not be acquired"
             raise RuntimeError(message, result["error_description"])
+
+        # Save cache if it changed after authentication setup
+        _save_cache(global_token_cache, CACHE_PATH)
 
         return result
 
@@ -104,18 +108,15 @@ class RREDAuthenticator:
 def _check_or_set_up_cache():
     """Set up MSAL token cache and load existing token"""
     cache = msal.SerializableTokenCache()
-    cache_path = Path("my_cache.bin")
 
-    if cache_path.exists():
-        with cache_path.open("rb") as cache_file:
+    if CACHE_PATH.exists():
+        with CACHE_PATH.open("rb") as cache_file:
             cache.deserialize(cache_file.read())
 
-    def save_cache():
-        if cache.has_state_changed:
-            with cache_path.open("wb") as cache_file:
-                cache_file.write(cache.serialize())
-
-    save_cache()
-    atexit.register(save_cache)
-
     return cache
+
+
+def _save_cache(cache: msal.SerializableTokenCache, cache_path: Path) -> None:
+    if cache.has_state_changed:
+        with cache_path.open("w") as cache_file:
+            cache_file.write(cache.serialize())
