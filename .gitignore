@@ -159,3 +159,5 @@ input/dispatch_lists/*.xls*
 access_link.txt
 
 my_cache.bin
+
+secrets.toml
