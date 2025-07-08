@@ -1,6 +1,16 @@
 [school]
 n_tables = 7
 
+    [school.2024]
+    template = "input/templates/2024/2024-25_template.docx"
+    masterfile = "input/processed/2024/masterfile_2024-25.xlsx"
+    dispatch_list = "input/dispatch_lists/Dispatch list 2024-25.xlsx"
+
+    [school.2023]
+    template = "input/templates/2023/2023-24_template.docx"
+    masterfile = "input/processed/2023/masterfile_2023-24.xlsx"
+    dispatch_list = "input/dispatch_lists/Dispatch list 2023-24.xlsx"
+
     [school.2022]
     template = "input/templates/2022/2022-23_template.docx"
     masterfile = "input/processed/2022/masterfile_2022-23.xlsx"
