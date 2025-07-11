@@ -133,7 +133,7 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    manual_id: Annotated[Optional[list[str]], typer.Option([])] = (),
+    manual_id: Annotated[list[str], typer.Option(default_factory=list)],
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,

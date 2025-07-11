@@ -33,12 +33,12 @@ dispatch_list = "input/dispatch_lists/Dispatch list 2023-24.xlsx"
     label_data_file = "input/downloaded/2023/ReadingRecoveryEvalu_DATA_LABELS_2022.csv"
 
 [2024]
-dispatch_list = "input/dispatch_lists/Dispatch list 2024-24.xlsx"
+dispatch_list = "input/dispatch_lists/Dispatch list 2024-25.xlsx"
 
     [2024.current_year]
-    coded_data_file = "input/downloaded/2023/ReadingRecoveryEvalu_DATA_2024.csv"
-    label_data_file = "input/downloaded/2023/ReadingRecoveryEvalu_DATA_LABELS_2024.csv"
+    coded_data_file = "input/downloaded/2024/ReadingRecoveryEvalu_DATA_2024.csv"
+    label_data_file = "input/downloaded/2024/ReadingRecoveryEvalu_DATA_LABELS_2024.csv"
 
     [2024.previous_year]
-    coded_data_file = "input/downloaded/2023/ReadingRecoveryEvalu_DATA_2023.csv"
-    label_data_file = "input/downloaded/2023/ReadingRecoveryEvalu_DATA_LABELS_2023.csv"
+    coded_data_file = "input/downloaded/2024/ReadingRecoveryEvalu_DATA_2023.csv"
+    label_data_file = "input/downloaded/2024/ReadingRecoveryEvalu_DATA_LABELS_2023.csv"
