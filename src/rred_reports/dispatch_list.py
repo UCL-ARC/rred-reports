@@ -76,7 +76,7 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: 
 
     # Find no teacher email instance - replace with TL if that exists
 
-    dispatch_df.loc[:, "Mailing List"] = np.nan
+    dispatch_df["Mailing List"] = pd.Series([np.nan] * len(dispatch_df), dtype=object)
     teacher_leader_dispatch = dispatch_df.copy()
     teacher_leader_dispatch.loc[~dispatch_df["TL Email"].isna(), "Mailing List"] = teacher_leader_dispatch["TL Email"]
     dispatch_df.loc[(~dispatch_df["Email"].isna()), "Mailing List"] = dispatch_df["Email"]

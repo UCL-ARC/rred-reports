@@ -93,7 +93,6 @@ class Pupil(PandasDataFrame):
     month6_wv_result: Data[pd.Int32Dtype]
     month6_bas_result: Data[pd.Int32Dtype]
 
-
 @dataclass
 class Teacher(PandasDataFrame):
     """Teacher information, can link with Pupil df with rreduserID"""

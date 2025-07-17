@@ -202,6 +202,9 @@ class RedcapReader:
             "month6_bl_result",
             "month6_wv_result",
             "month6_bas_result",
+            "reg_deis_status",
+            "reg_lan",
+            "reg_lan_tum",
         ],
     }
 
