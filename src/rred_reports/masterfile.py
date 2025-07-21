@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from pandas_dataclasses import AsFrame, Data
 
 # hardcode column number so that extra rows can be added, but ignored for our processing
-COL_NUMBER_AFTER_SLIMMING = 65
+COL_NUMBER_AFTER_SLIMMING = 68
 
 
 class PandasDataFrame(AsFrame):
@@ -92,6 +92,9 @@ class Pupil(PandasDataFrame):
     month6_bl_result: Data[pd.Int32Dtype]
     month6_wv_result: Data[pd.Int32Dtype]
     month6_bas_result: Data[pd.Int32Dtype]
+    reg_deis_status: Data[str]
+    reg_lan: Data[str]
+    reg_lan_tum: Data[str]
 
 
 @dataclass
