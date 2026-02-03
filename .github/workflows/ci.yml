@@ -34,9 +34,11 @@ jobs:
         with:
           extra_args: --hook-stage manual --all-files
       - name: Run PyLint
+        # Hardcoding to python 3.11 to avoid dependency building issues with python 3.12
+        # Ideally we should update our dependencies to support python >3.11
         run: |
           echo "::add-matcher::$GITHUB_WORKSPACE/.github/matchers/pylint.json"
-          pipx run nox -s pylint
+          pipx run nox -s pylint --force-python 3.11
 
   checks:
     name: Check Python ${{ matrix.python-version }} on ${{ matrix.runs-on }}
