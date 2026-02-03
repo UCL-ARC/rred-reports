@@ -140,7 +140,16 @@ class RedcapReader:
     # Hardcoded columns for exporting, could finesse this but probably isn't worth the time
     # The final columns output are under unit testing so will catch any changes to input or output data
     _parsing_cols = {
-        "non_wide_columns": ["reg_rr_title", "rrcp_country", "rrcp_area", "redcap_school_name", "school_id", "reg_deis_status", "reg_lan", "reg_lan_tum"],
+        "non_wide_columns": [
+            "reg_rr_title",
+            "rrcp_country",
+            "rrcp_area",
+            "redcap_school_name",
+            "school_id",
+            "reg_deis_status",
+            "reg_lan",
+            "reg_lan_tum",
+        ],
         "wide_columns": [
             "assessi_engtest2",
             "assessi_iretest1",
