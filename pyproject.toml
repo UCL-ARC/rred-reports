@@ -18,8 +18,7 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering",
 ]
 dynamic = ["version"]
@@ -119,7 +118,7 @@ exclude = ["cli.py"]
 
 
 [tool.pylint]
-py-version = "3.12"
+py-version = "3.11"
 ignore-paths= ["src/rred_reports/_version.py"]
 reports.output-format = "colorized"
 similarities.ignore-imports = "yes"
