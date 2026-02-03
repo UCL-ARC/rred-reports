@@ -1,7 +1,6 @@
 """Downloading and processing of redcap data"""
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -25,7 +24,7 @@ class ExtractInput:
 class RedcapReader:
     """Reads two years of redcap data, processing the files (wide to long, and others) and filtering to non-empty rows"""
 
-    def __init__(self, school_list: Path, school_aliases: Optional[Path] = None):
+    def __init__(self, school_list: Path, school_aliases: Path | None = None):
         self._school_list = get_unique_schools(school_list)
         self._school_aliases = None
         if school_aliases:

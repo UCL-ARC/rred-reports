@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from loguru import logger
@@ -17,7 +17,7 @@ app = typer.Typer()
 TOP_LEVEL_DIR = Path(__file__).resolve().parents[3]
 
 
-def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Optional[Path] = None) -> dict:
+def validate_data_sources(year: int, template_file: Path, masterfile_path: Path, dispatch_path: Path, top_level_dir: Path | None = None) -> dict:
     """Perform some basic data source validation
 
     Args:
@@ -61,7 +61,7 @@ def validate_data_sources(year: int, template_file: Path, masterfile_path: Path,
 
 @app.command()
 def generate(
-    level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", top_level_dir: Optional[Path] = None
+    level: ReportType, year: int, config_file: Path = "src/rred_reports/reports/report_config.toml", top_level_dir: Path | None = None
 ) -> Path:
     """Generate a report at the level specified
 
@@ -133,11 +133,11 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    manual_id: Annotated[Optional[list[str]], typer.Option(default=None)] = None,
+    manual_id: Annotated[list[str] | None, typer.Option(default=None)] = None,
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
-    top_level_dir: Optional[Path] = None,
-    override_mailto: Optional[str] = None,
+    top_level_dir: Path | None = None,
+    override_mailto: str | None = None,
 ):
     """Send reports to school contacts via RRED school ID
 

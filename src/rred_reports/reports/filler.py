@@ -103,7 +103,7 @@ class TemplateFiller:
         to be hidden when viewed in MS Word.
         """
         updated_tables = []
-        for table, header_rows in zip(self.tables, self.header_rows):
+        for table, header_rows in zip(self.tables, self.header_rows, strict=True):
             if header_rows != 1:
                 logger.trace("Working out duplicate columns with multiple header rows is very fraught, should correct template")
                 updated_tables.append(table)

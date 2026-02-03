@@ -1,6 +1,5 @@
 """Reading and use of the RRED dispatch list"""
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -48,7 +47,7 @@ def _raise_if_school_duplicated(schools) -> None:
         raise DispatchListException(message)
 
 
-def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: Optional[str] = None) -> dict:
+def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: str | None = None) -> dict:
     """Obtain the mailing info for a single school ID, emailing the teacher and teacher leader for each school
 
     Args:

@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -15,7 +14,7 @@ app = typer.Typer()
 
 @app.command()
 def extract(
-    year: int, config_file: Path = "src/rred_reports/redcap/redcap_config.toml", output_dir: Path = "output/", school_aliases: Optional[Path] = None
+    year: int, config_file: Path = "src/rred_reports/redcap/redcap_config.toml", output_dir: Path = "output/", school_aliases: Path | None = None
 ) -> None:
     """
     Extract files from redcap from wide to long and apply basic processing

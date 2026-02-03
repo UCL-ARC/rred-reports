@@ -31,7 +31,7 @@ file transfer of the zipped repository to move code over.
   package in editable mode. The creation and installation may give some retry
   errors, that's fine.
   ```shell
-  conda create python=3.9 -n rred
+  conda create python=3.13 -n rred
   conda activate rred
   pip install -e .
   ```

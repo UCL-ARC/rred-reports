@@ -1,7 +1,6 @@
 """Emailing of reports to users"""
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
@@ -108,11 +107,11 @@ class EmailContent:
 
     account: Account
     recipients: list[str]
-    cc_recipients: Optional[list[str]]
+    cc_recipients: list[str] | None
     subject: str
     body: str
-    attachment_path: Optional[Path]
-    attachment_name: Optional[str]
+    attachment_path: Path | None
+    attachment_name: str | None
 
 
 class ReportEmailer:
@@ -183,9 +182,9 @@ class ReportEmailer:
         start_year: int,
         end_year: int,
         to_list: list[str],
-        cc_to: Optional[list[str]] = None,
-        report: Optional[Path] = None,
-        report_name: Optional[str] = "RRED_Processed_Report.pdf",
+        cc_to: list[str] | None = None,
+        report: Path | None = None,
+        report_name: str | None = "RRED_Processed_Report.pdf",
         save_email: bool = False,
     ) -> bool:
         """Prepare, construct and send an email
