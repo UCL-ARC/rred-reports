@@ -133,7 +133,7 @@ def create(level: ReportType, year: int, config_file: Path = "src/rred_reports/r
 @app.command()
 def send_school(
     year: int,
-    manual_id: Annotated[list[str], typer.Option(default_factory=list)],
+    manual_id: Annotated[Optional[list[str]], typer.Option(default=None)] = None,
     attachment_name: str = "RRED_report.pdf",
     config_file: Path = "src/rred_reports/reports/report_config.toml",
     top_level_dir: Optional[Path] = None,
@@ -150,6 +150,8 @@ def send_school(
             data can be found. Defaults to None.
         override_mailto (str, optional): Email address to override for each school, for use in manual testing and UAT
     """
+    if not manual_id:
+        manual_id = []
     config = get_config(config_file)
     dispatch_path, *_ = get_report_year_files(config, ReportType.SCHOOL, year)
 
