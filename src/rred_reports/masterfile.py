@@ -145,11 +145,12 @@ def parse_masterfile(file: Path) -> dict[str, pd.DataFrame]:
 
     drop_cols = ["rrcp_country", "rrcp_area", "rrcp_school", "reg_rr_title"]
 
-    df_slimmed = full_data.drop(columns=drop_cols)
+    df_slimmed = full_data.drop(columns=drop_cols, errors="ignore")
 
-    remaining_columns = [clmnlist(x, df_slimmed) for x in range(COL_NUMBER_AFTER_SLIMMING)]
-
+    expected_cols = len(Pupil.fields())
+    remaining_columns = [clmnlist(x, df_slimmed) for x in range(expected_cols)]
     pupils_df = Pupil.new(*remaining_columns)
+
     pupils_df.drop_duplicates(inplace=True)  # pylint: disable=E1101
 
     return {"pupils": pupils_df, "teachers": teach_df, "schools": all_schools_df}
