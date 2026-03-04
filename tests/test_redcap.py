@@ -40,7 +40,7 @@ def test_preprocess_wide_data(data_path):
     assert (same_coerced_values.get("school_id") == "RRS180").all()
 
     # missing date converted to 0001-01-01
-    assert (redcap.loc[redcap["record_id"] == "AB100"].get("_test_timestamp") == pd.Timestamp.date(pd.NaT)).all()
+    assert redcap.loc[redcap["record_id"] == "AB100"].get("_test_timestamp").isna().all()
     # missing values filtered out
     assert redcap.loc[redcap["record_id"].isin(["AB101", "AB102", "AB103", "Sandbox1"])].size == 0
 
