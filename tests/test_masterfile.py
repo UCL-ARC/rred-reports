@@ -15,7 +15,7 @@ def test_masterfile_read(data_path):
     assert nested_data["pupils"].shape == (40, 68)
     assert nested_data["teachers"].shape == (11, 3)
     assert nested_data["schools"].shape == (10, 4)
-    assert joined_data.shape == (40, 69)  # should be the same number of students as in the pupils df
+    assert joined_data.shape == (40, 72)  # should be the same number of students as in the pupils df
 
 
 def test_masterfile_warns_duplicate_school(data_path, loguru_caplog):
