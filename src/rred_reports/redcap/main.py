@@ -114,9 +114,9 @@ class RedcapReader:
     def _convert_timestamps_to_dates(extract: pd.DataFrame):
         timestamp_cols = [col for col in extract if col.endswith("_timestamp")]
         dates = (
-            extract[timestamp_cols].applymap(pd.to_datetime, format="%Y-%m-%d %H:%M:%S", errors="coerce")
-            # mapping to date causes NaT to be converted to 2001-01-01
-            .applymap(pd.Timestamp.date)
+            extract[timestamp_cols]
+            .applymap(lambda x: pd.to_datetime(x, dayfirst=True, errors="coerce"))
+            .applymap(lambda x: x.date() if pd.notna(x) else x)
         )
         extract[timestamp_cols] = dates
 
@@ -255,7 +255,7 @@ class RedcapReader:
     @staticmethod
     def _convert_dates_to_datetime(extract: pd.DataFrame):
         date_cols = [col for col in extract if col.endswith("_date")]
-        dates = extract[date_cols].applymap(pd.to_datetime, format="%Y-%m-%d", errors="coerce")
+        dates = extract[date_cols].applymap(lambda x: pd.to_datetime(x, dayfirst=True, errors="coerce"))
         extract[date_cols] = dates
 
     def _process_calculated_columns(self, entry_year_cols: list[str], export_data: pd.DataFrame, survey_period: str) -> pd.DataFrame:
@@ -268,7 +268,10 @@ class RedcapReader:
         processed_data["entry_year"] = entry_year
 
         processed_data["summer"] = "No"
-        processed_data[["dob_year", "dob_month", "dob_day"]] = processed_data["entry_dob"].str.split("-", expand=True).apply(pd.to_numeric)
+        dob = pd.to_datetime(processed_data["entry_dob"], dayfirst=True, errors="coerce")
+        processed_data["dob_year"] = dob.dt.year
+        processed_data["dob_month"] = dob.dt.month
+        processed_data["dob_day"] = dob.dt.day
         summer_dob = (processed_data["dob_month"] >= 4) & (processed_data["dob_month"] <= 8) & (processed_data["dob_day"] <= 31)
         processed_data.loc[summer_dob, "summer"] = "Yes"
 
