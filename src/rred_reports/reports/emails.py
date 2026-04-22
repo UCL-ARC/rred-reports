@@ -1,7 +1,6 @@
 """Emailing of reports to users"""
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from exchangelib import Account, FileAttachment, HTMLBody, Mailbox, Message
 
@@ -35,7 +34,7 @@ def formatted_mail_content(school_name: str, start_year: int, end_year) -> dict:
     Please find attached the Reading Recovery Annual Report for your school for {start_year}-{end_year_short}.
     The report outlines the progress that pupils have made in Reading Recovery in your school during the year {start_year}-{end_year_short}.<br><br>
 
-    Programmes that offered regular teaching have been recorded as complete, either Discontinued or Referred.
+    Programmes that offered regular teaching have been recorded as Complete, either Discontinued or Referred.
     Programmes that will continue after the summer break are recorded as 'Ongoing'.
     Any programme that <b>will not continue after the summer break</b> but is without exit assessment data has been recorded as 'Incomplete'.
     Any record started last year will still be available in your survey queue for {start_year}-{end_year_short} so that you can complete the pupil's record.<br><br>
@@ -108,11 +107,11 @@ class EmailContent:
 
     account: Account
     recipients: list[str]
-    cc_recipients: Optional[list[str]]
+    cc_recipients: list[str] | None
     subject: str
     body: str
-    attachment_path: Optional[Path]
-    attachment_name: Optional[str]
+    attachment_path: Path | None
+    attachment_name: str | None
 
 
 class ReportEmailer:
@@ -183,9 +182,9 @@ class ReportEmailer:
         start_year: int,
         end_year: int,
         to_list: list[str],
-        cc_to: Optional[list[str]] = None,
-        report: Optional[Path] = None,
-        report_name: Optional[str] = "RRED_Processed_Report.pdf",
+        cc_to: list[str] | None = None,
+        report: Path | None = None,
+        report_name: str | None = "RRED_Processed_Report.pdf",
         save_email: bool = False,
     ) -> bool:
         """Prepare, construct and send an email

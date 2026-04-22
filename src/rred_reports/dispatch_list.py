@@ -1,6 +1,5 @@
 """Reading and use of the RRED dispatch list"""
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -48,7 +47,7 @@ def _raise_if_school_duplicated(schools) -> None:
         raise DispatchListException(message)
 
 
-def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: Optional[str] = None) -> dict:
+def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: str | None = None) -> dict:
     """Obtain the mailing info for a single school ID, emailing the teacher and teacher leader for each school
 
     Args:
@@ -76,7 +75,7 @@ def get_mailing_info(rred_school_id: str, dispatch_list: Path, override_mailto: 
 
     # Find no teacher email instance - replace with TL if that exists
 
-    dispatch_df.loc[:, "Mailing List"] = np.nan
+    dispatch_df["Mailing List"] = pd.Series([np.nan] * len(dispatch_df), dtype=object)
     teacher_leader_dispatch = dispatch_df.copy()
     teacher_leader_dispatch.loc[~dispatch_df["TL Email"].isna(), "Mailing List"] = teacher_leader_dispatch["TL Email"]
     dispatch_df.loc[(~dispatch_df["Email"].isna()), "Mailing List"] = dispatch_df["Email"]

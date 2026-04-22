@@ -104,7 +104,7 @@ def convert_all_reports(docx_report_paths: list[Path], output_pdf_paths: list[Pa
     convert(input_path=docx_report_paths[0].parent)
 
     logger.info("Validating output PDFs")
-    for report_path, output_path in zip(docx_report_paths, output_pdf_paths):
+    for report_path, output_path in zip(docx_report_paths, output_pdf_paths, strict=True):
         if not validate_pdf(output_path):
             message = "Report conversion failed - invalid PDF produced"
             logger.error("{message} for docx {report}", message=message, report=report_path)

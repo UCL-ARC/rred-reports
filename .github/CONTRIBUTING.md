@@ -19,7 +19,7 @@ specific jobs:
 
 ```console
 $ nox -s lint  # Lint only
-$ nox -s tests-3.9  # Python 3.9 tests only
+$ nox -s tests-3.11  # Python 3.11 tests only
 $ nox -s build  # Make an SDist and wheel
 ```
 
