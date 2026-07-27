@@ -131,7 +131,7 @@ Below is some context for the issues spreadsheet:
   a pupil has been allocated to a different school, but we’d like an explicit
   check for each.
 - Not_in_masterfile: These are schools found in the dispatch list, but not in
-  the Masterfile. Check that we don’t have any complete data for this year’s
+  the Masterfile. Check that we don’t have any incomplete data for this year’s
   period – if so then please remove from the dispatch list. Otherwise let us
   know because that suggests there is something wrong with our extract.
 - Not_in_dispatch_list: For all schools where `in_current_survey` is TRUE,
